@@ -1,53 +1,40 @@
-import { useState } from "react"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Separator } from "./ui/separator"
-import { BarChart3, Upload, Eye, EyeOff, Mail, Lock, User, Building } from "lucide-react"
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Separator } from "./ui/separator";
+import {
+  BarChart3,
+  Upload,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Building,
+} from "lucide-react";
+import { handleLogin, handleSignup } from "@/services/api";
 
 export default function AuthPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [signupData, setSignupData] = useState({ name: "", email: "", password: "", confirmPassword: "" })
-  const [loginData, setLoginData] = useState({ email: "", password: "" })
-
-  const handleSignup = async (e) => {
-    e.preventDefault()
-    if (signupData.password !== signupData.confirmPassword) return alert("Passwords do not match")
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", {
-        name: signupData.name,
-        email: signupData.email,
-        password: signupData.password,
-      })
-
-      localStorage.setItem("token", res.data.token) 
-      alert("Signup successful")
-    } catch (err) {
-      console.error(err)
-      alert("Signup failed")
-    }
-  }
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email: loginData.email,
-        password: loginData.password,
-      })
-
-      localStorage.setItem("token", res.data.token) // Save JWT
-      alert("Login successful")
-    } catch (err) {
-      console.error(err)
-      alert("Login failed")
-    }
-  }
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupData, setSignupData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role:""
+  });
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
@@ -60,7 +47,9 @@ export default function AuthPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-slate-900">Excel Analytics</h1>
-          <p className="text-slate-600 mt-2">Transform your Excel data into insights</p>
+          <p className="text-slate-600 mt-2">
+            Transform your Excel data into insights
+          </p>
         </div>
 
         <Card className="shadow-xl border-0">
@@ -73,18 +62,46 @@ export default function AuthPage() {
             {/* Login Tab */}
             <TabsContent value="login">
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
-                <CardDescription className="text-center mb-4">Sign in to access your data visualizations</CardDescription>
+                <CardTitle className="text-2xl text-center">
+                  Welcome back
+                </CardTitle>
+                <CardDescription className="text-center mb-4">
+                  Sign in to access your data visualizations
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleLogin(loginData)
+                      .then(() => {
+                        // Redirect or update state on success
+                      })
+                      .catch((error) => {
+                        console.error("Login error:", error);
+                      });
+                  }}
+                  className="space-y-4"
+                >
+                  {/* Email Field */}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                      <Input id="login-email" type="email" placeholder="Enter your email" className="pl-10" required />
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        className="pl-10"
+                        onChange={(e) =>
+                          setLoginData({ ...loginData, email: e.target.value })
+                        }
+                        required
+                      />
                     </div>
                   </div>
+
+                  {/* Password Field */}
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
                     <div className="relative">
@@ -94,6 +111,12 @@ export default function AuthPage() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         className="pl-10 pr-10"
+                        onChange={(e) =>
+                          setLoginData({
+                            ...loginData,
+                            password: e.target.value,
+                          })
+                        }
                         required
                       />
                       <Button
@@ -111,10 +134,19 @@ export default function AuthPage() {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Remember Me & Forgot Password */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="remember" className="rounded border-slate-300" />
-                      <Label htmlFor="remember" className="text-sm text-slate-600">
+                      <input
+                        type="checkbox"
+                        id="remember"
+                        className="rounded border-slate-300"
+                      />
+                      <Label
+                        htmlFor="remember"
+                        className="text-sm text-slate-600"
+                      >
                         Remember me
                       </Label>
                     </div>
@@ -122,11 +154,17 @@ export default function AuthPage() {
                       Forgot password?
                     </Button>
                   </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
                     Sign In
                   </Button>
                 </form>
 
+                {/* Social Login */}
                 <div className="mt-6">
                   <Separator className="my-4" />
                   <div className="grid grid-cols-2 gap-4">
@@ -152,7 +190,11 @@ export default function AuthPage() {
                       Google
                     </Button>
                     <Button variant="outline" className="w-full">
-                      <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="mr-2 h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                       </svg>
                       Twitter
@@ -165,28 +207,81 @@ export default function AuthPage() {
             {/* Signup Tab */}
             <TabsContent value="signup">
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">Create account</CardTitle>
-                <CardDescription className="text-center mb-4">Start visualizing your Excel data today</CardDescription>
+                <CardTitle className="text-2xl text-center">
+                  Create account
+                </CardTitle>
+                <CardDescription className="text-center mb-4">
+                  Start visualizing your Excel data today
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4 ">
-                  <div className="grid grid-cols-2 gap-4 ">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSignup(signupData)
+                      .then(() => {
+                        // Redirect or update state on success
+                      })
+                      .catch((error) => {
+                        console.error("Signup error:", error);
+                      });
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="first-name">First name</Label>
-                      <Input id="first-name" placeholder="John" required />
+                      <Input
+                        id="first-name"
+                        placeholder="John"
+                        value={signupData.firstName}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            firstName: e.target.value,
+                          })
+                        }
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="last-name">Last name</Label>
-                      <Input id="last-name" placeholder="Doe" required />
+                      <Input
+                        id="last-name"
+                        placeholder="Doe"
+                        value={signupData.lastName}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            lastName: e.target.value,
+                          })
+                        }
+                        required
+                      />
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                      <Input id="signup-email" type="email" placeholder="Enter your email" className="pl-10" required />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        className="pl-10"
+                        value={signupData.email}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            email: e.target.value,
+                          })
+                        }
+                        required
+                      />
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
@@ -196,6 +291,13 @@ export default function AuthPage() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a password"
                         className="pl-10 pr-10"
+                        value={signupData.password}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            password: e.target.value,
+                          })
+                        }
                         required
                       />
                       <Button
@@ -213,6 +315,7 @@ export default function AuthPage() {
                       </Button>
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm password</Label>
                     <div className="relative">
@@ -222,6 +325,13 @@ export default function AuthPage() {
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
                         className="pl-10 pr-10"
+                        value={signupData.confirmPassword}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         required
                       />
                       <Button
@@ -229,7 +339,9 @@ export default function AuthPage() {
                         variant="ghost"
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4 text-slate-400" />
@@ -239,7 +351,11 @@ export default function AuthPage() {
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
                     Create Account
                   </Button>
                 </form>
@@ -269,7 +385,11 @@ export default function AuthPage() {
                       Google
                     </Button>
                     <Button variant="outline" className="w-full">
-                      <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="mr-2 h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                       </svg>
                       Twitter
@@ -283,7 +403,9 @@ export default function AuthPage() {
 
         {/* Features Preview */}
         <div className="mt-8 text-center">
-          <p className="text-slate-600 text-sm mb-4">What you'll get access to:</p>
+          <p className="text-slate-600 text-sm mb-4">
+            What you'll get access to:
+          </p>
           <div className="grid grid-cols-3 gap-4 text-xs">
             <div className="flex flex-col items-center">
               <Upload className="h-6 w-6 text-blue-600 mb-2" />
@@ -301,5 +423,5 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

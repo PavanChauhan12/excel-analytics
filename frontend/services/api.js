@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
 
 const baseurl = "http://localhost:5050";
 
@@ -21,6 +21,9 @@ export const handleSignup = async (signupData,navigate) => {
     );
 
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("username", res.data.username);
+    localStorage.setItem("email", res.data.email);
+    localStorage.setItem("role", res.data.role);
     toast.success("Signup Successful!");
     navigate("/dashboard");
     return res.data;

@@ -4,9 +4,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Upload, BarChart3, Brain, Calendar } from "lucide-react"
 
-export function WelcomeSection() {
-  // In a real app, this would come from authentication context or props
-  const userName = "John Doe"
+export function WelcomeSection({name,email}) {
+
   const currentTime = new Date()
   const hour = currentTime.getHours()
 
@@ -31,7 +30,7 @@ export function WelcomeSection() {
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">
-              {getGreeting()}, Welcome back {userName}! 👋
+              {getGreeting()}, Welcome back {name} 👋
             </h1>
             <p className="text-blue-100 flex items-center gap-2">
               <Calendar className="h-4 w-4" />

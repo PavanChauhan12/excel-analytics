@@ -1,14 +1,14 @@
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const baseurl = "http://localhost:5050";
 
-export const handleSignup = async (signupData) => {
+export const handleSignup = async (signupData,navigate) => {
   if (signupData.password !== signupData.confirmPassword) {
     toast.error("Passwords do not match");
     return;
   }
-
   try {
     const res = await axios.post(
       `${baseurl}/api/auth/register`,
@@ -22,6 +22,7 @@ export const handleSignup = async (signupData) => {
 
     localStorage.setItem("token", res.data.token);
     toast.success("Signup Successful!");
+    navigate("/dashboard");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -30,7 +31,7 @@ export const handleSignup = async (signupData) => {
   }
 };
 
-export const handleLogin = async (loginData) => {
+export const handleLogin = async (loginData,navigate) => {
   try {
     const res = await axios.post(
       `${baseurl}/api/auth/login`,
@@ -41,7 +42,11 @@ export const handleLogin = async (loginData) => {
     );
 
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("username", res.data.username);
+    localStorage.setItem("email", res.data.email);
+    localStorage.setItem("role", res.data.role);
     toast.success("Login Successful!");
+    navigate("/dashboard");
     return res.data;
   } catch (err) {
     console.error(err);

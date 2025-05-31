@@ -22,8 +22,10 @@ import {
   Building,
 } from "lucide-react";
 import { handleLogin, handleSignup } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupData, setSignupData] = useState({
@@ -39,7 +41,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
+
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <div className="bg-blue-600 p-3 rounded-xl">
@@ -59,7 +61,6 @@ export default function AuthPage() {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
-            {/* Login Tab */}
             <TabsContent value="login">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl text-center">
@@ -73,9 +74,9 @@ export default function AuthPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleLogin(loginData)
+                    handleLogin(loginData,navigate)
                       .then(() => {
-                        // Redirect or update state on success
+                        console.log("logged in");
                       })
                       .catch((error) => {
                         console.error("Login error:", error);
@@ -83,7 +84,6 @@ export default function AuthPage() {
                   }}
                   className="space-y-4"
                 >
-                  {/* Email Field */}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <div className="relative">
@@ -218,7 +218,7 @@ export default function AuthPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleSignup(signupData)
+                    handleSignup(signupData,navigate)
                       .then(() => {
                         // Redirect or update state on success
                       })

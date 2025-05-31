@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,17 +18,28 @@ import { StatsCards } from "@/components/stats-cards"
 
 export default function DashboardPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [user, setUser] = useState(null)
+
+useEffect(() => {
+  const name = localStorage.getItem("username")
+  const email = localStorage.getItem("email")
+  if (name && email) {
+    setUser({ name, email })
+  }
+}, [])
+
+if (!user) return <p className="p-6 text-sm text-gray-500">Loading dashboard...</p>
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
       <div className="flex-1 flex flex-col">
-        <DashboardHeader />
+        <DashboardHeader name={user.name} email={user.email} />
 
         <main className="flex-1 p-6 space-y-6">
           {/* Welcome Section */}
-          <WelcomeSection />
+          <WelcomeSection name={user.name}  />
 
           {/* Stats Overview */}
           <StatsCards />

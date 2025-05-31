@@ -33,5 +33,5 @@ exports.login = async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
   const token = generateToken(user);
-  res.json({ token, role: user.role } );
+  res.json({ token, role: user.role, username:user.username, email:user.email } );
 };

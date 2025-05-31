@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import axios from "axios";
 
-const baseurl = "http://localhost:5000";
+const baseurl = "http://localhost:5050";
 
 export const handleSignup = async (signupData) => {
   if (signupData.password !== signupData.confirmPassword) {

@@ -69,15 +69,22 @@ export const handleSignOut = async (navigate) => {
 }
 
 export const uploadExcelFile = async (file, onUploadProgress) => {
-  const formData = new FormData()
-  formData.append("excelFile", file)
+  const formData = new FormData();
+  formData.append("excelFile", file);
 
-  const response = await axios.post("http://localhost:5050/api/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    onUploadProgress,
-  })
+  try {
+    const response = await axios.post("http://localhost:5050/api/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress,
+    });
 
-  return response.data
+    toast.success("File uploaded successfully!");
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data || error.message || "Upload failed";
+    toast.error(`Upload error: ${errorMessage}`);
+    throw error;
+  }
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Upload, FileSpreadsheet, X } from "lucide-react"
+import { uploadExcelFile } from "@/services/api"
 
 export function UploadDialog({ open, onOpenChange }) {
   const [dragActive, setDragActive] = useState(false)
@@ -43,26 +44,27 @@ export function UploadDialog({ open, onOpenChange }) {
   }
 
   const handleUpload = async () => {
-    if (!selectedFile) return
+  if (!selectedFile) return
 
-    setUploading(true)
-    setUploadProgress(0)
+  setUploading(true)
+  setUploadProgress(0)
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setUploading(false)
-          onOpenChange(false)
-          setSelectedFile(null)
-          setUploadProgress(0)
-          return 100
-        }
-        return prev + 10
-      })
-    }, 200)
+  try {
+    const result = await uploadExcelFile(selectedFile, (progressEvent) => {
+      const percent = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1))
+      setUploadProgress(percent)
+    })
+
+    console.log("Upload result:", result)
+    onOpenChange(false)
+    setSelectedFile(null)
+  } catch (error) {
+    console.error("Upload failed:", error)
+    alert("Upload failed. Please try again.")
+  } finally {
+    setUploading(false)
   }
+}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

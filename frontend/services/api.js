@@ -67,3 +67,17 @@ export const handleSignOut = async (navigate) => {
     console.log(err);
   }
 }
+
+export const uploadExcelFile = async (file, onUploadProgress) => {
+  const formData = new FormData()
+  formData.append("excelFile", file)
+
+  const response = await axios.post("http://localhost:5050/api/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    onUploadProgress,
+  })
+
+  return response.data
+}

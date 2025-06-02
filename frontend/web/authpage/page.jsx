@@ -1,16 +1,17 @@
+"use client"
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Separator } from "./ui/separator";
+} from "../../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Separator } from "../../components/ui/separator";
 import {
   BarChart3,
   Upload,
@@ -19,7 +20,6 @@ import {
   Mail,
   Lock,
   User,
-  Building,
 } from "lucide-react";
 import { handleLogin, handleSignup } from "@/services/api";
 import { useNavigate } from "react-router-dom";
@@ -100,8 +100,6 @@ export default function AuthPage() {
                       />
                     </div>
                   </div>
-
-                  {/* Password Field */}
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
                     <div className="relative">
@@ -135,7 +133,7 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  {/* Remember Me & Forgot Password */}
+                  {/* update */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <input
@@ -155,7 +153,6 @@ export default function AuthPage() {
                     </Button>
                   </div>
 
-                  {/* Submit Button */}
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700"
@@ -164,7 +161,6 @@ export default function AuthPage() {
                   </Button>
                 </form>
 
-                {/* Social Login */}
                 <div className="mt-6">
                   <Separator className="my-4" />
                   <div className="grid grid-cols-2 gap-4">
@@ -204,7 +200,6 @@ export default function AuthPage() {
               </CardContent>
             </TabsContent>
 
-            {/* Signup Tab */}
             <TabsContent value="signup">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl text-center">
@@ -220,7 +215,7 @@ export default function AuthPage() {
                     e.preventDefault();
                     handleSignup(signupData,navigate)
                       .then(() => {
-                        // Redirect or update state on success
+                        console.log("signed up");
                       })
                       .catch((error) => {
                         console.error("Signup error:", error);
@@ -401,7 +396,6 @@ export default function AuthPage() {
           </Tabs>
         </Card>
 
-        {/* Features Preview */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm mb-4">
             What you'll get access to:

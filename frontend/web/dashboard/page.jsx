@@ -16,6 +16,7 @@ import { RecentUploads } from "@/components/recent-uploads"
 import { ChartGallery } from "@/components/chart-gallery"
 import { StatsCards } from "@/components/stats-cards"
 
+
 export default function DashboardPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [user, setUser] = useState(null)

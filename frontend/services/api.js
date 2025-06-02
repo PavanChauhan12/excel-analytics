@@ -57,3 +57,13 @@ export const handleLogin = async (loginData,navigate) => {
     throw err;
   }
 };
+
+export const handleSignOut = async (navigate) => {
+  try{
+  localStorage.clear();
+  navigate("/");
+  }
+  catch(err){
+    console.log(err);
+  }
+}

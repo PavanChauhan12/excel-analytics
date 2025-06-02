@@ -25,12 +25,11 @@ export function ChartPreview({ chart }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Chart Preview */}
+
         <div className="h-32 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
           <BarChart3 className="h-8 w-8 text-blue-600" />
         </div>
 
-        {/* Chart Info */}
         <div>
           <CardTitle className="text-sm">{chart.title}</CardTitle>
           <p className="text-xs text-gray-500 mt-1">From {chart.file}</p>

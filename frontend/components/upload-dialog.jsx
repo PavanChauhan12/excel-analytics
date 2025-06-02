@@ -1,10 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Upload, FileSpreadsheet, X } from "lucide-react"
 import { uploadExcelFile } from "@/services/api"
@@ -32,7 +37,16 @@ export function UploadDialog({ open, onOpenChange }) {
 
     const files = e.dataTransfer.files
     if (files && files[0]) {
-      setSelectedFile(files[0])
+      const file = files[0]
+      const validTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ]
+      if (!validTypes.includes(file.type)) {
+        alert("Please upload a valid Excel file (.xls or .xlsx)")
+        return
+      }
+      setSelectedFile(file)
     }
   }
 
@@ -44,34 +58,36 @@ export function UploadDialog({ open, onOpenChange }) {
   }
 
   const handleUpload = async () => {
-  if (!selectedFile) return
+    if (!selectedFile) return
 
-  setUploading(true)
-  setUploadProgress(0)
+    setUploading(true)
+    setUploadProgress(0)
 
-  try {
-    const result = await uploadExcelFile(selectedFile, (progressEvent) => {
-      const percent = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1))
-      setUploadProgress(percent)
-    })
+    try {
+      const result = await uploadExcelFile(selectedFile, (progressEvent) => {
+        const percent = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1))
+        setUploadProgress(percent)
+      })
 
-    console.log("Upload result:", result)
-    onOpenChange(false)
-    setSelectedFile(null)
-  } catch (error) {
-    console.error("Upload failed:", error)
-    alert("Upload failed. Please try again.")
-  } finally {
-    setUploading(false)
+      console.log("Upload result:", result)
+      onOpenChange(false)
+      setSelectedFile(null)
+    } catch (error) {
+      console.error("Upload failed:", error)
+      alert("Upload failed. Please try again.")
+    } finally {
+      setUploading(false)
+    }
   }
-}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Upload Excel File</DialogTitle>
-          <DialogDescription>Upload your .xls or .xlsx file to start analyzing your data</DialogDescription>
+          <DialogDescription>
+            Upload your .xls or .xlsx file to start analyzing your data
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -88,10 +104,9 @@ export function UploadDialog({ open, onOpenChange }) {
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-2">Drop your Excel file here</p>
               <p className="text-sm text-gray-500 mb-4">or click to browse files</p>
-              <Label htmlFor="file-upload">
-                <Button variant="outline" className="cursor-pointer">
-                  Choose File
-                </Button>
+
+              {/* Manual trigger for file input */}
+              <div>
                 <Input
                   id="file-upload"
                   type="file"
@@ -99,7 +114,10 @@ export function UploadDialog({ open, onOpenChange }) {
                   className="hidden"
                   onChange={handleFileSelect}
                 />
-              </Label>
+                <Button variant="outline" onClick={() => document.getElementById("file-upload")?.click()}>
+                  Choose File
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -107,7 +125,9 @@ export function UploadDialog({ open, onOpenChange }) {
                 <FileSpreadsheet className="h-8 w-8 text-green-600" />
                 <div className="flex-1">
                   <p className="font-medium">{selectedFile.name}</p>
-                  <p className="text-sm text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-sm text-gray-500">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
                   <X className="h-4 w-4" />

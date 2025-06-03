@@ -3,6 +3,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const ExcelRecord = require('../models/ExcelRecord');
+const user = require('../models/User');
 const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 const upload = require('../multerConfig');
@@ -10,6 +11,9 @@ const upload = require('../multerConfig');
 router.post('/upload', verifyToken, upload.single('excelFile'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).send('No file uploaded or invalid format.');
+
+    const email = req.user?.email;
+    if (!email) return res.status(400).json({ error: 'Email not found in token' });
 
     const filePath = path.join(__dirname, '..', 'uploads', req.file.filename);
     const workbook = XLSX.readFile(filePath);
@@ -19,6 +23,7 @@ router.post('/upload', verifyToken, upload.single('excelFile'), async (req, res)
 
     const newRecord = new ExcelRecord({
       user: req.user._id,
+      uploaderEmail: email,
       filename: req.file.filename,
       data: jsonData,
     });
@@ -28,6 +33,8 @@ router.post('/upload', verifyToken, upload.single('excelFile'), async (req, res)
 
     res.status(200).json({
       message: 'File uploaded and processed successfully',
+      filename: req.file.filename,
+      uploaderEmail: email,
       recordId: newRecord._id,
       rowCount: jsonData.length,
     });

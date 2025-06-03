@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const ExcelRecordSchema = new mongoose.Schema({
+  uploaderEmail: {
+    type: String,
+    required: true,
+  },
   data: {
     type: Object, 
     required: true,

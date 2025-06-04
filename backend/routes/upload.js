@@ -25,6 +25,7 @@ router.post('/upload', verifyToken, upload.single('excelFile'), async (req, res)
       user: req.user._id,
       uploaderEmail: email,
       filename: req.file.filename,
+      filesize: parseFloat((req.file.size / 1024).toFixed(2)),
       data: jsonData,
     });
     await newRecord.save();

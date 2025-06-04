@@ -5,6 +5,14 @@ const ExcelRecordSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  filename: {
+    type: String,
+    required: true,
+  },
+  filesize: {
+    type: Number,
+    required: true,
+  },
   data: {
     type: Object, 
     required: true,

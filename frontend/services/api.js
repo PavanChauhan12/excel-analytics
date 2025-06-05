@@ -1,7 +1,6 @@
 import toast from "react-hot-toast";
 import axios from "axios";
 
-
 const baseurl = "http://localhost:5050";
 
 export const handleSignup = async (signupData,navigate) => {
@@ -59,15 +58,37 @@ export const handleLogin = async (loginData,navigate) => {
   }
 };
 
+export const handleGoogleLogin = async (response, navigate) => {
+  try {
+    const res = await axios.post(`${baseurl}/api/auth/google`, {
+      token: response.credential
+    });
+
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("username", res.data.username);
+    localStorage.setItem("email", res.data.email);
+    localStorage.setItem("role", res.data.role);
+    localStorage.setItem("number", res.data.excelRecords.length);
+    
+    toast.success("Google Login Successful!");
+    navigate("/dashboard");
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.error || "Google login failed");
+    throw err;
+  }
+};
+
 export const handleSignOut = async (navigate) => {
   try{
-  localStorage.clear();
-  navigate("/");
+    localStorage.clear();
+    navigate("/");
   }
   catch(err){
     console.log(err);
   }
-}
+};
 
 export const uploadExcelFile = async (file, onUploadProgress) => {
   const formData = new FormData();

@@ -2,7 +2,6 @@ const express = require('express');
 const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
-// const ExcelRecord = require('../models/ExcelRecord');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
@@ -28,6 +27,17 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
 
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const alreadyUploaded = user.excelRecords.some(
+      (record) => record.filename === req.file.filename
+    );
+    if (alreadyUploaded) {
+      fs.unlinkSync(filePath);
+      
+      return res.status(409).json({
+        message: 'This file has already been uploaded.'
+      });
+    }
 
     user.excelRecords.push({
       uploaderEmail: email,
@@ -57,34 +67,31 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
   }
 });
 
-router.get('/record/:id', verifyToken, async (req, res) => {
+router.get('/dashboard', verifyToken, async (req, res) => {
   try {
-    const recordId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.id; // token gives id as 'id', not '_id'
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const record = user.excelRecords.id(recordId); // find record by its _id
-
-    if (!record) {
-      return res.status(404).json({ message: 'Record not found' });
-    }
-
     res.status(200).json({
-      message: 'Record fetched successfully',
-      data: record.data,
-      filename: record.filename,
-      fileSize: record.filesize + ' KB',
-      uploadedAt: record.uploadedAt,
+      message: 'Dashboard data fetched successfully',
+      records: user.excelRecords.map(record => ({
+        id: record._id,
+        filename: record.filename,
+        filesize: record.filesize + ' KB',
+        // uploaderEmail: record.uploaderEmail,
+        uploadedAt: record.uploadedAt,
+        rowCount: record.data.length
+      }))
     });
+
   } catch (error) {
-    console.error('Error fetching record:', error);
-    res.status(500).json({ message: 'Error fetching record', error: error.message });
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({ message: 'Error fetching dashboard data', error: error.message });
   }
 });
-
 
 module.exports = router;

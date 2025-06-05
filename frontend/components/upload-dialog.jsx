@@ -2,11 +2,8 @@
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
+  Dialog, DialogContent, DialogDescription,
+  DialogHeader, DialogTitle
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Upload, FileSpreadsheet, X } from "lucide-react"
 import { uploadExcelFile } from "@/services/api"
 
-export function UploadDialog({ open, onOpenChange }) {
+export function UploadDialog({ open, onOpenChange, onUploadSuccess }) {
   const [dragActive, setDragActive] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -23,11 +20,8 @@ export function UploadDialog({ open, onOpenChange }) {
   const handleDrag = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true)
+    else if (e.type === "dragleave") setDragActive(false)
   }
 
   const handleDrop = (e) => {
@@ -59,7 +53,6 @@ export function UploadDialog({ open, onOpenChange }) {
 
   const handleUpload = async () => {
     if (!selectedFile) return
-
     setUploading(true)
     setUploadProgress(0)
 
@@ -69,7 +62,10 @@ export function UploadDialog({ open, onOpenChange }) {
         setUploadProgress(percent)
       })
 
-      console.log("Upload result:", result)
+      if (onUploadSuccess) {
+        onUploadSuccess(selectedFile)
+      }
+
       onOpenChange(false)
       setSelectedFile(null)
     } catch (error) {
@@ -105,7 +101,6 @@ export function UploadDialog({ open, onOpenChange }) {
               <p className="text-lg font-medium text-gray-900 mb-2">Drop your Excel file here</p>
               <p className="text-sm text-gray-500 mb-4">or click to browse files</p>
 
-              {/* Manual trigger for file input */}
               <div>
                 <Input
                   id="file-upload"
@@ -151,7 +146,7 @@ export function UploadDialog({ open, onOpenChange }) {
               Cancel
             </Button>
             <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
-              {uploading ? "Uploading..." : "Upload & Analyze"}
+              {uploading ? "Uploading..." : "Upload"}
             </Button>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Upload, BarChart3, Brain, Calendar } from "lucide-react"
 
-export function WelcomeSection({name,email}) {
+export function WelcomeSection({name}) {
 
   const currentTime = new Date()
   const hour = currentTime.getHours()
@@ -40,7 +40,6 @@ export function WelcomeSection({name,email}) {
               Ready to analyze your data? You have 3 new insights waiting for you.
             </p>
           </div>
-
           <div className="hidden md:flex items-center gap-3">
             <div className="text-center">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
@@ -62,7 +61,6 @@ export function WelcomeSection({name,email}) {
             </div>
           </div>
         </div>
-
         <div className="mt-4 flex gap-3">
           <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
             View Tutorial

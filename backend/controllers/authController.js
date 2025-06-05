@@ -25,6 +25,7 @@ exports.register = async (req, res) => {
         role: user.role,
         username: user.username,
         email: user.email,
+        excelRecords: user.excelRecords
       });
   } catch (err) {
     res.status(400).json({ error: "User exists." });
@@ -45,5 +46,6 @@ exports.login = async (req, res) => {
     role: user.role,
     username: user.username,
     email: user.email,
+    excelRecords : user.excelRecords
   });
 };

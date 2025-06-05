@@ -48,6 +48,7 @@ export const handleLogin = async (loginData,navigate) => {
     localStorage.setItem("username", res.data.username);
     localStorage.setItem("email", res.data.email);
     localStorage.setItem("role", res.data.role);
+    localStorage.setItem("number", res.data.excelRecords.length);
     toast.success("Login Successful!");
     navigate("/dashboard");
     return res.data;
@@ -86,8 +87,8 @@ export const uploadExcelFile = async (file, onUploadProgress) => {
     toast.success("File uploaded successfully!");
     return response.data;
   } catch (error) {
-    const errorMessage = error.response?.data || error.message || "Upload failed";
+    const errorMessage = error.response?.data?.message || error.message || "Upload failed";
     toast.error(`Upload error: ${errorMessage}`);
     throw error;
   }
-}
+};

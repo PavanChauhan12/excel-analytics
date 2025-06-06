@@ -33,9 +33,12 @@ import { AIInsights } from "@/components/ai-insights";
 import { RecentUploads } from "@/components/recent-uploads";
 import { ChartGallery } from "@/components/chart-gallery";
 import { StatsCards } from "@/components/stats-cards";
+import { ChartCreationDialog } from "@/components/chart-creation";
+import { Files } from "@/components/files";
 
 export default function DashboardPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false); // updated name
   const [user, setUser] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -45,10 +48,24 @@ export default function DashboardPage() {
   useEffect(() => {
     const name = localStorage.getItem("username");
     const email = localStorage.getItem("email");
-    const number = localStorage.getItem("number");
     if (name && email) {
-      setUser({ name, email ,number});
+      setUser({ name, email });
     }
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:5050/api/dashboard", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setUploadedFiles(data.records || []);
+      })
+      .catch((err) =>
+        console.error("Failed to fetch dashboard data:", err)
+      );
   }, []);
 
   const handleFileUpload = (file) => {
@@ -72,7 +89,7 @@ export default function DashboardPage() {
 
         <main className="flex-1 p-6 space-y-6">
           <WelcomeSection name={user.name} />
-          <StatsCards number={user.number}/>
+          <StatsCards files={uploadedFiles} />
 
           <Card>
             <CardHeader>
@@ -109,8 +126,13 @@ export default function DashboardPage() {
                   </Button>
                 )}
               </div>
+
               {selectedFile && (
-                <Button variant="outline" className="flex items-center gap-2 bg-black text-white hover:bg-green-600 hover:text-white">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 bg-black text-white hover:bg-green-600 hover:text-white"
+                  onClick={() => setDialogOpen(true)}
+                >
                   <BarChart3 className="h-4 w-4" />
                   Create Chart
                 </Button>
@@ -133,7 +155,7 @@ export default function DashboardPage() {
 
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <RecentUploads />
+                <RecentUploads files={uploadedFiles} />
                 <ChartGallery />
               </div>
               <AIInsights />
@@ -153,39 +175,7 @@ export default function DashboardPage() {
                     Upload New File
                   </Button>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {uploadedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileSpreadsheet className="h-8 w-8 text-green-600" />
-                          <div>
-                            <h4 className="font-medium">{file.name}</h4>
-                            <p className="text-sm text-gray-500">
-                              {((file.size || 0) / 1024 / 1024).toFixed(2)} MB •
-                              just now • 0 charts
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="default">processed</Badge>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
+                <Files files={uploadedFiles} />
               </Card>
             </TabsContent>
 
@@ -200,10 +190,17 @@ export default function DashboardPage() {
         </main>
       </div>
 
+      {/* Dialogs */}
       <UploadDialog
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
         onUploadSuccess={handleFileUpload}
+      />
+
+      <ChartCreationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        selectedFile={selectedFile}
       />
     </div>
   );

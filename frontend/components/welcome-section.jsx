@@ -40,34 +40,6 @@ export function WelcomeSection({name}) {
               Ready to analyze your data? You have 3 new insights waiting for you.
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-3">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                <Upload className="h-6 w-6" />
-              </div>
-              <p className="text-xs text-blue-100">Upload</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                <BarChart3 className="h-6 w-6" />
-              </div>
-              <p className="text-xs text-blue-100">Analyze</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                <Brain className="h-6 w-6" />
-              </div>
-              <p className="text-xs text-blue-100">Insights</p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex gap-3">
-          <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
-            View Tutorial
-          </Button>
-          <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
-            What's New
-          </Button>
         </div>
       </CardContent>
     </Card>

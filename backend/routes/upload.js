@@ -25,20 +25,27 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
     const jsonData = XLSX.utils.sheet_to_json(sheet);
     const fileSizeKB = parseFloat((req.file.size / 1024).toFixed(2));
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const alreadyUploaded = user.excelRecords.some(
       (record) => record.filename === req.file.filename
     );
+
+    // Always delete the file after processing
+    fs.unlinkSync(filePath);
+
     if (alreadyUploaded) {
-      fs.unlinkSync(filePath);
-      
-      return res.status(409).json({
-        message: 'This file has already been uploaded.'
+      return res.status(200).json({
+        message: 'File already uploaded previously. Ignoring DB insertion.',
+        filename: req.file.filename,
+        fileSize: fileSizeKB + ' KB',
+        uploaderEmail: email,
+        rowCount: jsonData.length
       });
     }
 
+    // Only add to DB if it's a new file
     user.excelRecords.push({
       uploaderEmail: email,
       filename: req.file.filename,
@@ -47,8 +54,6 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
       uploadedBy: userId
     });
     await user.save();
-
-    fs.unlinkSync(filePath);
 
     res.status(200).json({
       message: 'File uploaded and saved to user document',

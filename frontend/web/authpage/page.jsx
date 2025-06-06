@@ -42,8 +42,22 @@ export default function AuthPage() {
   const initializeGoogleButton = () => {
     if (window.google?.accounts?.id) {
       window.google.accounts.id.initialize({
-        client_id: 'YOUR_GOOGLE_CLIENT_ID',
-        callback: handleGoogleCallback
+        client_id: 'http://279966597320-b62uf7hueul5trjupfc7fmboju94774a.apps.googleusercontent.com',
+        callback: handleGoogleCallback,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        login_uri: window.location.origin,
+        context: 'use',
+        ux_mode: 'redirect',
+        prompt_parent_id: 'googleLoginButton',
+        login_hint: '',
+        itp_support: true,
+        native_callback: true,
+        auto_prompt: false,
+        select_by: 'auto',
+        state: 'login',
+        nonce: '',
+        flow_name: 'general',
       });
 
       // Render button for both login and signup tabs

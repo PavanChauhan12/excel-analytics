@@ -42,7 +42,7 @@ export default function AuthPage() {
   const initializeGoogleButton = () => {
     if (window.google?.accounts?.id) {
       window.google.accounts.id.initialize({
-        client_id: 'http://279966597320-b62uf7hueul5trjupfc7fmboju94774a.apps.googleusercontent.com',
+        client_id: '279966597320-b62uf7hueul5trjupfc7fmboju94774a.apps.googleusercontent.com',
         callback: handleGoogleCallback,
         auto_select: false,
         cancel_on_tap_outside: true,

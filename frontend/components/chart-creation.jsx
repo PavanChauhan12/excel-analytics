@@ -1,30 +1,46 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { useNavigate } from "react-router-dom"
+import { useState, useRef, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   BarChart3,
   LineChart,
   PieChart,
   AreaChart,
   ScatterChart,
-  TrendingUp,
   Palette,
-  Eye,
   FileSpreadsheet,
-} from "lucide-react"
-import * as XLSX from "xlsx"
-import { Chart } from "chart.js/auto"
-import toast from "react-hot-toast"
+  CuboidIcon as Cube,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+} from "lucide-react";
+import * as XLSX from "xlsx";
 
 // Define chart types for selection
 const chartTypes = [
@@ -34,6 +50,7 @@ const chartTypes = [
     icon: BarChart3,
     description: "Compare values across categories",
     best_for: "Categorical data comparison",
+    is3D: false,
   },
   {
     id: "line",
@@ -41,6 +58,7 @@ const chartTypes = [
     icon: LineChart,
     description: "Show trends over time",
     best_for: "Time series data",
+    is3D: false,
   },
   {
     id: "pie",
@@ -48,6 +66,7 @@ const chartTypes = [
     icon: PieChart,
     description: "Show parts of a whole",
     best_for: "Percentage breakdown",
+    is3D: false,
   },
   {
     id: "area",
@@ -55,6 +74,7 @@ const chartTypes = [
     icon: AreaChart,
     description: "Show cumulative values over time",
     best_for: "Stacked data visualization",
+    is3D: false,
   },
   {
     id: "scatter",
@@ -62,277 +82,597 @@ const chartTypes = [
     icon: ScatterChart,
     description: "Show correlation between variables",
     best_for: "Relationship analysis",
+    is3D: false,
   },
-]
+  {
+    id: "bar3d",
+    name: "3D Bar Chart",
+    icon: Cube,
+    description: "Compare values across multiple dimensions",
+    best_for: "Multi-dimensional data comparison",
+    is3D: true,
+  },
+  {
+    id: "scatter3d",
+    name: "3D Scatter Plot",
+    icon: Cube,
+    description: "Show correlation between three variables",
+    best_for: "Multi-dimensional relationship analysis",
+    is3D: true,
+  },
+  {
+    id: "surface3d",
+    name: "3D Surface Plot",
+    icon: Cube,
+    description: "Visualize a function of two variables",
+    best_for: "Surface visualization and terrain mapping",
+    is3D: true,
+  },
+];
 
 // Define color themes for chart customization
 const colorThemes = [
-  { name: "Default", colors: ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"] },
-  { name: "Ocean", colors: ["#0ea5e9", "#06b6d4", "#0891b2", "#0e7490", "#155e75"] },
-  { name: "Forest", colors: ["#10b981", "#059669", "#047857", "#065f46", "#064e3b"] },
-  { name: "Sunset", colors: ["#f59e0b", "#f97316", "#ef4444", "#dc2626", "#b91c1c"] },
-  { name: "Purple", colors: ["#8b5cf6", "#7c3aed", "#6d28d9", "#5b21b6", "#4c1d95"] },
-  { name: "Yellow", colors: ["#f1c40f", "#f39c12", "#e67e22", "#d35400", "#c0392b"] },
-]
+  {
+    name: "Default",
+    colors: ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"],
+  },
+  {
+    name: "Ocean",
+    colors: ["#0ea5e9", "#06b6d4", "#0891b2", "#0e7490", "#155e75"],
+  },
+  {
+    name: "Forest",
+    colors: ["#10b981", "#059669", "#047857", "#065f46", "#064e3b"],
+  },
+  {
+    name: "Sunset",
+    colors: ["#f59e0b", "#f97316", "#ef4444", "#dc2626", "#b91c1c"],
+  },
+  {
+    name: "Purple",
+    colors: ["#8b5cf6", "#7c3aed", "#6d28d9", "#5b21b6", "#4c1d95"],
+  },
+  {
+    name: "Yellow",
+    colors: ["#f1c40f", "#f39c12", "#e67e22", "#d35400", "#c0392b"],
+  },
+];
 
 export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
-  const navigate = useNavigate()
-  const [fileData, setFileData] = useState([])
-  const [columns, setColumns] = useState([])
-  const [selectedChart, setSelectedChart] = useState("line") // Default to line chart
-  const [xAxis, setXAxis] = useState("")
-  const [yAxis, setYAxis] = useState("")
-  const [chartTitle, setChartTitle] = useState("")
-  const [selectedTheme, setSelectedTheme] = useState("Default")
-  const [showLegend, setShowLegend] = useState(true)
-  const [showGrid, setShowGrid] = useState(true)
-  const [fileName, setFileName] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const chartRef = useRef(null)
-  const chartInstance = useRef(null)
+  const [fileData, setFileData] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [selectedChart, setSelectedChart] = useState("line");
+  const [xAxis, setXAxis] = useState("");
+  const [yAxis, setYAxis] = useState("");
+  const [zAxis, setZAxis] = useState("");
+  const [chartTitle, setChartTitle] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState("Default");
+  const [showLegend, setShowLegend] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
+  const [fileName, setFileName] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const chartRef = useRef(null);
+  const plotlyInstance = useRef(null);
+
+  // Define the steps in the workflow
+  const steps = [
+    "Select Data",
+    "Choose Chart",
+    "Configure Axes",
+    "Style & Theme",
+    "Preview",
+  ];
 
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile)
+      processExcelFile(selectedFile);
     }
-  }, [selectedFile, open])
+  }, [selectedFile, open]);
 
   // Effect hook to re-render the preview chart
   useEffect(() => {
-    if (fileData.length > 0 && xAxis && yAxis && selectedChart) {
-      renderPreviewChart()
+    if (
+      currentStep === 4 &&
+      fileData.length > 0 &&
+      xAxis &&
+      yAxis &&
+      selectedChart
+    ) {
+      renderPreviewChart();
     }
-  }, [fileData, xAxis, yAxis, selectedChart, selectedTheme, showLegend, showGrid])
+  }, [
+    currentStep,
+    fileData,
+    xAxis,
+    yAxis,
+    zAxis,
+    selectedChart,
+    selectedTheme,
+    showLegend,
+    showGrid,
+  ]);
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (plotlyInstance.current && chartRef.current) {
+        try {
+          window.Plotly?.purge(chartRef.current);
+        } catch (e) {
+          console.log("Plotly cleanup error:", e);
+        }
+        plotlyInstance.current = null;
+      }
+    };
+  }, []);
 
   // Improved function to detect if a value can be treated as a number
   const isNumericValue = (value) => {
-    if (value === null || value === undefined || value === "") return false
-    if (typeof value === "number") return !isNaN(value)
+    if (value === null || value === undefined || value === "") return false;
+    if (typeof value === "number") return !isNaN(value);
     if (typeof value === "string") {
-      // Remove common formatting characters and check if it's a valid number
-      const cleanValue = value.toString().replace(/[,$%\s]/g, "")
-      return !isNaN(cleanValue) && !isNaN(Number.parseFloat(cleanValue)) && cleanValue !== ""
+      const cleanValue = value.toString().replace(/[,$%\s]/g, "");
+      return (
+        !isNaN(cleanValue) &&
+        !isNaN(Number.parseFloat(cleanValue)) &&
+        cleanValue !== ""
+      );
     }
-    return false
-  }
+    return false;
+  };
 
   // Improved function to detect column type based on multiple samples
   const detectColumnType = (columnName, data) => {
-    const samples = data.slice(0, Math.min(10, data.length)) // Check first 10 rows
-    let numericCount = 0
-    let totalCount = 0
+    const samples = data.slice(0, Math.min(10, data.length));
+    let numericCount = 0;
+    let totalCount = 0;
 
     for (const row of samples) {
-      const value = row[columnName]
+      const value = row[columnName];
       if (value !== null && value !== undefined && value !== "") {
-        totalCount++
+        totalCount++;
         if (isNumericValue(value)) {
-          numericCount++
+          numericCount++;
         }
       }
     }
 
-    // If more than 70% of non-empty values are numeric, consider it a number column
-    return totalCount > 0 && numericCount / totalCount > 0.7 ? "number" : "text"
-  }
+    return totalCount > 0 && numericCount / totalCount > 0.7
+      ? "number"
+      : "text";
+  };
 
-  // Process the Excel file using the logic from the original HTML
+  // Process the Excel file
   const processExcelFile = (file) => {
-    setIsProcessing(true)
-    setFileName(file.name)
+    setIsProcessing(true);
+    setFileName(file.name);
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        // Use the same logic as the original HTML file
-        const workbook = XLSX.read(event.target.result, { type: "binary" })
-        const firstSheet = workbook.SheetNames[0]
-        const worksheet = workbook.Sheets[firstSheet]
-        const jsonData = XLSX.utils.sheet_to_json(worksheet)
+        const workbook = XLSX.read(event.target.result, { type: "binary" });
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheet];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         if (jsonData.length === 0) {
-          toast.error("No data found in the Excel sheet.")
-          setIsProcessing(false)
-          return
+          console.error("No data found in the Excel sheet.");
+          setIsProcessing(false);
+          return;
         }
 
-        setFileData(jsonData)
+        setFileData(jsonData);
 
-        // Get headers and populate dropdowns with improved type detection
-        const headers = Object.keys(jsonData[0])
+        const headers = Object.keys(jsonData[0]);
         const columnsWithTypes = headers.map((header) => {
-          const sampleValue = jsonData[0][header]
-          const detectedType = detectColumnType(header, jsonData)
-
+          const detectedType = detectColumnType(header, jsonData);
           return {
             name: header,
             type: detectedType,
-            sample: sampleValue,
-          }
-        })
+            sample: jsonData[0][header],
+          };
+        });
 
-        console.log("Detected columns:", columnsWithTypes) // Debug log
-        setColumns(columnsWithTypes)
-        setIsProcessing(false)
+        setColumns(columnsWithTypes);
+        setIsProcessing(false);
       } catch (error) {
-        console.error("Error processing Excel file:", error)
-        alert("Error processing Excel file. Please check the file format.")
-        setIsProcessing(false)
+        console.error("Error processing Excel file:", error);
+        setIsProcessing(false);
+      }
+    };
+
+    reader.readAsBinaryString(file);
+  };
+
+  // Render preview chart using Plotly.js
+  const renderPreviewChart = async () => {
+    if (!chartRef.current || !selectedChart) return;
+
+    // Load Plotly dynamically
+    if (!window.Plotly) {
+      try {
+        const Plotly = await import("plotly.js-dist");
+        window.Plotly = Plotly.default;
+      } catch (error) {
+        console.error("Failed to load Plotly:", error);
+        return;
       }
     }
 
-    reader.readAsBinaryString(file)
-  }
-
-  // Render preview chart using Chart.js logic from the original HTML
-  const renderPreviewChart = () => {
-    if (chartInstance.current) {
-      chartInstance.current.destroy()
+    // Clean up previous chart if it exists
+    if (plotlyInstance.current) {
+      window.Plotly.purge(chartRef.current);
     }
 
-    if (!chartRef.current || !selectedChart) return
+    try {
+      // Extract data
+      const xData = fileData.map((row) => row[xAxis]);
+      const yData = fileData.map((row) => {
+        const value = row[yAxis];
+        return isNumericValue(value)
+          ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
+          : 0;
+      });
 
-    const ctx = chartRef.current.getContext("2d")
+      // Extract z-axis data for 3D charts
+      const zData = zAxis
+        ? fileData.map((row) => {
+            const value = row[zAxis];
+            return isNumericValue(value)
+              ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
+              : 0;
+          })
+        : [];
 
-    // Extract data using the same logic as the original HTML
-    const xData = fileData.map((row) => row[xAxis])
-    const yData = fileData
-      .map((row) => {
-        const value = row[yAxis]
-        if (isNumericValue(value)) {
-          return Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-        }
-        return 0
-      })
-      .filter((val) => !isNaN(val))
+      const themeColors =
+        colorThemes.find((t) => t.name === selectedTheme)?.colors ||
+        colorThemes[0].colors;
+      const primaryColor = themeColors[0];
 
-    if (xData.length === 0 || yData.length === 0) return
+      // Determine if the selected chart is 3D
+      const is3D =
+        chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false;
 
-    const themeColors = colorThemes.find((t) => t.name === selectedTheme)?.colors || colorThemes[0].colors
+      let plotData = [];
+      let layout = {
+        title:
+          chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
+        showlegend: showLegend,
+        margin: { l: 50, r: 50, b: 50, t: 50, pad: 4 },
+        paper_bgcolor: "white",
+        plot_bgcolor: "white",
+      };
 
-    // Use the same Chart.js configuration as the original HTML with enhancements
-    const config = {
-      type: selectedChart === "pie" ? "pie" : selectedChart === "area" ? "line" : selectedChart,
-      data: {
-        labels: selectedChart === "scatter" ? [] : xData,
-        datasets: [
-          {
-            label: `${yAxis} vs ${xAxis}`,
-            data: selectedChart === "scatter" ? xData.map((x, i) => ({ x: x, y: yData[i] })) : yData,
-            borderColor: themeColors[0],
-            backgroundColor:
-              selectedChart === "line"
-                ? "transparent"
-                : selectedChart === "area"
-                  ? `${themeColors[0]}33`
-                  : selectedChart === "pie"
-                    ? themeColors
-                    : themeColors[0],
-            fill: selectedChart === "area",
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: chartTitle || `${yAxis} vs ${xAxis}`,
-          },
-          legend: {
-            display: showLegend,
-          },
-        },
-        scales:
-          selectedChart === "pie"
-            ? {}
-            : {
-                x: {
-                  title: {
-                    display: true,
-                    text: xAxis,
-                  },
-                  grid: {
-                    display: showGrid,
-                  },
+      // Configure chart based on type
+      if (is3D) {
+        // 3D chart configuration
+        switch (selectedChart) {
+          case "bar3d":
+            plotData = [
+              {
+                type: "scatter3d",
+                mode: "markers",
+                x: xData,
+                y: yData,
+                z: zData,
+                marker: {
+                  size: 8,
+                  color: primaryColor,
+                  opacity: 0.8,
                 },
-                y: {
-                  title: {
-                    display: true,
-                    text: yAxis,
-                  },
-                  beginAtZero: true,
-                  grid: {
-                    display: showGrid,
-                  },
-                },
+                name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
               },
-      },
+            ];
+            break;
+          case "scatter3d":
+            plotData = [
+              {
+                type: "scatter3d",
+                mode: "markers",
+                x: xData,
+                y: yData,
+                z: zData,
+                marker: {
+                  size: 6,
+                  color: primaryColor,
+                  opacity: 0.8,
+                },
+                name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
+              },
+            ];
+            break;
+          case "surface3d":
+            // For surface plots, we need to organize data into a grid
+            const uniqueX = [...new Set(xData)].sort((a, b) => a - b);
+            const uniqueY = [...new Set(yData)].sort((a, b) => a - b);
+
+            // Create a 2D array for z values
+            const zValues = Array(uniqueY.length)
+              .fill()
+              .map(() => Array(uniqueX.length).fill(0));
+
+            // Fill in z values where we have data
+            fileData.forEach((row) => {
+              const x = row[xAxis];
+              const y = row[yAxis];
+              const z = row[zAxis];
+
+              if (isNumericValue(x) && isNumericValue(y) && isNumericValue(z)) {
+                const xIndex = uniqueX.indexOf(x);
+                const yIndex = uniqueY.indexOf(y);
+                if (xIndex >= 0 && yIndex >= 0) {
+                  zValues[yIndex][xIndex] = Number.parseFloat(
+                    z.toString().replace(/[,$%\s]/g, "")
+                  );
+                }
+              }
+            });
+
+            plotData = [
+              {
+                type: "surface",
+                x: uniqueX,
+                y: uniqueY,
+                z: zValues,
+                colorscale: "Viridis",
+                name: `${zAxis} by ${xAxis} and ${yAxis}`,
+              },
+            ];
+            break;
+        }
+
+        // 3D layout settings
+        layout = {
+          ...layout,
+          scene: {
+            xaxis: { title: xAxis, showgrid: showGrid },
+            yaxis: { title: yAxis, showgrid: showGrid },
+            zaxis: { title: zAxis, showgrid: showGrid },
+          },
+        };
+      } else {
+        // 2D chart configuration
+        switch (selectedChart) {
+          case "bar":
+            plotData = [
+              {
+                type: "bar",
+                x: xData,
+                y: yData,
+                marker: { color: primaryColor },
+                name: yAxis,
+              },
+            ];
+            break;
+          case "line":
+            plotData = [
+              {
+                type: "scatter",
+                mode: "lines+markers",
+                x: xData,
+                y: yData,
+                line: { color: primaryColor },
+                name: yAxis,
+              },
+            ];
+            break;
+          case "pie":
+            plotData = [
+              {
+                type: "pie",
+                labels: xData,
+                values: yData,
+                marker: { colors: themeColors },
+                name: yAxis,
+              },
+            ];
+            break;
+          case "area":
+            plotData = [
+              {
+                type: "scatter",
+                mode: "lines",
+                x: xData,
+                y: yData,
+                fill: "tozeroy",
+                fillcolor: `${primaryColor}33`,
+                line: { color: primaryColor },
+                name: yAxis,
+              },
+            ];
+            break;
+          case "scatter":
+            plotData = [
+              {
+                type: "scatter",
+                mode: "markers",
+                x: xData,
+                y: yData,
+                marker: { color: primaryColor },
+                name: yAxis,
+              },
+            ];
+            break;
+        }
+
+        // 2D layout settings
+        if (selectedChart !== "pie") {
+          layout = {
+            ...layout,
+            xaxis: { title: xAxis, showgrid: showGrid },
+            yaxis: { title: yAxis, showgrid: showGrid },
+          };
+        }
+      }
+
+      // Create the Plotly chart
+      await window.Plotly.newPlot(chartRef.current, plotData, layout, {
+        responsive: true,
+        displayModeBar: false,
+      });
+      plotlyInstance.current = true;
+    } catch (error) {
+      console.error("Error rendering chart:", error);
     }
+  };
 
-    chartInstance.current = new Chart(ctx, config)
-  }
-
-  // Handle chart type selection (just update state, don't navigate)
+  // Handle chart type selection
   const handleChartTypeSelect = (chartType) => {
-    setSelectedChart(chartType)
-  }
+    setSelectedChart(chartType);
 
-  // Create chart and navigate to /chart route
+    // Reset z-axis if switching from 3D to 2D chart
+    const is3D =
+      chartTypes.find((chart) => chart.id === chartType)?.is3D || false;
+    if (!is3D) {
+      setZAxis("");
+    }
+  };
+
+  // Handle next step in workflow
+  const handleNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  // Handle previous step in workflow
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Create chart and close dialog
   const handleCreateChart = () => {
     if (!xAxis || !yAxis) {
-      alert("Please select both X and Y axes.")
-      return
+      console.error("Please select both X and Y axes.");
+      return;
     }
 
-    // Prepare chart data using the same logic as the original HTML
-    const xData = fileData.map((row) => row[xAxis])
-    const yData = fileData
-      .map((row) => {
-        const value = row[yAxis]
-        if (isNumericValue(value)) {
-          return Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-        }
-        return 0
-      })
-      .filter((val) => !isNaN(val))
+    // For 3D charts, ensure z-axis is selected
+    const is3D =
+      chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false;
+    if (is3D && !zAxis) {
+      console.error("Please select a Z-axis for 3D chart.");
+      return;
+    }
+
+    // Extract data for chart configuration
+    const xData = fileData.map((row) => row[xAxis]);
+    const yData = fileData.map((row) => {
+      const value = row[yAxis];
+      return isNumericValue(value)
+        ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
+        : 0;
+    });
+
+    // Extract z-axis data for 3D charts
+    const zData = zAxis
+      ? fileData.map((row) => {
+          const value = row[zAxis];
+          return isNumericValue(value)
+            ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
+            : 0;
+        })
+      : [];
 
     const chartConfig = {
       type: selectedChart,
       xAxis,
       yAxis,
-      chartTitle: chartTitle || `${yAxis} vs ${xAxis}`,
+      zAxis: zAxis || null,
+      chartTitle:
+        chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
       selectedTheme,
       showLegend,
       showGrid,
       xData,
       yData,
+      zData,
       fileName,
-    }
+      is3D,
+      createdAt: new Date().toISOString(),
+      dataPoints: fileData.length,
+    };
 
     // Generate unique ID and store chart config
-    const chartId = `chart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    const chartId = `chart-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
 
     try {
-      localStorage.setItem(`chartConfig_${chartId}`, JSON.stringify(chartConfig))
+      // Store chart configuration
+      localStorage.setItem(
+        `chartConfig_${chartId}`,
+        JSON.stringify(chartConfig)
+      );
+
+      // Store chart metadata for gallery
+      const chartMetadata = {
+        id: chartId,
+        title: chartConfig.chartTitle,
+        type: selectedChartType?.name || selectedChart,
+        file: fileName,
+        created: new Date().toLocaleString(),
+        is3D,
+        views: 0,
+        downloads: 0,
+      };
+
+      // Get existing charts and add new one
+      const existingCharts = JSON.parse(
+        localStorage.getItem("userCharts") || "[]"
+      );
+      existingCharts.unshift(chartMetadata);
+      localStorage.setItem("userCharts", JSON.stringify(existingCharts));
+
+      onOpenChange(false);
 
       // Navigate to chart page
-      navigate(`/chart/${chartId}`)
-      onOpenChange(false)
+      window.location.href = `/chart/${chartId}`;
     } catch (error) {
-      console.error("Failed to save chart config:", error)
-      alert("Failed to create chart. Please try again.")
+      console.error("Failed to save chart config:", error);
     }
-  }
+  };
 
-  const selectedChartType = chartTypes.find((chart) => chart.id === selectedChart)
+  const selectedChartType = chartTypes.find(
+    (chart) => chart.id === selectedChart
+  );
+  const is3D = selectedChartType?.is3D || false;
 
-  // Get available columns for Y-axis (numeric columns that aren't selected for X-axis)
-  const availableYAxisColumns = columns.filter((col) => col.name !== xAxis)
-  const numericYAxisColumns = availableYAxisColumns.filter((col) => col.type === "number")
+  // Get available columns for Y-axis and Z-axis
+  const availableYAxisColumns = columns.filter(
+    (col) => col.name !== xAxis && col.name !== zAxis
+  );
+  const availableZAxisColumns = columns.filter(
+    (col) => col.name !== xAxis && col.name !== yAxis
+  );
+  const numericYAxisColumns = availableYAxisColumns.filter(
+    (col) => col.type === "number"
+  );
+  const numericZAxisColumns = availableZAxisColumns.filter(
+    (col) => col.type === "number"
+  );
+
+  // Determine if we can proceed to the next step
+  const canProceedToNextStep = () => {
+    switch (currentStep) {
+      case 0: // Select Data
+        return fileData.length > 0 && columns.length > 0;
+      case 1: // Choose Chart
+        return !!selectedChart;
+      case 2: // Configure Axes
+        return !!xAxis && !!yAxis && (!is3D || !!zAxis);
+      case 3: // Style & Theme
+        return true;
+      case 4: // Preview
+        return true;
+      default:
+        return false;
+    }
+  };
 
   if (isProcessing) {
     return (
@@ -340,173 +680,195 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         <DialogContent className="max-w-md">
           <div className="flex flex-col items-center justify-center py-8">
             <FileSpreadsheet className="h-16 w-16 text-blue-500 animate-pulse mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Processing Excel File</h3>
-            <p className="text-sm text-gray-600 text-center">Reading and analyzing your data...</p>
+            <h3 className="text-lg font-semibold mb-2">
+              Processing Excel File
+            </h3>
+            <p className="text-sm text-gray-600 text-center">
+              Reading and analyzing your data...
+            </p>
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Create Chart from {fileName}
+            {is3D ? (
+              <Cube className="h-5 w-5" />
+            ) : (
+              <BarChart3 className="h-5 w-5" />
+            )}
+            Create {is3D ? "3D " : ""}Chart from {fileName}
           </DialogTitle>
-          <DialogDescription>Configure your chart settings and preview before creating</DialogDescription>
+          <DialogDescription>
+            Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
+          </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="axes" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="axes">Select Axes</TabsTrigger>
-            <TabsTrigger value="chart">Chart Type</TabsTrigger>
-            <TabsTrigger value="theme">Theme & Style</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
+        {/* Step Progress Indicator */}
+        <div className="flex items-center justify-center mb-6 overflow-x-auto">
+          <div className="flex items-center space-x-2 min-w-max">
+            {steps.map((step, index) => (
+              <div key={step} className="flex items-center">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                    index <= currentStep
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {index + 1}
+                </div>
+                <span
+                  className={`ml-1 text-xs hidden sm:inline ${
+                    index <= currentStep ? "text-blue-600" : "text-gray-500"
+                  }`}
+                >
+                  {step}
+                </span>
+                {index < steps.length - 1 && (
+                  <div
+                    className={`w-4 h-0.5 mx-2 ${
+                      index < currentStep ? "bg-blue-600" : "bg-gray-200"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
-          {/* Axes Selection Tab */}
-          <TabsContent value="axes" className="space-y-4">
+        {/* select data */}
+        {currentStep === 0 && (
+          <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Select Chart Axes</CardTitle>
-                <CardDescription>Choose which columns from your Excel file to use for X and Y axes</CardDescription>
+                <CardTitle>Data Analysis</CardTitle>
+                <CardDescription>
+                  We've analyzed your Excel file and found the following data
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="x-axis" className="text-base font-medium">
-                      X-Axis (Categories)
-                    </Label>
-                    <Select value={xAxis} onValueChange={setXAxis}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select X-axis column" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {columns
-                          .filter((column) => column.name !== yAxis) // Filter out Y-axis selection
-                          .map((column) => (
-                            <SelectItem key={column.name} value={column.name}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>{column.name}</span>
-                                <Badge variant="outline" className="ml-2">
-                                  {column.type}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    {xAxis && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Sample: {columns.find((c) => c.name === xAxis)?.sample}
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-medium mb-2">File Information</h3>
+                      <p className="text-sm">Filename: {fileName}</p>
+                      <p className="text-sm">Rows: {fileData.length}</p>
+                      <p className="text-sm">Columns: {columns.length}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-2">Column Types</h3>
+                      <p className="text-sm">
+                        Numeric columns:{" "}
+                        {columns.filter((c) => c.type === "number").length}
                       </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="y-axis" className="text-base font-medium">
-                      Y-Axis (Values)
-                    </Label>
-                    <Select value={yAxis} onValueChange={setYAxis}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select Y-axis column" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {/* Show numeric columns first, then all available columns if no numeric found */}
-                        {numericYAxisColumns.length > 0
-                          ? numericYAxisColumns.map((column) => (
-                              <SelectItem key={column.name} value={column.name}>
-                                <div className="flex items-center justify-between w-full">
-                                  <span>{column.name}</span>
-                                  <Badge variant="outline" className="ml-2">
-                                    {column.type}
-                                  </Badge>
-                                </div>
-                              </SelectItem>
-                            ))
-                          : // Fallback: show all columns except X-axis if no numeric columns detected
-                            availableYAxisColumns.map((column) => (
-                              <SelectItem key={column.name} value={column.name}>
-                                <div className="flex items-center justify-between w-full">
-                                  <span>{column.name}</span>
-                                  <Badge variant="outline" className="ml-2">
-                                    {column.type}
-                                  </Badge>
-                                </div>
-                              </SelectItem>
-                            ))}
-                      </SelectContent>
-                    </Select>
-                    {yAxis && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Sample: {columns.find((c) => c.name === yAxis)?.sample}
+                      <p className="text-sm">
+                        Text columns:{" "}
+                        {columns.filter((c) => c.type === "text").length}
                       </p>
-                    )}
-                    {numericYAxisColumns.length === 0 && availableYAxisColumns.length > 0 && (
-                      <p className="text-xs text-amber-600 mt-1">
-                        ⚠️ No numeric columns detected. All columns are shown, but charts work best with numeric Y-axis
-                        data.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {xAxis && yAxis && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-medium text-green-800 mb-1">Chart Preview</h4>
-                    <p className="text-sm text-green-700">
-                      Your chart will show <strong>{yAxis}</strong> values across different <strong>{xAxis}</strong>{" "}
-                      categories
-                    </p>
-                  </div>
-                )}
-
-                {/* Debug information */}
-                {columns.length > 0 && (
-                  <div className="p-3 bg-gray-50 border rounded-lg">
-                    <h4 className="font-medium text-gray-800 mb-2">Column Analysis</h4>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p>Total columns: {columns.length}</p>
-                      <p>Numeric columns: {columns.filter((c) => c.type === "number").length}</p>
-                      <p>Text columns: {columns.filter((c) => c.type === "text").length}</p>
                     </div>
                   </div>
-                )}
+
+                  {columns.length > 0 && (
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-4 py-2 text-left">
+                                Column Name
+                              </th>
+                              <th className="px-4 py-2 text-left">Type</th>
+                              <th className="px-4 py-2 text-left">
+                                Sample Value
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {columns.map((column, index) => (
+                              <tr
+                                key={index}
+                                className={
+                                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                }
+                              >
+                                <td className="px-4 py-2 border-t">
+                                  {column.name}
+                                </td>
+                                <td className="px-4 py-2 border-t">
+                                  <Badge variant="outline">{column.type}</Badge>
+                                </td>
+                                <td className="px-4 py-2 border-t">
+                                  {String(column.sample).substring(0, 30)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Chart Type Tab */}
-          <TabsContent value="chart" className="space-y-4">
+        {/* choose chart */}
+        {currentStep === 1 && (
+          <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Choose Chart Type</CardTitle>
-                <CardDescription>Select the visualization that best represents your data</CardDescription>
+                <CardDescription>
+                  Select the visualization that best represents your data
+                </CardDescription>
               </CardHeader>
+
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                   {chartTypes.map((chart) => (
                     <Card
                       key={chart.id}
                       className={`cursor-pointer transition-all hover:shadow-md ${
-                        selectedChart === chart.id ? "ring-2 ring-blue-500 bg-blue-50" : ""
+                        selectedChart === chart.id
+                          ? "ring-2 ring-blue-500 bg-blue-50"
+                          : ""
                       }`}
                       onClick={() => handleChartTypeSelect(chart.id)}
                     >
-                      <CardContent className="p-4 text-center">
+                      <CardContent className="p-2 text-center h-36 flex flex-col items-center justify-center  gap-2 rounded-md">
                         <chart.icon
-                          className={`h-8 w-8 mx-auto mb-2 ${
-                            selectedChart === chart.id ? "text-blue-600" : "text-gray-600"
+                          className={`h-6 w-6 ${
+                            selectedChart === chart.id
+                              ? "text-blue-600"
+                              : "text-gray-400"
                           }`}
                         />
-                        <h3 className="font-medium">{chart.name}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{chart.description}</p>
-                        <Badge variant="outline" className="mt-2 text-xs">
-                          {chart.best_for}
-                        </Badge>
+                        <h3 className="font-medium text-md leading-tight ">
+                          {chart.name}
+                        </h3>
+                        <p className="text-xs text-gray-400 line-clamp-2 leading-tight max-w-[90%]">
+                          {chart.description}
+                        </p>
+                        <div className="flex flex-wrap gap-1 justify-center">
+                          <Badge
+                            variant="outline"
+                            className="px-1 py-[1px] leading-tight whitespace-normal break-words text-[10px] max-w-[100px]"
+                          >
+                            {chart.best_for}
+                          </Badge>
+                          {chart.is3D && (
+                            <Badge className="text-[10px] px-1 py-0 bg-blue-500 leading-tight text-white">
+                              3D
+                            </Badge>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -516,71 +878,293 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <selectedChartType.icon className="h-5 w-5 text-blue-600" />
-                      <h4 className="font-medium text-blue-900">{selectedChartType.name}</h4>
+                      <h4 className="font-medium text-blue-900">
+                        {selectedChartType.name}
+                      </h4>
                     </div>
-                    <p className="text-sm text-blue-800">{selectedChartType.description}</p>
-                    <p className="text-xs text-blue-600 mt-1">Best for: {selectedChartType.best_for}</p>
+                    <p className="text-sm text-blue-800">
+                      {selectedChartType.description}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Best for: {selectedChartType.best_for}
+                    </p>
+                    {selectedChartType.is3D && (
+                      <p className="text-xs text-blue-600 mt-1 font-semibold">
+                        This is a 3D chart and requires X, Y, and Z axes
+                        selection.
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Theme & Style Tab */}
-          <TabsContent value="theme" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Chart Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+        {/* ask axes */}
+        {currentStep === 2 && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Chart Axes</CardTitle>
+                <CardDescription>
+                  Choose which columns from your Excel file to use for{" "}
+                  {is3D ? "X, Y, and Z axes" : "X and Y axes"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div
+                  className={`grid ${
+                    is3D
+                      ? "grid-cols-1 sm:grid-cols-3"
+                      : "grid-cols-1 sm:grid-cols-2"
+                  } gap-4`}
+                >
                   <div>
-                    <Label htmlFor="chart-title">Chart Title</Label>
+                    <Label htmlFor="x-axis" className="text-sm font-medium">
+                      X-Axis (Categories)
+                    </Label>
+                    <Select value={xAxis} onValueChange={setXAxis}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select X-axis" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {columns
+                          .filter(
+                            (column) =>
+                              column.name !== yAxis && column.name !== zAxis
+                          )
+                          .map((column) => (
+                            <SelectItem key={column.name} value={column.name}>
+                              <div className="flex items-center justify-between w-full">
+                                <span className="truncate">{column.name}</span>
+                                <Badge
+                                  variant="outline"
+                                  className="ml-2 text-xs"
+                                >
+                                  {column.type}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    {xAxis && (
+                      <p className="text-xs text-gray-600 mt-1 truncate">
+                        Sample: {columns.find((c) => c.name === xAxis)?.sample}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="y-axis" className="text-sm font-medium">
+                      Y-Axis (Values)
+                    </Label>
+                    <Select value={yAxis} onValueChange={setYAxis}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select Y-axis" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {numericYAxisColumns.length > 0
+                          ? numericYAxisColumns.map((column) => (
+                              <SelectItem key={column.name} value={column.name}>
+                                <div className="flex items-center justify-between w-full">
+                                  <span className="truncate">
+                                    {column.name}
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-2 text-xs"
+                                  >
+                                    {column.type}
+                                  </Badge>
+                                </div>
+                              </SelectItem>
+                            ))
+                          : availableYAxisColumns.map((column) => (
+                              <SelectItem key={column.name} value={column.name}>
+                                <div className="flex items-center justify-between w-full">
+                                  <span className="truncate">
+                                    {column.name}
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-2 text-xs"
+                                  >
+                                    {column.type}
+                                  </Badge>
+                                </div>
+                              </SelectItem>
+                            ))}
+                      </SelectContent>
+                    </Select>
+                    {yAxis && (
+                      <p className="text-xs text-gray-600 mt-1 truncate">
+                        Sample: {columns.find((c) => c.name === yAxis)?.sample}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3d z axis */}
+                  {is3D && (
+                    <div>
+                      <Label htmlFor="z-axis" className="text-sm font-medium">
+                        Z-Axis (Depth)
+                      </Label>
+                      <Select value={zAxis} onValueChange={setZAxis}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select Z-axis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {numericZAxisColumns.length > 0
+                            ? numericZAxisColumns.map((column) => (
+                                <SelectItem
+                                  key={column.name}
+                                  value={column.name}
+                                >
+                                  <div className="flex items-center justify-between w-full">
+                                    <span className="truncate">
+                                      {column.name}
+                                    </span>
+                                    <Badge
+                                      variant="outline"
+                                      className="ml-2 text-xs"
+                                    >
+                                      {column.type}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            : availableZAxisColumns.map((column) => (
+                                <SelectItem
+                                  key={column.name}
+                                  value={column.name}
+                                >
+                                  <div className="flex items-center justify-between w-full">
+                                    <span className="truncate">
+                                      {column.name}
+                                    </span>
+                                    <Badge
+                                      variant="outline"
+                                      className="ml-2 text-xs"
+                                    >
+                                      {column.type}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                        </SelectContent>
+                      </Select>
+                      {zAxis && (
+                        <p className="text-xs text-gray-600 mt-1 truncate">
+                          Sample:{" "}
+                          {columns.find((c) => c.name === zAxis)?.sample}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {xAxis && yAxis && (!is3D || zAxis) && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-medium text-green-800 mb-1 text-sm">
+                      Chart Preview
+                    </h4>
+                    <p className="text-xs text-green-700">
+                      Your chart will show <strong>{yAxis}</strong> values
+                      across different <strong>{xAxis}</strong>{" "}
+                      {is3D && (
+                        <>
+                          and <strong>{zAxis}</strong>
+                        </>
+                      )}{" "}
+                      categories
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* theme and style */}
+        {currentStep === 3 && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Chart Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label htmlFor="chart-title" className="text-sm">
+                      Chart Title
+                    </Label>
                     <Input
                       id="chart-title"
                       value={chartTitle}
                       onChange={(e) => setChartTitle(e.target.value)}
-                      placeholder={`${yAxis} vs ${xAxis}`}
-                      className="mt-2"
+                      placeholder={`${yAxis} vs ${xAxis}${
+                        zAxis ? ` vs ${zAxis}` : ""
+                      }`}
+                      className="mt-1"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="legend-toggle">Show Legend</Label>
-                    <Switch id="legend-toggle" checked={showLegend} onCheckedChange={setShowLegend} />
-                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="legend-toggle" className="text-sm">
+                        Show Legend
+                      </Label>
+                      <Switch
+                        id="legend-toggle"
+                        checked={showLegend}
+                        onCheckedChange={setShowLegend}
+                      />
+                    </div>
 
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="grid-toggle">Show Grid Lines</Label>
-                    <Switch id="grid-toggle" checked={showGrid} onCheckedChange={setShowGrid} />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="grid-toggle" className="text-sm">
+                        Show Grid Lines
+                      </Label>
+                      <Switch
+                        id="grid-toggle"
+                        checked={showGrid}
+                        onCheckedChange={setShowGrid}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
                     <Palette className="h-4 w-4" />
                     Color Theme
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-3">
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {colorThemes.map((theme) => (
                       <div
                         key={theme.name}
-                        className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                          selectedTheme === theme.name ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
+                        className={`p-2 border rounded-lg cursor-pointer transition-all ${
+                          selectedTheme === theme.name
+                            ? "ring-2 ring-blue-500 bg-blue-50"
+                            : "hover:bg-gray-50"
                         }`}
                         onClick={() => setSelectedTheme(theme.name)}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{theme.name}</span>
+                        <div className="flex flex-col items-center space-y-1">
+                          <span className="font-medium text-sm">
+                            {theme.name}
+                          </span>
                           <div className="flex gap-1">
-                            {theme.colors.map((color, index) => (
+                            {theme.colors.slice(0, 4).map((color, index) => (
                               <div
                                 key={index}
-                                className="w-4 h-4 rounded-full border"
+                                className="w-3 h-3 rounded-full border"
                                 style={{ backgroundColor: color }}
                               />
                             ))}
@@ -592,71 +1176,123 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Preview Tab */}
-          <TabsContent value="preview" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Chart Preview
-                </CardTitle>
-                <CardDescription>Preview your chart before creating</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-500">Chart Type</p>
-                      <p className="font-medium text-sm">{selectedChartType?.name || "Not selected"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">X-Axis</p>
-                      <p className="font-medium text-sm">{xAxis || "Not selected"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Y-Axis</p>
-                      <p className="font-medium text-sm">{yAxis || "Not selected"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Theme</p>
-                      <p className="font-medium text-sm">{selectedTheme}</p>
-                    </div>
+        {/* preview */}
+        {currentStep === 4 && (
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-xs text-gray-500">Chart Type</p>
+                  <p className="font-medium text-sm truncate">
+                    {selectedChartType?.name || "Not selected"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">X-Axis</p>
+                  <p className="font-medium text-sm truncate">
+                    {xAxis || "Not selected"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Y-Axis</p>
+                  <p className="font-medium text-sm truncate">
+                    {yAxis || "Not selected"}
+                  </p>
+                </div>
+                {is3D ? (
+                  <div>
+                    <p className="text-xs text-gray-500">Z-Axis</p>
+                    <p className="font-medium text-sm truncate">
+                      {zAxis || "Not selected"}
+                    </p>
                   </div>
+                ) : (
+                  <div>
+                    <p className="text-xs text-gray-500">Theme</p>
+                    <p className="font-medium text-sm truncate">
+                      {selectedTheme}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-                  <div className="h-96 bg-white rounded-lg flex items-center justify-center p-4 border">
-                    {selectedChart && xAxis && yAxis && fileData.length > 0 ? (
-                      <canvas ref={chartRef}></canvas>
+              <div className="h-80 bg-white rounded-lg flex items-center justify-center p-4 border">
+                {selectedChart &&
+                xAxis &&
+                yAxis &&
+                (!is3D || zAxis) &&
+                fileData.length > 0 ? (
+                  <div
+                    id="plotly-chart"
+                    ref={chartRef}
+                    className="w-full h-full"
+                  ></div>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    {is3D ? (
+                      <Cube className="h-12 w-12 mx-auto mb-3" />
                     ) : (
-                      <div className="text-center text-gray-500">
-                        <BarChart3 className="h-16 w-16 mx-auto mb-4" />
-                        <p>Complete the configuration to see the preview</p>
-                        {!selectedChart && <p className="text-sm mt-1">Select a chart type</p>}
-                        {(!xAxis || !yAxis) && <p className="text-sm mt-1">Select X and Y axes</p>}
-                      </div>
+                      <BarChart3 className="h-12 w-12 mx-auto mb-3" />
+                    )}
+                    <p className="text-sm">
+                      Complete the configuration to see the preview
+                    </p>
+                    {!selectedChart && (
+                      <p className="text-xs mt-1">Select a chart type</p>
+                    )}
+                    {(!xAxis || !yAxis) && (
+                      <p className="text-xs mt-1">Select X and Y axes</p>
+                    )}
+                    {is3D && !zAxis && (
+                      <p className="text-xs mt-1">Select Z axis for 3D chart</p>
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        )}
 
         <div className="flex justify-between pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreateChart}
-            disabled={!selectedChart || !xAxis || !yAxis}
-            className="flex items-center gap-2"
-          >
-            <TrendingUp className="h-4 w-4" />
-            Create Chart
-          </Button>
+          {currentStep > 0 ? (
+            <Button
+              variant="outline"
+              onClick={handlePrevStep}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+          )}
+
+          {currentStep < steps.length - 1 ? (
+            <Button
+              onClick={handleNextStep}
+              disabled={!canProceedToNextStep()}
+              className="flex items-center gap-2"
+            >
+              Next
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleCreateChart}
+              disabled={!selectedChart || !xAxis || !yAxis || (is3D && !zAxis)}
+              className="flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Create Chart
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

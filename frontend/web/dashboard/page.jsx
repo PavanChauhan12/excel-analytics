@@ -59,9 +59,7 @@ export default function DashboardPage() {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     })
-      .then((res) => {
-        console.log("Raw response:", res);
-        return res.json();})
+      .then((res) => res.json())
       .then((data) => {
         setUploadedFiles(data.records || []);
       })

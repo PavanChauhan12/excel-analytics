@@ -63,8 +63,6 @@ export function DashboardHeader({ name, email }) {
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            
-           
               <Button
                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 bg-white"
                 onClick={() => handleSignOut(navigate)}

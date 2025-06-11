@@ -1,5 +1,5 @@
-"use client"
-import { useState, useEffect } from "react";
+"use client";
+import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -10,7 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
 import { Separator } from "../../components/ui/separator";
 import {
   BarChart3,
@@ -28,72 +33,15 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("login");
   const [signupData, setSignupData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role:""
+    role: "",
   });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-
-  const initializeGoogleButton = () => {
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: 'http://279966597320-b62uf7hueul5trjupfc7fmboju94774a.apps.googleusercontent.com',
-        callback: handleGoogleCallback,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        login_uri: window.location.origin,
-        context: 'signin',
-        ux_mode: 'redirect',
-        prompt_parent_id: 'googleLoginButton',
-        login_hint: '',
-        native_callback: true,
-        itp_support: true,
-        auto_prompt: false,
-      });
-
-      // Render button for both login and signup tabs
-      window.google.accounts.id.renderButton(
-        document.getElementById('googleLoginButton'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-      window.google.accounts.id.renderButton(
-        document.getElementById('googleSignupButton'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-    }
-  };
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    script.onload = initializeGoogleButton;
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  // Re-initialize Google buttons when tab changes
-  useEffect(() => {
-    initializeGoogleButton();
-  }, [activeTab]);
-
-  const handleGoogleCallback = async (response) => {
-    try {
-      await handleGoogleLogin(response, navigate);
-    } catch (error) {
-      console.error('Google login error:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
@@ -111,16 +59,13 @@ export default function AuthPage() {
         </div>
 
         <Card className="shadow-xl border-0">
-          <Tabs 
-            defaultValue="login" 
-            className="w-full px-4"
-            onValueChange={(value) => setActiveTab(value)}
-          >
+          <Tabs defaultValue="login" className="w-full px-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
+            {/* Login Tab */}
             <TabsContent value="login">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl text-center">
@@ -134,13 +79,7 @@ export default function AuthPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleLogin(loginData,navigate)
-                      .then(() => {
-                        console.log("logged in");
-                      })
-                      .catch((error) => {
-                        console.error("Login error:", error);
-                      });
+                    handleLogin(loginData, navigate);
                   }}
                   className="space-y-4"
                 >
@@ -193,25 +132,6 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="remember"
-                        className="rounded border-slate-300"
-                      />
-                      <Label
-                        htmlFor="remember"
-                        className="text-sm text-slate-600"
-                      >
-                        Remember me
-                      </Label>
-                    </div>
-                    <Button variant="link" className="px-0 text-sm">
-                      Forgot password?
-                    </Button>
-                  </div>
-
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700"
@@ -220,13 +140,17 @@ export default function AuthPage() {
                   </Button>
                 </form>
 
-                <div className="mt-6">
-                  <Separator className="my-4" />
-                  <div id="googleLoginButton" className="w-full"></div>
-                </div>
+                <Separator className="my-4" />
+                <Button
+                  onClick={() => handleGoogleLogin(navigate)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Continue with Google
+                </Button>
               </CardContent>
             </TabsContent>
 
+            {/* Signup Tab */}
             <TabsContent value="signup">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl text-center">
@@ -240,13 +164,7 @@ export default function AuthPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleSignup(signupData,navigate)
-                      .then(() => {
-                        console.log("signed up");
-                      })
-                      .catch((error) => {
-                        console.error("Signup error:", error);
-                      });
+                    handleSignup(signupData, navigate);
                   }}
                   className="space-y-4"
                 >
@@ -382,10 +300,13 @@ export default function AuthPage() {
                   </Button>
                 </form>
 
-                <div className="mt-6">
-                  <Separator className="my-4" />
-                  <div id="googleSignupButton" className="w-full"></div>
-                </div>
+                <Separator className="my-4" />
+                <Button
+                  onClick={() => handleGoogleLogin(navigate)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Continue with Google
+                </Button>
               </CardContent>
             </TabsContent>
           </Tabs>

@@ -6,6 +6,7 @@ const cors = require('cors');
 dotenv.config();
 const app = express();
 const uploadRoute = require('./routes/upload');
+const chartRoute = require('./routes/chartRoute');
 app.use(cors());
 app.use(express.json());
 
@@ -15,6 +16,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api', uploadRoute);
+app.use('/api/chart', chartRoute);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

@@ -30,7 +30,15 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       }
-  }]
+  }],
+  chartRecords: [
+  {
+    chartType: { type: String },
+    createdAt: { type: Date, default: Date.now },
+    fromExcelFile: { type: String }, // optional: to link chart to a file
+    chartConfig: { type: Object },   // optional: store chart config/options
+  }
+]
 });
 
 module.exports = mongoose.model('User', UserSchema);

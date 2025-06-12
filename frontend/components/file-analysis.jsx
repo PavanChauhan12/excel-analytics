@@ -6,7 +6,7 @@ export function FileAnalysisInlineView({ file, onClose }) {
   if (!file) return null
 
   return (
-    <Card className="border-blue-200 shadow-sm">
+    <Card className="border border-pink-500/20 bg-white/10 text-white">
       <CardHeader className="flex items-center justify-between">
         <CardTitle>Analysis for: {file.name}</CardTitle>
         <Button

@@ -4,14 +4,13 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Upload, X, FileSpreadsheet, CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { DashboardHeader } from "@/components/dashboard-header"
 import { UploadDialog } from "@/components/upload-dialog"
 import { FileAnalysisInlineView } from "@/components/file-analysis"
+import Iridescence from "@/components/ui/iridescence"
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false)
@@ -20,7 +19,7 @@ export default function UploadPage() {
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [recentUploadedFile, setRecentUploadedFile] = useState(null)
-  const [showAnalysis, setShowAnalysis] = useState(false) // NEW
+  const [showAnalysis, setShowAnalysis] = useState(false)
 
   const handleDrag = (e) => {
     e.preventDefault()
@@ -47,7 +46,7 @@ export default function UploadPage() {
         file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
         file.type === "application/vnd.ms-excel" ||
         file.name.endsWith(".xlsx") ||
-        file.name.endsWith(".xls"),
+        file.name.endsWith(".xls")
     )
 
     const newFiles = excelFiles.map((file, index) => ({
@@ -56,7 +55,6 @@ export default function UploadPage() {
       name: file.name,
       size: (file.size / 1024 / 1024).toFixed(2) + " MB",
       status: "pending",
-      description: "",
     }))
 
     setSelectedFiles((prev) => [...prev, ...newFiles])
@@ -64,12 +62,6 @@ export default function UploadPage() {
 
   const removeFile = (id) => {
     setSelectedFiles((prev) => prev.filter((file) => file.id !== id))
-  }
-
-  const updateFileDescription = (id, description) => {
-    setSelectedFiles((prev) =>
-      prev.map((file) => (file.id === id ? { ...file, description } : file))
-    )
   }
 
   const uploadFiles = async () => {
@@ -92,7 +84,7 @@ export default function UploadPage() {
               setUploadedFiles((prevUploaded) => [...prevUploaded, uploaded])
               setSelectedFiles((prevSelected) => prevSelected.filter((f) => f.id !== file.id))
               setRecentUploadedFile(uploaded)
-              setShowAnalysis(true) // SHOW ANALYSIS AFTER UPLOAD
+              setShowAnalysis(true)
               return { ...prev, [file.id]: 100 }
             }
             return { ...prev, [file.id]: currentProgress + 10 }
@@ -105,23 +97,19 @@ export default function UploadPage() {
   const getStatusBadge = (status) => {
     const statusConfig = {
       completed: {
-        variant: "default",
-        className: "bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border-emerald-200",
+        className: "bg-emerald-900 text-emerald-300 border-emerald-600",
         icon: CheckCircle,
       },
       processing: {
-        variant: "secondary",
-        className: "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border-amber-200",
+        className: "bg-yellow-900 text-yellow-300 border-yellow-600",
         icon: Clock,
       },
       error: {
-        variant: "destructive",
-        className: "bg-gradient-to-r from-rose-100 to-pink-100 text-rose-800 border-rose-200",
+        className: "bg-red-900 text-red-300 border-red-600",
         icon: AlertCircle,
       },
       pending: {
-        variant: "outline",
-        className: "bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 border-slate-200",
+        className: "bg-slate-800 text-slate-300 border-slate-600",
         icon: Clock,
       },
     }
@@ -138,38 +126,44 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="flex min-h-screen  bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="flex min-h-screen bg-[#0a0f1c] overflow-hidden text-white relative">
+      
+      
+<div className="absolute inset-0 z-0 opacity-20 h-full">
+    <Iridescence />
+  </div>
+      {/* Sidebar */}
       <DashboardSidebar />
-      <div className="flex flex-col flex-1  ">
-        <main className="flex-1 p-6 space-y-6 ">
-          {/* Header */}
-          
-            <div className="space-y-1 items-center justify-center text-center mt-8">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
-                Upload Files
-              </h1>
-              <p className="text-slate-600">Transform your Excel data into beautiful visualizations</p>
-            </div>
-            
-          
+
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 relative z-10">
+        <main className="flex-1 p-6 space-y-6">
+          <div className="text-center mt-8 space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-pink-400 bg-clip-text text-transparent">
+              Upload Files
+            </h1>
+            <p className="text-slate-400">
+              Transform your Excel data into beautiful visualizations
+            </p>
+          </div>
 
           {/* Dropzone */}
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-sm">
-            <CardHeader className="rounded-t-lg">
-              <CardTitle className="text-slate-800 flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+          <Card className="bg-transparent border border-blue-900/50 shadow-xl backdrop-blur-3xl">
+            <CardHeader>
+              <CardTitle className="text-blue-100 flex gap-2 items-center text-xl">
+                <FileSpreadsheet className="w-5 h-5" />
                 Upload Excel Files
               </CardTitle>
-              <CardDescription className="text-slate-600">
+              <CardDescription className="text-slate-400">
                 Drag and drop your .xlsx or .xls files here, or click to browse
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent>
               <div
                 className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
                   dragActive
-                    ? "border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100 scale-105"
-                    : "border-slate-300 bg-gradient-to-br from-slate-50 to-blue-50/30 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-blue-50/50"
+                    ? "border-blue-400 bg-blue-900/20 scale-105"
+                    : "border-slate-600 bg-slate-800 hover:border-blue-500"
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -177,13 +171,11 @@ export default function UploadPage() {
                 onDrop={handleDrop}
               >
                 <div className="space-y-4">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-blue-600" />
+                  <div className="mx-auto w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-blue-300" />
                   </div>
-                  <div>
-                    <p className="text-xl font-semibold text-slate-800 mb-2">Drop your files here</p>
-                    <p className="text-slate-500 mb-4">Supports .xlsx and .xls files up to 50MB each</p>
-                  </div>
+                  <p className="text-xl font-semibold text-white">Drop your files here</p>
+                  <p className="text-sm text-slate-400">Supports .xlsx and .xls files up to 50MB each</p>
                   <Input
                     id="file-upload"
                     type="file"
@@ -194,10 +186,10 @@ export default function UploadPage() {
                   />
                   <Button
                     variant="outline"
-                    className="bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-50 border-blue-200 text-blue-700 hover:text-blue-800"
                     onClick={() => document.getElementById("file-upload")?.click()}
+                    className="border-blue-400 text-blue-300 hover:bg-blue-900 hover:text-blue-100"
                   >
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
                     Choose Files
                   </Button>
                 </div>
@@ -205,70 +197,68 @@ export default function UploadPage() {
             </CardContent>
           </Card>
 
-          {/* Selected Files List */}
+          {/* Selected Files */}
           {selectedFiles.length > 0 && (
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50/50">
-              <CardHeader className="rounded-t-lg">
-                <CardTitle className="text-slate-800 flex items-center gap-2">
-                  <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+            <Card className="bg-[#1c2a44] border border-blue-900/40 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="text-blue-300 flex items-center gap-2">
+                  <FileSpreadsheet className="w-5 h-5" />
                   Selected Files ({selectedFiles.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="space-y-4">
                 {selectedFiles.map((file) => (
                   <div
                     key={file.id}
-                    className="border border-slate-200 bg-gradient-to-r from-white to-slate-50/50 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="bg-slate-800/60 border border-slate-600 p-6 rounded-xl"
                   >
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-lg flex items-center justify-center">
-                            <FileSpreadsheet className="h-6 w-6 text-emerald-600" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-800">{file.name}</p>
-                            <p className="text-sm text-slate-500">{file.size}</p>
-                          </div>
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-900 to-teal-800 rounded-lg flex items-center justify-center">
+                          <FileSpreadsheet className="h-6 w-6 text-blue-300" />
                         </div>
-                        <div className="flex items-center gap-3">
-                          {getStatusBadge(file.status)}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(file.id)}
-                            className="text-slate-400 hover:text-red-500 hover:bg-red-50"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
+                        <div>
+                          <p className="font-medium text-white">{file.name}</p>
+                          <p className="text-sm text-slate-400">{file.size}</p>
                         </div>
                       </div>
-
-                      {uploadProgress[file.id] !== undefined && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-600">Uploading...</span>
-                            <span className="text-blue-600 font-medium">{uploadProgress[file.id]}%</span>
-                          </div>
-                          <Progress value={uploadProgress[file.id]} className="h-2 bg-slate-200" />
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {getStatusBadge(file.status)}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(file.id)}
+                          className="text-red-400 hover:bg-red-900/20"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
+
+                    {uploadProgress[file.id] !== undefined && (
+                      <div className="space-y-2 mt-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-300">Uploading...</span>
+                          <span className="text-blue-400">{uploadProgress[file.id]}%</span>
+                        </div>
+                        <Progress value={uploadProgress[file.id]} className="h-2 bg-slate-700" />
+                      </div>
+                    )}
                   </div>
                 ))}
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
                   <Button
                     variant="outline"
                     onClick={() => setSelectedFiles([])}
-                    className="border-slate-300 text-slate-600 hover:bg-slate-50"
+                    className="border-slate-600 text-slate-300"
                   >
                     Clear All
                   </Button>
                   <Button
                     onClick={uploadFiles}
                     disabled={selectedFiles.length === 0}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-blue-700 to-blue-800 text-white hover:from-blue-600 hover:to-blue-700"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Upload {selectedFiles.length} File{selectedFiles.length !== 1 ? "s" : ""}
@@ -278,7 +268,6 @@ export default function UploadPage() {
             </Card>
           )}
 
-          {/* Inline Analysis */}
           {recentUploadedFile && showAnalysis && (
             <div className="animate-in slide-in-from-bottom-4 duration-500">
               <FileAnalysisInlineView
@@ -290,6 +279,7 @@ export default function UploadPage() {
         </main>
       </div>
 
+      {/* Upload Dialog Component */}
       <UploadDialog
         open={isDialogOpen}
         onOpenChange={setDialogOpen}

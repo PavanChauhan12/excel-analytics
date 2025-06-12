@@ -1,11 +1,9 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Upload, BarChart3, Brain, Calendar } from "lucide-react"
+import { Calendar } from "lucide-react"
+import GlitchText from "./ui/glitchtext"
 
-export function WelcomeSection({name}) {
-
+export function WelcomeSection({ name }) {
   const currentTime = new Date()
   const hour = currentTime.getHours()
 
@@ -25,23 +23,19 @@ export function WelcomeSection({name}) {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-700 to-blue-400 text-white border-0">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">
-              {getGreeting()}, Welcome back {name} 👋
-            </h1>
-            <p className="text-blue-100 flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              {formatDate()}
-            </p>
-            <p className="text-blue-100 text-sm">
-              Ready to analyze your data? You have 3 new insights waiting for you.
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="text-white text-center space-y-4">
+      <p
+        className="text-3xl md:text-4xl font-bold z-10"
+      >{`${getGreeting()}, ${name}!`}</p>
+
+      <div className="flex justify-center items-center gap-2 text-gray-400 text-sm">
+        <Calendar className="w-4 h-4" />
+        <span>{formatDate()}</span>
+      </div>
+
+      <p className="text-gray-400 text-sm">
+        Ready to analyze your data? You have 3 new insights waiting for you.
+      </p>
+    </div>
   )
 }

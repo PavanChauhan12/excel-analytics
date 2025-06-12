@@ -3,12 +3,23 @@ import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 
 export function FileAnalysisInlineView({ file, onClose }) {
-  if (!file) return null
+  if (!file) return null;
+
+  const uploadedAtFormatted = file?.uploadedAt
+    ? new Date(file.uploadedAt).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "-";
 
   return (
-    <Card className="border border-pink-500/20 bg-white/10 text-white">
+    <Card className="border border-pink-500/20 bg-white/10 text-white mt-4">
       <CardHeader className="flex items-center justify-between">
-        <CardTitle>Analysis for: {file.name}</CardTitle>
+        <CardTitle>Analysis for: {file.filename}</CardTitle>
         <Button
           variant="ghost"
           size="icon"
@@ -18,12 +29,13 @@ export function FileAnalysisInlineView({ file, onClose }) {
           <X className="w-4 h-4" />
         </Button>
       </CardHeader>
-      <CardContent>
-        <p><strong>Size:</strong> {file.size}</p>
-        <p><strong>Uploaded at:</strong> {file.uploadTime}</p>
-        <p><strong>Charts Detected:</strong> {file.charts}</p>
-        {/* Add analysis result content here */}
+      <CardContent className="space-y-2">
+        <p><strong>Size:</strong> {file.filesize}</p>
+        <p><strong>Uploaded at:</strong> {uploadedAtFormatted}</p>
+        <p><strong>Rows:</strong> {file.rows ?? "-"}</p>
+        <p><strong>Columns:</strong> {file.columns ?? "-"}</p>
+        <p><strong>Charts Detected:</strong> {file.charts ?? "N/A"}</p>
       </CardContent>
     </Card>
-  )
+  );
 }

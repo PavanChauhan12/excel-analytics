@@ -128,20 +128,20 @@ export default function ChartsHistoryPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-blue-50">
+    <div className="flex min-h-screen  bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       <DashboardSidebar />
 
       <div className="flex-1">
-        <div className="bg-white border-b border-blue-200">
+        
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between  mt-12">
+             
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-blue-800">
+                  <h1 className="text-4xl font-bold text-blue-800">
                     Charts History
                   </h1>
                 </div>
-              </div>
+              
               <div className="flex items-center gap-4">
                 <div className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
                   {filteredCharts.length} of {charts.length} charts
@@ -149,7 +149,6 @@ export default function ChartsHistoryPage() {
                 <UploadDialog onChartCreated={handleChartCreated} />
               </div>
             </div>
-          </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -218,14 +217,14 @@ export default function ChartsHistoryPage() {
               ) : null}
             </div>
           ) : (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 ">
               {filteredCharts.map((chart) => (
                 <div
                   key={chart.id}
-                  className="bg-white border border-blue-200 rounded-xl shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow h-full"
+                  className="bg-white border border-blue-200 rounded-xl shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow h-full w-70 "
                 >
                   {/* Header: Type & Date */}
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-3 ">
                     <div className="flex items-center gap-2 text-sm text-blue-600">
                       <Cube className="h-4 w-4" />
                       <span className="capitalize">{chart.type}</span>

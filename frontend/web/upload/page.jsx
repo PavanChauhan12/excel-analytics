@@ -20,6 +20,7 @@ export default function UploadPage() {
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [recentUploadedFile, setRecentUploadedFile] = useState(null)
+  const [showAnalysis, setShowAnalysis] = useState(false) // NEW
 
   const handleDrag = (e) => {
     e.preventDefault()
@@ -66,7 +67,9 @@ export default function UploadPage() {
   }
 
   const updateFileDescription = (id, description) => {
-    setSelectedFiles((prev) => prev.map((file) => (file.id === id ? { ...file, description } : file)))
+    setSelectedFiles((prev) =>
+      prev.map((file) => (file.id === id ? { ...file, description } : file))
+    )
   }
 
   const uploadFiles = async () => {
@@ -89,6 +92,7 @@ export default function UploadPage() {
               setUploadedFiles((prevUploaded) => [...prevUploaded, uploaded])
               setSelectedFiles((prevSelected) => prevSelected.filter((f) => f.id !== file.id))
               setRecentUploadedFile(uploaded)
+              setShowAnalysis(true) // SHOW ANALYSIS AFTER UPLOAD
               return { ...prev, [file.id]: 100 }
             }
             return { ...prev, [file.id]: currentProgress + 10 }
@@ -134,27 +138,23 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen  bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       <DashboardSidebar />
-      <div className="flex flex-col flex-1 ">
-        <main className="flex-1 p-6 space-y-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+      <div className="flex flex-col flex-1  ">
+        <main className="flex-1 p-6 space-y-6 ">
+          {/* Header */}
+          
+            <div className="space-y-1 items-center justify-center text-center mt-8">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
                 Upload Files
               </h1>
               <p className="text-slate-600">Transform your Excel data into beautiful visualizations</p>
             </div>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Quick Upload
-            </Button>
-          </div>
+            
+          
 
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-sm">
+          {/* Dropzone */}
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-sm">
             <CardHeader className="rounded-t-lg">
               <CardTitle className="text-slate-800 flex items-center gap-2">
                 <FileSpreadsheet className="h-5 w-5 text-blue-600" />
@@ -168,8 +168,8 @@ export default function UploadPage() {
               <div
                 className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
                   dragActive
-                    ? "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-100 scale-105"
-                    : "border-slate-300 bg-gradient-to-br from-slate-50 to-blue-50/30 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-indigo-50/50"
+                    ? "border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100 scale-105"
+                    : "border-slate-300 bg-gradient-to-br from-slate-50 to-blue-50/30 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-blue-50/50"
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -177,7 +177,7 @@ export default function UploadPage() {
                 onDrop={handleDrop}
               >
                 <div className="space-y-4">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
                     <Upload className="h-8 w-8 text-blue-600" />
                   </div>
                   <div>
@@ -194,7 +194,7 @@ export default function UploadPage() {
                   />
                   <Button
                     variant="outline"
-                    className="bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border-blue-200 text-blue-700 hover:text-blue-800"
+                    className="bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-50 border-blue-200 text-blue-700 hover:text-blue-800"
                     onClick={() => document.getElementById("file-upload")?.click()}
                   >
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
@@ -205,17 +205,14 @@ export default function UploadPage() {
             </CardContent>
           </Card>
 
-          {/* Selected Files */}
+          {/* Selected Files List */}
           {selectedFiles.length > 0 && (
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-purple-50/50">
-              <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-t-lg">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50/50">
+              <CardHeader className="rounded-t-lg">
                 <CardTitle className="text-slate-800 flex items-center gap-2">
-                  <FileSpreadsheet className="h-5 w-5 text-purple-600" />
+                  <FileSpreadsheet className="h-5 w-5 text-blue-600" />
                   Selected Files ({selectedFiles.length})
                 </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Review and add descriptions before uploading
-                </CardDescription>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 {selectedFiles.map((file) => (
@@ -247,14 +244,6 @@ export default function UploadPage() {
                         </div>
                       </div>
 
-                      <Textarea
-                        placeholder="Add a description for this file (optional)..."
-                        value={file.description}
-                        onChange={(e) => updateFileDescription(file.id, e.target.value)}
-                        className="bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-200"
-                        rows={2}
-                      />
-
                       {uploadProgress[file.id] !== undefined && (
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
@@ -279,7 +268,7 @@ export default function UploadPage() {
                   <Button
                     onClick={uploadFiles}
                     disabled={selectedFiles.length === 0}
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Upload {selectedFiles.length} File{selectedFiles.length !== 1 ? "s" : ""}
@@ -290,9 +279,12 @@ export default function UploadPage() {
           )}
 
           {/* Inline Analysis */}
-          {recentUploadedFile && (
+          {recentUploadedFile && showAnalysis && (
             <div className="animate-in slide-in-from-bottom-4 duration-500">
-              <FileAnalysisInlineView file={recentUploadedFile} />
+              <FileAnalysisInlineView
+                file={recentUploadedFile}
+                onClose={() => setShowAnalysis(false)}
+              />
             </div>
           )}
         </main>
@@ -312,6 +304,7 @@ export default function UploadPage() {
           }
           setUploadedFiles((prev) => [...prev, fileData])
           setRecentUploadedFile(fileData)
+          setShowAnalysis(true)
         }}
       />
     </div>

@@ -53,28 +53,26 @@ export function DashboardSidebar() {
     <div className="relative flex">
       <div
         className={cn(
-          "flex flex-col bg-[#0b0c10] border-r border-[#1f1f1f] transition-all duration-300",
-          isCollapsed ? "w-16" : "w-64"
+          "flex flex-col backdrop-blur-2xl bg-[#0b0c10]/60 shadow-[0_0_10px_#06b6d4] transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-16" : "w-64",
+          
         )}
       >
-        <div className="flex items-center h-16 px-6 border-b border-[#1f1f1f]">
-          {!isCollapsed && (
+        <div className="flex items-center h-16 px-6 border-b border-[#1f1f1f]/60">
+          {!isCollapsed ? (
             <div
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleNavigation("/dashboard")}
             >
-              
               <span className="text-xl font-bold text-[#b8e2f4]">ExcelAI</span>
             </div>
-          )}
-
-          {isCollapsed && (
+          ) : (
             <div
               className="flex items-center justify-center w-full cursor-pointer"
               onClick={() => handleNavigation("/dashboard")}
             >
-              <div className="w-8 h-8 bg-pink-500/30 border border-pink-500 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-pink-500" />
+              <div className="w-8 h-8 bg-cyan-500/30 border border-cyan-500 p-2 flex items-center justify-center shadow-[0_0_8px_#06b6d4]">
+                <BarChart3 className="h-5 w-5 text-cyan-500" />
               </div>
             </div>
           )}
@@ -88,10 +86,10 @@ export function DashboardSidebar() {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full gap-3 text-white hover:bg-[#1a1a2e] hover:text-pink-400 transition-all duration-200",
+                    "w-full gap-3 text-white hover:bg-cyan-500/10 hover:text-cyan-300 transition-all duration-200",
                     isCollapsed ? "justify-center px-2" : "justify-start",
                     isActive &&
-                      "bg-[#1a1a2e] text-pink-400 border-l-4 border-pink-500"
+                      "bg-cyan-500/10 text-cyan-300 border-l-4 border-cyan-400"
                   )}
                   onClick={() => handleNavigation(item.href)}
                 >
@@ -100,7 +98,7 @@ export function DashboardSidebar() {
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
                       {item.count && (
-                        <Badge variant="secondary" className="ml-auto bg-pink-500/20 text-pink-400 border border-pink-400">
+                        <Badge variant="secondary" className="ml-auto bg-cyan-500/20 text-cyan-300 border border-cyan-400">
                           {item.count}
                         </Badge>
                       )}
@@ -114,7 +112,7 @@ export function DashboardSidebar() {
                 </Button>
 
                 {isCollapsed && (
-                  <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-blue-400 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-cyan-300 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow">
                     {item.name}
                     {item.count && ` (${item.count})`}
                   </div>
@@ -124,13 +122,13 @@ export function DashboardSidebar() {
           })}
         </nav>
 
-        <div className="px-4 py-4 border-t border-[#1f1f1f] space-y-1">
+        <div className="px-4 py-4 border-t border-[#1f1f1f]/60 space-y-1">
           {secondaryNavigation.map((item) => (
             <div key={item.name} className="relative group">
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full gap-3 text-white hover:text-blue-400 hover:bg-[#1a1a2e] transition-all duration-200",
+                  "w-full gap-3 text-white hover:text-blue-400 hover:bg-cyan-500/10 transition-all duration-200",
                   isCollapsed ? "justify-center px-2" : "justify-start"
                 )}
                 onClick={() => handleNavigation(item.href)}
@@ -140,7 +138,7 @@ export function DashboardSidebar() {
               </Button>
 
               {isCollapsed && (
-                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-blue-400 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-blue-400 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow">
                   {item.name}
                 </div>
               )}
@@ -164,7 +162,7 @@ export function DashboardSidebar() {
             </Button>
 
             {isCollapsed && (
-              <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-red-400 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+              <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-red-400 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow">
                 Sign Out
               </div>
             )}
@@ -177,15 +175,15 @@ export function DashboardSidebar() {
         size="sm"
         onClick={toggleSidebar}
         className={cn(
-          "absolute top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full border border-pink-500 bg-[#0b0c10] hover:bg-pink-500/10 shadow-md transition-all duration-200",
+          "absolute top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full border border-cyan-400 bg-[#0b0c10]/70 hover:bg-cyan-500/10 shadow-[0_0_10px_#06b6d4] transition-all duration-200",
           "flex items-center justify-center p-0 z-10",
           isCollapsed ? "-right-4" : "-right-4"
         )}
       >
         {isCollapsed ? (
-          <ChevronRight className="h-4 w-4 text-pink-400" />
+          <ChevronRight className="h-4 w-4 text-cyan-300" />
         ) : (
-          <ChevronLeft className="h-4 w-4 text-pink-400" />
+          <ChevronLeft className="h-4 w-4 text-cyan-300" />
         )}
       </Button>
     </div>

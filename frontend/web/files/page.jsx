@@ -60,14 +60,14 @@ export default function FilesPage() {
       {/* Aurora Background */}
       <div className="absolute inset-0 z-0 opacity-40">
   <Aurora
-    colorStops={["#FE88B1", "#FFA6C3", "#EEBFD9"]}
+    colorStops={["#0038ff", "#00d4ff", "#002233"]}
     amplitude={0.8 }
     blend={1}
   />
 </div>
       <div className="absolute inset-0 z-0 scale-y-[-1] opacity-40">
   <Aurora
-    colorStops={["#FE88B1", "#FFA6C3", "#EEBFD9"]}
+    colorStops={["#0038ff", "#00d4ff", "#002233"]}
     amplitude={0.8}
     blend={1}
   />

@@ -175,11 +175,13 @@ export default function FilesPage() {
                 </div>
               </CardContent>
             </Card>
-            <FileAnalysisInlineView
-              open={analysisModalOpen}
-              onOpenChange={setAnalysisModalOpen}
+            {selectedFile && (
+              <FileAnalysisInlineView
               file={selectedFile}
-            />
+              onClose={() => setSelectedFile(null)}
+              />
+              )
+            }
           </main>
         </div>
       </div>

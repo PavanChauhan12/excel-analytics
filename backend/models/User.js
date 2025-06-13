@@ -29,7 +29,9 @@ const UserSchema = new mongoose.Schema({
       uploadedAt: {
         type: Date,
         default: Date.now,
-      }
+      },
+      rows: { type: Number}, 
+      columns: { type: Number }
   }],
   chartRecords: [
   {

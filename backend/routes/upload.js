@@ -22,7 +22,10 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet);
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // raw 2D array
+    const rowCount = data.length;
+    const columnCount = data[0]?.length || 0;
+
     const fileSizeKB = parseFloat((req.file.size / 1024).toFixed(2));
 
     const user = await User.findById(userId);
@@ -41,26 +44,33 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
         filename: req.file.filename,
         fileSize: fileSizeKB + ' KB',
         uploaderEmail: email,
-        rowCount: jsonData.length
+        rowCount,
+        columnCount
       });
     }
 
     // Only add to DB if it's a new file
     user.excelRecords.push({
-      uploaderEmail: email,
-      filename: req.file.filename,
-      filesize: fileSizeKB,
-      data: jsonData,
-      uploadedBy: userId
-    });
+  uploaderEmail: email,
+  filename: req.file.filename,
+  filesize: fileSizeKB,
+  data: data,
+  rows: rowCount,
+  columns: columnCount,
+  uploadedBy: userId,
+  uploadedAt: new Date()
+});
+
     await user.save();
 
     res.status(200).json({
       message: 'File uploaded and saved to user document',
       filename: req.file.filename,
       fileSize: fileSizeKB + ' KB',
+      data: data, // raw 2D array
       uploaderEmail: email,
-      rowCount: jsonData.length
+      rowCount,
+      columnCount
     });
 
   } catch (error) {
@@ -88,8 +98,10 @@ router.get('/dashboard', verifyToken, async (req, res) => {
         filename: record.filename,
         filesize: record.filesize + ' KB',
         // uploaderEmail: record.uploaderEmail,
+        data: record.data, // raw 2D array
         uploadedAt: record.uploadedAt,
-        rowCount: record.data.length
+        rows: record.rows ?? record.data?.length ?? "-",
+        columns: record.columns ?? (record.data?.[0]?.length || "-")
       }))
     });
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { Calendar } from "lucide-react"
-import GlitchText from "./ui/glitchtext"
+
 
 export function WelcomeSection({ name }) {
   const currentTime = new Date()

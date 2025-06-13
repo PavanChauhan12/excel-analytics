@@ -5,6 +5,7 @@ import ChartPage from "@/web/chart/page";
 import UploadPage from "@/web/upload/page";
 import FilesPage from "@/web/files/page";
 import ChartsHistoryPage from "@/web/charthistory/page";
+import AIInsightsPage from "@/web/aiinsights/page";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/dashboard/upload" element={<UploadPage/>}/>
         <Route path="/dashboard/files" element={<FilesPage/>}/>
         <Route path="/dashboard/charts" element={<ChartsHistoryPage/>}/>
+        <Route path="/dashboard/insights" element={<AIInsightsPage/>}/>
       </Routes>
     </Router>
   );

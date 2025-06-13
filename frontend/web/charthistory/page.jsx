@@ -18,12 +18,12 @@ import {
   Eye,
   CuboidIcon as Cube,
   Search,
-  ArrowLeft,
   Filter,
-  Sparkles,
 } from "lucide-react";
 import { UploadDialog } from "@/components/upload-dialog";
-import { DashboardSidebar } from "@/components/dashboard-sidebar"; // Ensure the path is correct
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import Aurora from "@/components/ui/aurora";
+import Orb from "@/components/ui/orb";
 
 export default function ChartsHistoryPage() {
   const navigate = useNavigate();
@@ -86,34 +86,24 @@ export default function ChartsHistoryPage() {
   }, [charts, searchTerm, filterType, sortBy]);
 
   const handleViewChart = (chartId) => {
-    try {
-      const updatedCharts = charts.map((chart) =>
-        chart.id === chartId
-          ? { ...chart, views: (chart.views || 0) + 1 }
-          : chart
-      );
-      localStorage.setItem("userCharts", JSON.stringify(updatedCharts));
-      setCharts(updatedCharts);
-    } catch (error) {
-      console.error("Error updating view count:", error);
-    }
-
+    const updatedCharts = charts.map((chart) =>
+      chart.id === chartId
+        ? { ...chart, views: (chart.views || 0) + 1 }
+        : chart
+    );
+    localStorage.setItem("userCharts", JSON.stringify(updatedCharts));
+    setCharts(updatedCharts);
     navigate(`/chart/${chartId}`);
   };
 
   const handleDownloadChart = (chartId) => {
-    try {
-      const updatedCharts = charts.map((chart) =>
-        chart.id === chartId
-          ? { ...chart, downloads: (chart.downloads || 0) + 1 }
-          : chart
-      );
-      localStorage.setItem("userCharts", JSON.stringify(updatedCharts));
-      setCharts(updatedCharts);
-    } catch (error) {
-      console.error("Error updating download count:", error);
-    }
-
+    const updatedCharts = charts.map((chart) =>
+      chart.id === chartId
+        ? { ...chart, downloads: (chart.downloads || 0) + 1 }
+        : chart
+    );
+    localStorage.setItem("userCharts", JSON.stringify(updatedCharts));
+    setCharts(updatedCharts);
     console.log("Downloading chart:", chartId);
   };
 
@@ -128,48 +118,51 @@ export default function ChartsHistoryPage() {
   };
 
   return (
-    <div className="flex min-h-screen  bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="flex min-h-screen bg-[#0a0a23] text-white relative overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-30 ">
+      <Aurora
+      colorStops={["#0038ff", "#00d4ff", "#002233"]}
+            amplitude={1.2}
+            blend={0.4} />
+      </div>
       <DashboardSidebar />
 
-      <div className="flex-1">
-        
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between  mt-12">
-             
-                <div className="flex items-center gap-2">
-                  <h1 className="text-4xl font-bold text-blue-800">
-                    Charts History
-                  </h1>
-                </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                  {filteredCharts.length} of {charts.length} charts
-                </div>
-                <UploadDialog onChartCreated={handleChartCreated} />
-              </div>
+      <div className="flex-1 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mt-12">
+            <div className="flex items-center gap-2">
+              <h1 className="text-4xl font-bold text-white">
+                Charts History
+              </h1>
             </div>
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-cyan-300 bg-cyan-950 border border-cyan-400 px-3 py-1 rounded-full">
+                {filteredCharts.length} of {charts.length} charts
+              </div>
+              <UploadDialog onChartCreated={handleChartCreated} />
+            </div>
+          </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-cyan-300" />
                 <Input
                   placeholder="Search charts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-blue-200 bg-white"
+                  className="pl-10 border-cyan-600 bg-black text-cyan-200"
                 />
               </div>
               <div className="flex gap-2">
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-40 border-blue-200 bg-white">
-                    <Filter className="h-4 w-4 mr-2 text-blue-500" />
+                  <SelectTrigger className="w-40 border-cyan-600 bg-black text-white">
+                    <Filter className="h-4 w-4 mr-2 text-cyan-400" />
                     <SelectValue placeholder="Filter by type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-blue-200">
+                  <SelectContent className="bg-black border-cyan-600 text-white">
                     <SelectItem value="all">All Types</SelectItem>
                     {getUniqueChartTypes().map((type) => (
                       <SelectItem key={type} value={type.toLowerCase()}>
@@ -178,17 +171,16 @@ export default function ChartsHistoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
+
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40 border-blue-200 bg-white">
+                  <SelectTrigger className="w-40 border-cyan-600 bg-black text-white">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-blue-200">
+                  <SelectContent className="bg-black border-cyan-600 text-white">
                     <SelectItem value="newest">Newest First</SelectItem>
                     <SelectItem value="oldest">Oldest First</SelectItem>
                     <SelectItem value="most-viewed">Most Viewed</SelectItem>
-                    <SelectItem value="most-downloaded">
-                      Most Downloaded
-                    </SelectItem>
+                    <SelectItem value="most-downloaded">Most Downloaded</SelectItem>
                     <SelectItem value="title">Title A-Z</SelectItem>
                   </SelectContent>
                 </Select>
@@ -198,16 +190,13 @@ export default function ChartsHistoryPage() {
 
           {/* Charts Grid */}
           {filteredCharts.length === 0 ? (
-            <div className="text-center py-1 flex flex-wrap">
-              <div className="p-4 bg-blue-200 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <BarChart3 className="h-10 w-10 text-blue-700" />
-              </div>
-              <h3 className="text-lg font-medium text-blue-800 mb-2">
+            <div className="text-center py-1 flex flex-wrap flex-col">
+              <h3 className="text-lg font-medium text-cyan-300 mb-2">
                 {charts.length === 0
-                  ? "No charts created yet"
+                  ? "No charts created yet "
                   : "No charts match your search"}
               </h3>
-              <p className="text-blue-600 mb-6">
+              <p className="text-cyan-400 mb-6">
                 {charts.length === 0
                   ? "Upload an Excel file and create your first chart!"
                   : "Try adjusting your search terms or filters"}
@@ -217,44 +206,40 @@ export default function ChartsHistoryPage() {
               ) : null}
             </div>
           ) : (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 ">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
               {filteredCharts.map((chart) => (
                 <div
                   key={chart.id}
-                  className="bg-white border border-blue-200 rounded-xl shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow h-full w-70 "
+                  className="bg-black border border-cyan-600 rounded-xl shadow-md p-6 flex flex-col justify-between hover:shadow-xl transition-shadow h-full"
                 >
-                  {/* Header: Type & Date */}
-                  <div className="flex items-center justify-between mb-3 ">
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="flex items-center justify-between mb-3 text-cyan-300 text-sm">
+                    <div className="flex items-center gap-2">
                       <Cube className="h-4 w-4" />
                       <span className="capitalize">{chart.type}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs">
                       {new Date(chart.created).toLocaleDateString()}
                     </span>
                   </div>
 
-                  {/* Title */}
-                  <h2 className="text-lg font-semibold text-blue-800 mb-3 break-words">
+                  <h2 className="text-lg font-semibold text-cyan-100 mb-3 break-words">
                     {chart.title}
                   </h2>
 
-                  {/* Stats */}
-                  <div className="flex items-center gap-2 flex-wrap text-xs text-blue-500 mb-4">
-                    <Badge variant="outline" className="px-2 py-1">
+                  <div className="flex items-center gap-2 flex-wrap text-xs text-cyan-400 mb-4">
+                    <Badge variant="outline" className="border-cyan-500 text-cyan-300">
                       Views: {chart.views || 0}
                     </Badge>
-                    <Badge variant="outline" className="px-2 py-1">
+                    <Badge variant="outline" className="border-cyan-500 text-cyan-300">
                       Downloads: {chart.downloads || 0}
                     </Badge>
                   </div>
 
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-2 mt-auto pt-2 ">
+                  <div className="flex items-center gap-2 mt-auto pt-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-blue-700 border-blue-300 whitespace-nowrap"
+                      className="text-cyan-400 border-cyan-500 bg-black"
                       onClick={() => handleDownloadChart(chart.id)}
                     >
                       <Download className="h-4 w-4 mr-1" />
@@ -262,7 +247,7 @@ export default function ChartsHistoryPage() {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+                      className="bg-cyan-600 hover:bg-cyan-700 text-white"
                       onClick={() => handleViewChart(chart.id)}
                     >
                       <Eye className="h-4 w-4 mr-1" />

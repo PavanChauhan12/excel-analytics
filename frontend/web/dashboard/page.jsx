@@ -34,14 +34,14 @@ export default function DashboardPage() {
         {/* Aurora background */}
         <div className="absolute inset-0 z-0 ">
           <Aurora
-            colorStops={["#3A29FF", "#B026FF", "#ADD8E6"]}
+            colorStops={["#0038ff", "#00d4ff", "#002233"]}
             amplitude={1.2}
             blend={0.4}
           />
         </div>
 
         <div className="relative z-10 flex items-center justify-center h-full">
-          <div className="relative flex items-center justify-center w-[800px] h-[800px]">
+          <div className="relative flex items-center justify-center w-[700px] h-[800px]">
             <Orb />
             <div className="absolute z-20 w-[90%] max-w-md">
               <WelcomeSection name={user.name} />

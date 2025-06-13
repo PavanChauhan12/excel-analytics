@@ -26,8 +26,6 @@ const navigation = [
   { name: "Upload", href: "/dashboard/upload", icon: Upload },
   { name: "Charts", href: "/dashboard/charts", icon: BarChart3, count: 24 },
   { name: "AI Insights", href: "/dashboard/insights", icon: Brain, count: 8 },
-  { name: "Users", href: "/admin", icon: Users, admin: true },
-  { name: "Data Usage", href: "/admin/usage", icon: Database, admin: true },
 ]
 
 const secondaryNavigation = [

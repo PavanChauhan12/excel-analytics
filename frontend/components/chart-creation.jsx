@@ -1,32 +1,14 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { useState, useRef, useEffect } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import {
   BarChart3,
   LineChart,
@@ -39,8 +21,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
-} from "lucide-react";
-import * as XLSX from "xlsx";
+  AlertCircle,
+} from "lucide-react"
+import * as XLSX from "xlsx"
 
 // Define chart types for selection
 const chartTypes = [
@@ -108,7 +91,7 @@ const chartTypes = [
     best_for: "Surface visualization and terrain mapping",
     is3D: true,
   },
-];
+]
 
 // Define color themes for chart customization
 const colorThemes = [
@@ -136,236 +119,323 @@ const colorThemes = [
     name: "Yellow",
     colors: ["#f1c40f", "#f39c12", "#e67e22", "#d35400", "#c0392b"],
   },
-];
+]
 
 export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
-  const [fileData, setFileData] = useState([]);
-  const [columns, setColumns] = useState([]);
-  const [selectedChart, setSelectedChart] = useState("line");
-  const [xAxis, setXAxis] = useState("");
-  const [yAxis, setYAxis] = useState("");
-  const [zAxis, setZAxis] = useState("");
-  const [chartTitle, setChartTitle] = useState("");
-  const [selectedTheme, setSelectedTheme] = useState("Default");
-  const [showLegend, setShowLegend] = useState(true);
-  const [showGrid, setShowGrid] = useState(true);
-  const [fileName, setFileName] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const chartRef = useRef(null);
-  const plotlyInstance = useRef(null);
+  const [fileData, setFileData] = useState([])
+  const [columns, setColumns] = useState([])
+  const [selectedChart, setSelectedChart] = useState("line")
+  const [xAxis, setXAxis] = useState("")
+  const [yAxis, setYAxis] = useState("")
+  const [zAxis, setZAxis] = useState("")
+  const [chartTitle, setChartTitle] = useState("")
+  const [selectedTheme, setSelectedTheme] = useState("Default")
+  const [showLegend, setShowLegend] = useState(true)
+  const [showGrid, setShowGrid] = useState(true)
+  const [fileName, setFileName] = useState("")
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [error, setError] = useState(null)
+  const chartRef = useRef(null)
+  const plotlyInstance = useRef(null)
 
   // Define the steps in the workflow
-  const steps = [
-    "Select Data",
-    "Choose Chart",
-    "Configure Axes",
-    "Style & Theme",
-    "Preview",
-  ];
+  const steps = ["Select Data", "Choose Chart", "Configure Axes", "Style & Theme", "Preview"]
 
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile);
+      processExcelFile(selectedFile)
     }
-  }, [selectedFile, open]);
+  }, [selectedFile, open])
 
   // Effect hook to re-render the preview chart
   useEffect(() => {
-    if (
-      currentStep === 4 &&
-      fileData.length > 0 &&
-      xAxis &&
-      yAxis &&
-      selectedChart
-    ) {
-      renderPreviewChart();
+    if (currentStep === 4 && fileData.length > 0 && xAxis && yAxis && selectedChart) {
+      renderPreviewChart()
     }
-  }, [
-    currentStep,
-    fileData,
-    xAxis,
-    yAxis,
-    zAxis,
-    selectedChart,
-    selectedTheme,
-    showLegend,
-    showGrid,
-  ]);
+  }, [currentStep, fileData, xAxis, yAxis, zAxis, selectedChart, selectedTheme, showLegend, showGrid])
 
   // Cleanup effect
   useEffect(() => {
     return () => {
       if (plotlyInstance.current && chartRef.current) {
         try {
-          window.Plotly?.purge(chartRef.current);
+          window.Plotly?.purge(chartRef.current)
         } catch (e) {
-          console.log("Plotly cleanup error:", e);
+          console.log("Plotly cleanup error:", e)
         }
-        plotlyInstance.current = null;
+        plotlyInstance.current = null
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Improved function to detect if a value can be treated as a number
   const isNumericValue = (value) => {
-    if (value === null || value === undefined || value === "") return false;
-    if (typeof value === "number") return !isNaN(value);
+    if (value === null || value === undefined || value === "") return false
+    if (typeof value === "number") return !isNaN(value)
     if (typeof value === "string") {
-      const cleanValue = value.toString().replace(/[,$%\s]/g, "");
-      return (
-        !isNaN(cleanValue) &&
-        !isNaN(Number.parseFloat(cleanValue)) &&
-        cleanValue !== ""
-      );
+      const cleanValue = value.toString().replace(/[,$%\s]/g, "")
+      return !isNaN(cleanValue) && !isNaN(Number.parseFloat(cleanValue)) && cleanValue !== ""
     }
-    return false;
-  };
+    return false
+  }
 
   // Improved function to detect column type based on multiple samples
   const detectColumnType = (columnName, data) => {
-    const samples = data.slice(0, Math.min(10, data.length));
-    let numericCount = 0;
-    let totalCount = 0;
+    const samples = data.slice(0, Math.min(10, data.length))
+    let numericCount = 0
+    let totalCount = 0
 
     for (const row of samples) {
-      const value = row[columnName];
+      const value = row[columnName]
       if (value !== null && value !== undefined && value !== "") {
-        totalCount++;
+        totalCount++
         if (isNumericValue(value)) {
-          numericCount++;
+          numericCount++
         }
       }
     }
 
-    return totalCount > 0 && numericCount / totalCount > 0.7
-      ? "number"
-      : "text";
-  };
+    return totalCount > 0 && numericCount / totalCount > 0.7 ? "number" : "text"
+  }
 
   // Process the Excel file
   const processExcelFile = (file) => {
-    setIsProcessing(true);
-    setFileName(file.name);
+    setIsProcessing(true)
+    setError(null)
 
-    const reader = new FileReader();
+    // Check if file is a valid File/Blob object
+    if (!file || !(file instanceof Blob)) {
+      setError("Invalid file object. Please select a valid Excel file.")
+      setIsProcessing(false)
+      return
+    }
+
+    setFileName(file.name || "Unknown file")
+
+    const reader = new FileReader()
+
     reader.onload = (event) => {
       try {
-        const workbook = XLSX.read(event.target.result, { type: "binary" });
-        const firstSheet = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheet];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const workbook = XLSX.read(event.target.result, { type: "binary" })
+        const firstSheet = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[firstSheet]
+        const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
         if (jsonData.length === 0) {
-          console.error("No data found in the Excel sheet.");
-          setIsProcessing(false);
-          return;
+          setError("No data found in the Excel sheet.")
+          setIsProcessing(false)
+          return
         }
 
-        setFileData(jsonData);
+        setFileData(jsonData)
 
-        const headers = Object.keys(jsonData[0]);
+        const headers = Object.keys(jsonData[0])
         const columnsWithTypes = headers.map((header) => {
-          const detectedType = detectColumnType(header, jsonData);
+          const detectedType = detectColumnType(header, jsonData)
           return {
             name: header,
             type: detectedType,
             sample: jsonData[0][header],
-          };
-        });
+          }
+        })
 
-        setColumns(columnsWithTypes);
-        setIsProcessing(false);
+        setColumns(columnsWithTypes)
+        setIsProcessing(false)
       } catch (error) {
-        console.error("Error processing Excel file:", error);
-        setIsProcessing(false);
+        console.error("Error processing Excel file:", error)
+        setError(`Error processing Excel file: ${error.message}`)
+        setIsProcessing(false)
       }
-    };
+    }
 
-    reader.readAsBinaryString(file);
-  };
+    reader.onerror = () => {
+      setError("Failed to read the file. Please try again.")
+      setIsProcessing(false)
+    }
+
+    try {
+      reader.readAsBinaryString(file)
+    } catch (error) {
+      setError(`Failed to read the file: ${error.message}`)
+      setIsProcessing(false)
+    }
+  }
 
   // Render preview chart using Plotly.js
   const renderPreviewChart = async () => {
-    if (!chartRef.current || !selectedChart) return;
+    if (!chartRef.current || !selectedChart) return
 
     // Load Plotly dynamically
     if (!window.Plotly) {
       try {
-        const Plotly = await import("plotly.js-dist");
-        window.Plotly = Plotly.default;
+        const Plotly = await import("plotly.js-dist")
+        window.Plotly = Plotly.default
       } catch (error) {
-        console.error("Failed to load Plotly:", error);
-        return;
+        console.error("Failed to load Plotly:", error)
+        return
       }
     }
 
     // Clean up previous chart if it exists
     if (plotlyInstance.current) {
-      window.Plotly.purge(chartRef.current);
+      window.Plotly.purge(chartRef.current)
     }
 
     try {
       // Extract data
-      const xData = fileData.map((row) => row[xAxis]);
+      const xData = fileData.map((row) => row[xAxis])
       const yData = fileData.map((row) => {
-        const value = row[yAxis];
-        return isNumericValue(value)
-          ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-          : 0;
-      });
+        const value = row[yAxis]
+        return isNumericValue(value) ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, "")) : 0
+      })
 
       // Extract z-axis data for 3D charts
       const zData = zAxis
         ? fileData.map((row) => {
-            const value = row[zAxis];
-            return isNumericValue(value)
-              ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-              : 0;
+            const value = row[zAxis]
+            return isNumericValue(value) ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, "")) : 0
           })
-        : [];
+        : []
 
-      const themeColors =
-        colorThemes.find((t) => t.name === selectedTheme)?.colors ||
-        colorThemes[0].colors;
-      const primaryColor = themeColors[0];
+      const themeColors = colorThemes.find((t) => t.name === selectedTheme)?.colors || colorThemes[0].colors
+      const primaryColor = themeColors[0]
 
       // Determine if the selected chart is 3D
-      const is3D =
-        chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false;
+      const is3D = chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false
 
-      let plotData = [];
+      let plotData = []
       let layout = {
-        title:
-          chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
+        title: chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
         showlegend: showLegend,
         margin: { l: 50, r: 50, b: 50, t: 50, pad: 4 },
         paper_bgcolor: "white",
         plot_bgcolor: "white",
-      };
+      }
 
       // Configure chart based on type
       if (is3D) {
         // 3D chart configuration
         switch (selectedChart) {
           case "bar3d":
-            plotData = [
-              {
-                type: "scatter3d",
-                mode: "markers",
-                x: xData,
-                y: yData,
-                z: zData,
-                marker: {
-                  size: 8,
-                  color: primaryColor,
-                  opacity: 0.8,
+            // Create a proper 3D bar chart using mesh3d
+            // First, prepare the data points for 3D bars
+            const xUnique = [...new Set(xData)].sort()
+            const yUnique = [...new Set(yData)].sort()
+
+            // Create arrays to hold all vertices and faces for the 3D bars
+            const vertices = []
+            const faces = []
+            const colors = []
+            let i = 0
+
+            // Process each data point to create a 3D bar
+            fileData.forEach((row, index) => {
+              const x = row[xAxis]
+              const y = row[yAxis]
+              const z = row[zAxis]
+
+              if (x !== undefined && y !== undefined && z !== undefined) {
+                const xVal = xUnique.indexOf(x)
+                const yVal = isNumericValue(y) ? Number.parseFloat(y.toString().replace(/[,$%\s]/g, "")) : 0
+                const zVal = isNumericValue(z) ? Number.parseFloat(z.toString().replace(/[,$%\s]/g, "")) : 0
+
+                // Skip if any value is invalid
+                if (xVal === -1 || isNaN(yVal) || isNaN(zVal) || zVal === 0) return
+
+                // Calculate bar width and depth
+                const width = 0.8
+                const depth = 0.8
+
+                // Calculate bar position
+                const xPos = xVal
+                const yPos = 0
+                const zPos = 0
+
+                // Add vertices for the bar (8 corners of a cuboid)
+                vertices.push(
+                  // Bottom face
+                  [xPos - width / 2, yPos, zPos],
+                  [xPos + width / 2, yPos, zPos],
+                  [xPos + width / 2, yPos + depth, zPos],
+                  [xPos - width / 2, yPos + depth, zPos],
+                  // Top face
+                  [xPos - width / 2, yPos, zVal],
+                  [xPos + width / 2, yPos, zVal],
+                  [xPos + width / 2, yPos + depth, zVal],
+                  [xPos - width / 2, yPos + depth, zVal],
+                )
+
+                // Add faces (6 faces of a cuboid, each defined by 4 vertices)
+                const baseIndex = i * 8
+                faces.push(
+                  // Bottom face
+                  [baseIndex, baseIndex + 1, baseIndex + 2],
+                  [baseIndex, baseIndex + 2, baseIndex + 3],
+                  // Top face
+                  [baseIndex + 4, baseIndex + 5, baseIndex + 6],
+                  [baseIndex + 4, baseIndex + 6, baseIndex + 7],
+                  // Side faces
+                  [baseIndex, baseIndex + 1, baseIndex + 5],
+                  [baseIndex, baseIndex + 5, baseIndex + 4],
+                  [baseIndex + 1, baseIndex + 2, baseIndex + 6],
+                  [baseIndex + 1, baseIndex + 6, baseIndex + 5],
+                  [baseIndex + 2, baseIndex + 3, baseIndex + 7],
+                  [baseIndex + 2, baseIndex + 7, baseIndex + 6],
+                  [baseIndex + 3, baseIndex + 0, baseIndex + 4],
+                  [baseIndex + 3, baseIndex + 4, baseIndex + 7],
+                )
+
+                // Add color for each vertex
+                const colorIndex = index % themeColors.length
+                const barColor = themeColors[colorIndex]
+                for (let j = 0; j < 8; j++) {
+                  colors.push(barColor)
+                }
+
+                i++
+              }
+            })
+
+            // If we have valid data, create the 3D bar chart
+            if (vertices.length > 0) {
+              plotData = [
+                {
+                  type: "mesh3d",
+                  x: vertices.map((v) => v[0]),
+                  y: vertices.map((v) => v[1]),
+                  z: vertices.map((v) => v[2]),
+                  i: faces.map((f) => f[0]),
+                  j: faces.map((f) => f[1]),
+                  k: faces.map((f) => f[2]),
+                  facecolor: faces.map((_, idx) => {
+                    const vertexIndex = Math.floor(idx / 12) * 8
+                    return colors[vertexIndex]
+                  }),
+                  flatshading: true,
+                  name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
                 },
-                name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
-              },
-            ];
-            break;
+              ]
+            } else {
+              // Fallback to scatter3d if we couldn't create proper 3D bars
+              plotData = [
+                {
+                  type: "scatter3d",
+                  mode: "markers",
+                  x: xData,
+                  y: yData,
+                  z: zData,
+                  marker: {
+                    size: 8,
+                    color: primaryColor,
+                    opacity: 0.8,
+                  },
+                  name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
+                },
+              ]
+            }
+            break
           case "scatter3d":
             plotData = [
               {
@@ -381,34 +451,32 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 },
                 name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
               },
-            ];
-            break;
+            ]
+            break
           case "surface3d":
             // For surface plots, we need to organize data into a grid
-            const uniqueX = [...new Set(xData)].sort((a, b) => a - b);
-            const uniqueY = [...new Set(yData)].sort((a, b) => a - b);
+            const uniqueX = [...new Set(xData)].sort((a, b) => a - b)
+            const uniqueY = [...new Set(yData)].sort((a, b) => a - b)
 
             // Create a 2D array for z values
             const zValues = Array(uniqueY.length)
               .fill()
-              .map(() => Array(uniqueX.length).fill(0));
+              .map(() => Array(uniqueX.length).fill(0))
 
             // Fill in z values where we have data
             fileData.forEach((row) => {
-              const x = row[xAxis];
-              const y = row[yAxis];
-              const z = row[zAxis];
+              const x = row[xAxis]
+              const y = row[yAxis]
+              const z = row[zAxis]
 
               if (isNumericValue(x) && isNumericValue(y) && isNumericValue(z)) {
-                const xIndex = uniqueX.indexOf(x);
-                const yIndex = uniqueY.indexOf(y);
+                const xIndex = uniqueX.indexOf(x)
+                const yIndex = uniqueY.indexOf(y)
                 if (xIndex >= 0 && yIndex >= 0) {
-                  zValues[yIndex][xIndex] = Number.parseFloat(
-                    z.toString().replace(/[,$%\s]/g, "")
-                  );
+                  zValues[yIndex][xIndex] = Number.parseFloat(z.toString().replace(/[,$%\s]/g, ""))
                 }
               }
-            });
+            })
 
             plotData = [
               {
@@ -419,8 +487,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 colorscale: "Viridis",
                 name: `${zAxis} by ${xAxis} and ${yAxis}`,
               },
-            ];
-            break;
+            ]
+            break
         }
 
         // 3D layout settings
@@ -431,7 +499,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             yaxis: { title: yAxis, showgrid: showGrid },
             zaxis: { title: zAxis, showgrid: showGrid },
           },
-        };
+        }
       } else {
         // 2D chart configuration
         switch (selectedChart) {
@@ -444,8 +512,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 marker: { color: primaryColor },
                 name: yAxis,
               },
-            ];
-            break;
+            ]
+            break
           case "line":
             plotData = [
               {
@@ -456,8 +524,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 line: { color: primaryColor },
                 name: yAxis,
               },
-            ];
-            break;
+            ]
+            break
           case "pie":
             plotData = [
               {
@@ -467,8 +535,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 marker: { colors: themeColors },
                 name: yAxis,
               },
-            ];
-            break;
+            ]
+            break
           case "area":
             plotData = [
               {
@@ -481,8 +549,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 line: { color: primaryColor },
                 name: yAxis,
               },
-            ];
-            break;
+            ]
+            break
           case "scatter":
             plotData = [
               {
@@ -493,8 +561,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 marker: { color: primaryColor },
                 name: yAxis,
               },
-            ];
-            break;
+            ]
+            break
         }
 
         // 2D layout settings
@@ -503,7 +571,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             ...layout,
             xaxis: { title: xAxis, showgrid: showGrid },
             yaxis: { title: yAxis, showgrid: showGrid },
-          };
+          }
         }
       }
 
@@ -511,80 +579,74 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       await window.Plotly.newPlot(chartRef.current, plotData, layout, {
         responsive: true,
         displayModeBar: false,
-      });
-      plotlyInstance.current = true;
+      })
+      plotlyInstance.current = true
     } catch (error) {
-      console.error("Error rendering chart:", error);
+      console.error("Error rendering chart:", error)
+      setError(`Error rendering chart: ${error.message}`)
     }
-  };
+  }
 
   // Handle chart type selection
   const handleChartTypeSelect = (chartType) => {
-    setSelectedChart(chartType);
+    setSelectedChart(chartType)
 
     // Reset z-axis if switching from 3D to 2D chart
-    const is3D =
-      chartTypes.find((chart) => chart.id === chartType)?.is3D || false;
+    const is3D = chartTypes.find((chart) => chart.id === chartType)?.is3D || false
     if (!is3D) {
-      setZAxis("");
+      setZAxis("")
     }
-  };
+  }
 
   // Handle next step in workflow
   const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   // Handle previous step in workflow
   const handlePrevStep = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   // Create chart and close dialog
   const handleCreateChart = () => {
     if (!xAxis || !yAxis) {
-      console.error("Please select both X and Y axes.");
-      return;
+      setError("Please select both X and Y axes.")
+      return
     }
 
     // For 3D charts, ensure z-axis is selected
-    const is3D =
-      chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false;
+    const is3D = chartTypes.find((chart) => chart.id === selectedChart)?.is3D || false
     if (is3D && !zAxis) {
-      console.error("Please select a Z-axis for 3D chart.");
-      return;
+      setError("Please select a Z-axis for 3D chart.")
+      return
     }
 
     // Extract data for chart configuration
-    const xData = fileData.map((row) => row[xAxis]);
+    const xData = fileData.map((row) => row[xAxis])
     const yData = fileData.map((row) => {
-      const value = row[yAxis];
-      return isNumericValue(value)
-        ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-        : 0;
-    });
+      const value = row[yAxis]
+      return isNumericValue(value) ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, "")) : 0
+    })
 
     // Extract z-axis data for 3D charts
     const zData = zAxis
       ? fileData.map((row) => {
-          const value = row[zAxis];
-          return isNumericValue(value)
-            ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, ""))
-            : 0;
+          const value = row[zAxis]
+          return isNumericValue(value) ? Number.parseFloat(value.toString().replace(/[,$%\s]/g, "")) : 0
         })
-      : [];
+      : []
 
     const chartConfig = {
       type: selectedChart,
       xAxis,
       yAxis,
       zAxis: zAxis || null,
-      chartTitle:
-        chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
+      chartTitle: chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
       selectedTheme,
       showLegend,
       showGrid,
@@ -595,19 +657,14 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       is3D,
       createdAt: new Date().toISOString(),
       dataPoints: fileData.length,
-    };
+    }
 
     // Generate unique ID and store chart config
-    const chartId = `chart-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+    const chartId = `chart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 
     try {
       // Store chart configuration
-      localStorage.setItem(
-        `chartConfig_${chartId}`,
-        JSON.stringify(chartConfig)
-      );
+      localStorage.setItem(`chartConfig_${chartId}`, JSON.stringify(chartConfig))
 
       // Store chart metadata for gallery
       const chartMetadata = {
@@ -619,60 +676,49 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         is3D,
         views: 0,
         downloads: 0,
-      };
+      }
 
       // Get existing charts and add new one
-      const existingCharts = JSON.parse(
-        localStorage.getItem("userCharts") || "[]"
-      );
-      existingCharts.unshift(chartMetadata);
-      localStorage.setItem("userCharts", JSON.stringify(existingCharts));
+      const existingCharts = JSON.parse(localStorage.getItem("userCharts") || "[]")
+      existingCharts.unshift(chartMetadata)
+      localStorage.setItem("userCharts", JSON.stringify(existingCharts))
 
-      onOpenChange(false);
+      onOpenChange(false)
 
       // Navigate to chart page
-      window.location.href = `/chart/${chartId}`;
+      window.location.href = `/chart/${chartId}`
     } catch (error) {
-      console.error("Failed to save chart config:", error);
+      console.error("Failed to save chart config:", error)
+      setError(`Failed to save chart: ${error.message}`)
     }
-  };
+  }
 
-  const selectedChartType = chartTypes.find(
-    (chart) => chart.id === selectedChart
-  );
-  const is3D = selectedChartType?.is3D || false;
+  const selectedChartType = chartTypes.find((chart) => chart.id === selectedChart)
+  const is3D = selectedChartType?.is3D || false
 
   // Get available columns for Y-axis and Z-axis
-  const availableYAxisColumns = columns.filter(
-    (col) => col.name !== xAxis && col.name !== zAxis
-  );
-  const availableZAxisColumns = columns.filter(
-    (col) => col.name !== xAxis && col.name !== yAxis
-  );
-  const numericYAxisColumns = availableYAxisColumns.filter(
-    (col) => col.type === "number"
-  );
-  const numericZAxisColumns = availableZAxisColumns.filter(
-    (col) => col.type === "number"
-  );
+  const availableYAxisColumns = columns.filter((col) => col.name !== xAxis && col.name !== zAxis)
+  const availableZAxisColumns = columns.filter((col) => col.name !== xAxis && col.name !== yAxis)
+  const numericYAxisColumns = availableYAxisColumns.filter((col) => col.type === "number")
+  const numericZAxisColumns = availableZAxisColumns.filter((col) => col.type === "number")
 
   // Determine if we can proceed to the next step
   const canProceedToNextStep = () => {
     switch (currentStep) {
       case 0: // Select Data
-        return fileData.length > 0 && columns.length > 0;
+        return fileData.length > 0 && columns.length > 0
       case 1: // Choose Chart
-        return !!selectedChart;
+        return !!selectedChart
       case 2: // Configure Axes
-        return !!xAxis && !!yAxis && (!is3D || !!zAxis);
+        return !!xAxis && !!yAxis && (!is3D || !!zAxis)
       case 3: // Style & Theme
-        return true;
+        return true
       case 4: // Preview
-        return true;
+        return true
       default:
-        return false;
+        return false
     }
-  };
+  }
 
   if (isProcessing) {
     return (
@@ -680,16 +726,12 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         <DialogContent className="max-w-md">
           <div className="flex flex-col items-center justify-center py-8">
             <FileSpreadsheet className="h-16 w-16 text-blue-500 animate-pulse mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              Processing Excel File
-            </h3>
-            <p className="text-sm text-gray-600 text-center">
-              Reading and analyzing your data...
-            </p>
+            <h3 className="text-lg font-semibold mb-2">Processing Excel File</h3>
+            <p className="text-sm text-gray-600 text-center">Reading and analyzing your data...</p>
           </div>
         </DialogContent>
       </Dialog>
-    );
+    )
   }
 
   return (
@@ -697,17 +739,24 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {is3D ? (
-              <Cube className="h-5 w-5" />
-            ) : (
-              <BarChart3 className="h-5 w-5" />
-            )}
+            {is3D ? <Cube className="h-5 w-5" /> : <BarChart3 className="h-5 w-5" />}
             Create {is3D ? "3D " : ""}Chart from {fileName}
           </DialogTitle>
           <DialogDescription>
             Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-start mb-4">
+            <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">Error</p>
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        )}
 
         {/* Step Progress Indicator */}
         <div className="flex items-center justify-center mb-6 overflow-x-auto">
@@ -716,9 +765,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
               <div key={step} className="flex items-center">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    index <= currentStep
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-600"
+                    index <= currentStep ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
                   }`}
                 >
                   {index + 1}
@@ -731,11 +778,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   {step}
                 </span>
                 {index < steps.length - 1 && (
-                  <div
-                    className={`w-4 h-0.5 mx-2 ${
-                      index < currentStep ? "bg-blue-600" : "bg-gray-200"
-                    }`}
-                  />
+                  <div className={`w-4 h-0.5 mx-2 ${index < currentStep ? "bg-blue-600" : "bg-gray-200"}`} />
                 )}
               </div>
             ))}
@@ -748,9 +791,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             <Card>
               <CardHeader>
                 <CardTitle>Data Analysis</CardTitle>
-                <CardDescription>
-                  We've analyzed your Excel file and found the following data
-                </CardDescription>
+                <CardDescription>We've analyzed your Excel file and found the following data</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -763,14 +804,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Column Types</h3>
-                      <p className="text-sm">
-                        Numeric columns:{" "}
-                        {columns.filter((c) => c.type === "number").length}
-                      </p>
-                      <p className="text-sm">
-                        Text columns:{" "}
-                        {columns.filter((c) => c.type === "text").length}
-                      </p>
+                      <p className="text-sm">Numeric columns: {columns.filter((c) => c.type === "number").length}</p>
+                      <p className="text-sm">Text columns: {columns.filter((c) => c.type === "text").length}</p>
                     </div>
                   </div>
 
@@ -780,32 +815,19 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="bg-gray-100">
-                              <th className="px-4 py-2 text-left">
-                                Column Name
-                              </th>
+                              <th className="px-4 py-2 text-left">Column Name</th>
                               <th className="px-4 py-2 text-left">Type</th>
-                              <th className="px-4 py-2 text-left">
-                                Sample Value
-                              </th>
+                              <th className="px-4 py-2 text-left">Sample Value</th>
                             </tr>
                           </thead>
                           <tbody>
                             {columns.map((column, index) => (
-                              <tr
-                                key={index}
-                                className={
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                }
-                              >
-                                <td className="px-4 py-2 border-t">
-                                  {column.name}
-                                </td>
+                              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                <td className="px-4 py-2 border-t">{column.name}</td>
                                 <td className="px-4 py-2 border-t">
                                   <Badge variant="outline">{column.type}</Badge>
                                 </td>
-                                <td className="px-4 py-2 border-t">
-                                  {String(column.sample).substring(0, 30)}
-                                </td>
+                                <td className="px-4 py-2 border-t">{String(column.sample).substring(0, 30)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -825,9 +847,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             <Card>
               <CardHeader>
                 <CardTitle>Choose Chart Type</CardTitle>
-                <CardDescription>
-                  Select the visualization that best represents your data
-                </CardDescription>
+                <CardDescription>Select the visualization that best represents your data</CardDescription>
               </CardHeader>
 
               <CardContent>
@@ -836,23 +856,15 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     <Card
                       key={chart.id}
                       className={`cursor-pointer transition-all hover:shadow-md ${
-                        selectedChart === chart.id
-                          ? "ring-2 ring-blue-500 bg-blue-50"
-                          : ""
+                        selectedChart === chart.id ? "ring-2 ring-blue-500 bg-blue-50" : ""
                       }`}
                       onClick={() => handleChartTypeSelect(chart.id)}
                     >
                       <CardContent className="p-2 text-center h-36 flex flex-col items-center justify-center  gap-2 rounded-md">
                         <chart.icon
-                          className={`h-6 w-6 ${
-                            selectedChart === chart.id
-                              ? "text-blue-600"
-                              : "text-gray-400"
-                          }`}
+                          className={`h-6 w-6 ${selectedChart === chart.id ? "text-blue-600" : "text-gray-400"}`}
                         />
-                        <h3 className="font-medium text-md leading-tight ">
-                          {chart.name}
-                        </h3>
+                        <h3 className="font-medium text-md leading-tight ">{chart.name}</h3>
                         <p className="text-xs text-gray-400 line-clamp-2 leading-tight max-w-[90%]">
                           {chart.description}
                         </p>
@@ -864,9 +876,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                             {chart.best_for}
                           </Badge>
                           {chart.is3D && (
-                            <Badge className="text-[10px] px-1 py-0 bg-blue-500 leading-tight text-white">
-                              3D
-                            </Badge>
+                            <Badge className="text-[10px] px-1 py-0 bg-blue-500 leading-tight text-white">3D</Badge>
                           )}
                         </div>
                       </CardContent>
@@ -878,20 +888,13 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <selectedChartType.icon className="h-5 w-5 text-blue-600" />
-                      <h4 className="font-medium text-blue-900">
-                        {selectedChartType.name}
-                      </h4>
+                      <h4 className="font-medium text-blue-900">{selectedChartType.name}</h4>
                     </div>
-                    <p className="text-sm text-blue-800">
-                      {selectedChartType.description}
-                    </p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      Best for: {selectedChartType.best_for}
-                    </p>
+                    <p className="text-sm text-blue-800">{selectedChartType.description}</p>
+                    <p className="text-xs text-blue-600 mt-1">Best for: {selectedChartType.best_for}</p>
                     {selectedChartType.is3D && (
                       <p className="text-xs text-blue-600 mt-1 font-semibold">
-                        This is a 3D chart and requires X, Y, and Z axes
-                        selection.
+                        This is a 3D chart and requires X, Y, and Z axes selection.
                       </p>
                     )}
                   </div>
@@ -908,18 +911,11 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
               <CardHeader>
                 <CardTitle>Select Chart Axes</CardTitle>
                 <CardDescription>
-                  Choose which columns from your Excel file to use for{" "}
-                  {is3D ? "X, Y, and Z axes" : "X and Y axes"}
+                  Choose which columns from your Excel file to use for {is3D ? "X, Y, and Z axes" : "X and Y axes"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div
-                  className={`grid ${
-                    is3D
-                      ? "grid-cols-1 sm:grid-cols-3"
-                      : "grid-cols-1 sm:grid-cols-2"
-                  } gap-4`}
-                >
+                <div className={`grid ${is3D ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"} gap-4`}>
                   <div>
                     <Label htmlFor="x-axis" className="text-sm font-medium">
                       X-Axis (Categories)
@@ -930,18 +926,12 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       </SelectTrigger>
                       <SelectContent>
                         {columns
-                          .filter(
-                            (column) =>
-                              column.name !== yAxis && column.name !== zAxis
-                          )
+                          .filter((column) => column.name !== yAxis && column.name !== zAxis)
                           .map((column) => (
                             <SelectItem key={column.name} value={column.name}>
                               <div className="flex items-center justify-between w-full">
                                 <span className="truncate">{column.name}</span>
-                                <Badge
-                                  variant="outline"
-                                  className="ml-2 text-xs"
-                                >
+                                <Badge variant="outline" className="ml-2 text-xs">
                                   {column.type}
                                 </Badge>
                               </div>
@@ -969,13 +959,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                           ? numericYAxisColumns.map((column) => (
                               <SelectItem key={column.name} value={column.name}>
                                 <div className="flex items-center justify-between w-full">
-                                  <span className="truncate">
-                                    {column.name}
-                                  </span>
-                                  <Badge
-                                    variant="outline"
-                                    className="ml-2 text-xs"
-                                  >
+                                  <span className="truncate">{column.name}</span>
+                                  <Badge variant="outline" className="ml-2 text-xs">
                                     {column.type}
                                   </Badge>
                                 </div>
@@ -984,13 +969,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                           : availableYAxisColumns.map((column) => (
                               <SelectItem key={column.name} value={column.name}>
                                 <div className="flex items-center justify-between w-full">
-                                  <span className="truncate">
-                                    {column.name}
-                                  </span>
-                                  <Badge
-                                    variant="outline"
-                                    className="ml-2 text-xs"
-                                  >
+                                  <span className="truncate">{column.name}</span>
+                                  <Badge variant="outline" className="ml-2 text-xs">
                                     {column.type}
                                   </Badge>
                                 </div>
@@ -1018,36 +998,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                         <SelectContent>
                           {numericZAxisColumns.length > 0
                             ? numericZAxisColumns.map((column) => (
-                                <SelectItem
-                                  key={column.name}
-                                  value={column.name}
-                                >
+                                <SelectItem key={column.name} value={column.name}>
                                   <div className="flex items-center justify-between w-full">
-                                    <span className="truncate">
-                                      {column.name}
-                                    </span>
-                                    <Badge
-                                      variant="outline"
-                                      className="ml-2 text-xs"
-                                    >
+                                    <span className="truncate">{column.name}</span>
+                                    <Badge variant="outline" className="ml-2 text-xs">
                                       {column.type}
                                     </Badge>
                                   </div>
                                 </SelectItem>
                               ))
                             : availableZAxisColumns.map((column) => (
-                                <SelectItem
-                                  key={column.name}
-                                  value={column.name}
-                                >
+                                <SelectItem key={column.name} value={column.name}>
                                   <div className="flex items-center justify-between w-full">
-                                    <span className="truncate">
-                                      {column.name}
-                                    </span>
-                                    <Badge
-                                      variant="outline"
-                                      className="ml-2 text-xs"
-                                    >
+                                    <span className="truncate">{column.name}</span>
+                                    <Badge variant="outline" className="ml-2 text-xs">
                                       {column.type}
                                     </Badge>
                                   </div>
@@ -1057,8 +1021,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       </Select>
                       {zAxis && (
                         <p className="text-xs text-gray-600 mt-1 truncate">
-                          Sample:{" "}
-                          {columns.find((c) => c.name === zAxis)?.sample}
+                          Sample: {columns.find((c) => c.name === zAxis)?.sample}
                         </p>
                       )}
                     </div>
@@ -1067,12 +1030,9 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
                 {xAxis && yAxis && (!is3D || zAxis) && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-medium text-green-800 mb-1 text-sm">
-                      Chart Preview
-                    </h4>
+                    <h4 className="font-medium text-green-800 mb-1 text-sm">Chart Preview</h4>
                     <p className="text-xs text-green-700">
-                      Your chart will show <strong>{yAxis}</strong> values
-                      across different <strong>{xAxis}</strong>{" "}
+                      Your chart will show <strong>{yAxis}</strong> values across different <strong>{xAxis}</strong>{" "}
                       {is3D && (
                         <>
                           and <strong>{zAxis}</strong>
@@ -1104,9 +1064,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       id="chart-title"
                       value={chartTitle}
                       onChange={(e) => setChartTitle(e.target.value)}
-                      placeholder={`${yAxis} vs ${xAxis}${
-                        zAxis ? ` vs ${zAxis}` : ""
-                      }`}
+                      placeholder={`${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`}
                       className="mt-1"
                     />
                   </div>
@@ -1116,22 +1074,14 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       <Label htmlFor="legend-toggle" className="text-sm">
                         Show Legend
                       </Label>
-                      <Switch
-                        id="legend-toggle"
-                        checked={showLegend}
-                        onCheckedChange={setShowLegend}
-                      />
+                      <Switch id="legend-toggle" checked={showLegend} onCheckedChange={setShowLegend} />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <Label htmlFor="grid-toggle" className="text-sm">
                         Show Grid Lines
                       </Label>
-                      <Switch
-                        id="grid-toggle"
-                        checked={showGrid}
-                        onCheckedChange={setShowGrid}
-                      />
+                      <Switch id="grid-toggle" checked={showGrid} onCheckedChange={setShowGrid} />
                     </div>
                   </div>
                 </CardContent>
@@ -1150,16 +1100,12 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       <div
                         key={theme.name}
                         className={`p-2 border rounded-lg cursor-pointer transition-all ${
-                          selectedTheme === theme.name
-                            ? "ring-2 ring-blue-500 bg-blue-50"
-                            : "hover:bg-gray-50"
+                          selectedTheme === theme.name ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
                         }`}
                         onClick={() => setSelectedTheme(theme.name)}
                       >
                         <div className="flex flex-col items-center space-y-1">
-                          <span className="font-medium text-sm">
-                            {theme.name}
-                          </span>
+                          <span className="font-medium text-sm">{theme.name}</span>
                           <div className="flex gap-1">
                             {theme.colors.slice(0, 4).map((color, index) => (
                               <div
@@ -1186,50 +1132,32 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-xs text-gray-500">Chart Type</p>
-                  <p className="font-medium text-sm truncate">
-                    {selectedChartType?.name || "Not selected"}
-                  </p>
+                  <p className="font-medium text-sm truncate">{selectedChartType?.name || "Not selected"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">X-Axis</p>
-                  <p className="font-medium text-sm truncate">
-                    {xAxis || "Not selected"}
-                  </p>
+                  <p className="font-medium text-sm truncate">{xAxis || "Not selected"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Y-Axis</p>
-                  <p className="font-medium text-sm truncate">
-                    {yAxis || "Not selected"}
-                  </p>
+                  <p className="font-medium text-sm truncate">{yAxis || "Not selected"}</p>
                 </div>
                 {is3D ? (
                   <div>
                     <p className="text-xs text-gray-500">Z-Axis</p>
-                    <p className="font-medium text-sm truncate">
-                      {zAxis || "Not selected"}
-                    </p>
+                    <p className="font-medium text-sm truncate">{zAxis || "Not selected"}</p>
                   </div>
                 ) : (
                   <div>
                     <p className="text-xs text-gray-500">Theme</p>
-                    <p className="font-medium text-sm truncate">
-                      {selectedTheme}
-                    </p>
+                    <p className="font-medium text-sm truncate">{selectedTheme}</p>
                   </div>
                 )}
               </div>
 
               <div className="h-80 bg-white rounded-lg flex items-center justify-center p-4 border">
-                {selectedChart &&
-                xAxis &&
-                yAxis &&
-                (!is3D || zAxis) &&
-                fileData.length > 0 ? (
-                  <div
-                    id="plotly-chart"
-                    ref={chartRef}
-                    className="w-full h-full"
-                  ></div>
+                {selectedChart && xAxis && yAxis && (!is3D || zAxis) && fileData.length > 0 ? (
+                  <div id="plotly-chart" ref={chartRef} className="w-full h-full"></div>
                 ) : (
                   <div className="text-center text-gray-500">
                     {is3D ? (
@@ -1237,18 +1165,10 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     ) : (
                       <BarChart3 className="h-12 w-12 mx-auto mb-3" />
                     )}
-                    <p className="text-sm">
-                      Complete the configuration to see the preview
-                    </p>
-                    {!selectedChart && (
-                      <p className="text-xs mt-1">Select a chart type</p>
-                    )}
-                    {(!xAxis || !yAxis) && (
-                      <p className="text-xs mt-1">Select X and Y axes</p>
-                    )}
-                    {is3D && !zAxis && (
-                      <p className="text-xs mt-1">Select Z axis for 3D chart</p>
-                    )}
+                    <p className="text-sm">Complete the configuration to see the preview</p>
+                    {!selectedChart && <p className="text-xs mt-1">Select a chart type</p>}
+                    {(!xAxis || !yAxis) && <p className="text-xs mt-1">Select X and Y axes</p>}
+                    {is3D && !zAxis && <p className="text-xs mt-1">Select Z axis for 3D chart</p>}
                   </div>
                 )}
               </div>
@@ -1258,11 +1178,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
         <div className="flex justify-between pt-4 border-t">
           {currentStep > 0 ? (
-            <Button
-              variant="outline"
-              onClick={handlePrevStep}
-              className="flex items-center gap-2"
-            >
+            <Button variant="outline" onClick={handlePrevStep} className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -1273,11 +1189,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
           )}
 
           {currentStep < steps.length - 1 ? (
-            <Button
-              onClick={handleNextStep}
-              disabled={!canProceedToNextStep()}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={handleNextStep} disabled={!canProceedToNextStep()} className="flex items-center gap-2">
               Next
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -1294,5 +1206,5 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

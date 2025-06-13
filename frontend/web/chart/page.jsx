@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download, Share2, CuboidIcon as Cube } from "lucide-react"
+import { ArrowLeft, Download, Share2, CuboidIcon as Cube } from 'lucide-react'
 
 export default function ChartPage() {
   const navigate = useNavigate()
@@ -79,7 +79,7 @@ export default function ChartPage() {
       const { type, xData, yData, zData, xAxis, yAxis, zAxis, chartTitle, selectedTheme, showLegend, showGrid, is3D } =
         chartConfig
 
-      // Color themes
+      // Original color themes
       const colorThemes = [
         { name: "Default", colors: ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"] },
         { name: "Ocean", colors: ["#0ea5e9", "#06b6d4", "#0891b2", "#0e7490", "#155e75"] },
@@ -94,11 +94,20 @@ export default function ChartPage() {
 
       let plotData = []
       let layout = {
-        title: chartTitle,
+        title: {
+          text: chartTitle,
+          font: {
+            color: "#00FFFF", // Neon cyan for title
+          },
+        },
         showlegend: showLegend,
         margin: { l: 60, r: 60, b: 60, t: 80, pad: 4 },
-        paper_bgcolor: "white",
-        plot_bgcolor: "white",
+        paper_bgcolor: "#121212", // Dark background for chart paper
+        plot_bgcolor: "#1a1a1a", // Dark background for plot area
+        font: {
+          color: "#00FFFF", // Neon cyan for text
+        },
+        colorway: themeColors, // Use the original theme colors
       }
 
       // Configure chart based on type
@@ -118,6 +127,10 @@ export default function ChartPage() {
                   size: type === "bar3d" ? 8 : 6,
                   color: primaryColor,
                   opacity: 0.8,
+                  line: {
+                    color: themeColors[1] || primaryColor,
+                    width: 1,
+                  },
                 },
                 name: `${yAxis} vs ${xAxis} vs ${zAxis}`,
               },
@@ -149,7 +162,11 @@ export default function ChartPage() {
                 x: uniqueX,
                 y: uniqueY,
                 z: zValues,
-                colorscale: "Viridis",
+                colorscale: [
+                  [0, "#121212"],
+                  [0.5, themeColors[1] || "#777777"],
+                  [1, primaryColor],
+                ],
                 name: `${zAxis} by ${xAxis} and ${yAxis}`,
               },
             ]
@@ -160,9 +177,27 @@ export default function ChartPage() {
         layout = {
           ...layout,
           scene: {
-            xaxis: { title: xAxis, showgrid: showGrid },
-            yaxis: { title: yAxis, showgrid: showGrid },
-            zaxis: { title: zAxis, showgrid: showGrid },
+            xaxis: {
+              title: xAxis,
+              showgrid: showGrid,
+              gridcolor: "#333333",
+              linecolor: "#555555",
+              zerolinecolor: "#444444",
+            },
+            yaxis: {
+              title: yAxis,
+              showgrid: showGrid,
+              gridcolor: "#333333",
+              linecolor: "#555555",
+              zerolinecolor: "#444444",
+            },
+            zaxis: {
+              title: zAxis,
+              showgrid: showGrid,
+              gridcolor: "#333333",
+              linecolor: "#555555",
+              zerolinecolor: "#444444",
+            },
           },
         }
       } else {
@@ -174,7 +209,13 @@ export default function ChartPage() {
                 type: "bar",
                 x: xData,
                 y: yData,
-                marker: { color: primaryColor },
+                marker: {
+                  color: primaryColor,
+                  line: {
+                    color: themeColors[1] || primaryColor,
+                    width: 1,
+                  },
+                },
                 name: yAxis,
               },
             ]
@@ -186,7 +227,14 @@ export default function ChartPage() {
                 mode: "lines+markers",
                 x: xData,
                 y: yData,
-                line: { color: primaryColor },
+                line: {
+                  color: primaryColor,
+                  width: 3,
+                },
+                marker: {
+                  color: themeColors[1] || primaryColor,
+                  size: 8,
+                },
                 name: yAxis,
               },
             ]
@@ -198,6 +246,10 @@ export default function ChartPage() {
                 labels: xData,
                 values: yData,
                 marker: { colors: themeColors },
+                textinfo: "label+percent",
+                textfont: {
+                  color: "#ffffff", // White text for better contrast on colored pie slices
+                },
                 name: yAxis,
               },
             ]
@@ -210,8 +262,11 @@ export default function ChartPage() {
                 x: xData,
                 y: yData,
                 fill: "tozeroy",
-                fillcolor: `${primaryColor}33`,
-                line: { color: primaryColor },
+                fillcolor: `${primaryColor}33`, // Add transparency
+                line: {
+                  color: primaryColor,
+                  width: 3,
+                },
                 name: yAxis,
               },
             ]
@@ -223,7 +278,14 @@ export default function ChartPage() {
                 mode: "markers",
                 x: xData,
                 y: yData,
-                marker: { color: primaryColor },
+                marker: {
+                  color: primaryColor,
+                  size: 10,
+                  line: {
+                    color: themeColors[1] || primaryColor,
+                    width: 1,
+                  },
+                },
                 name: yAxis,
               },
             ]
@@ -234,8 +296,20 @@ export default function ChartPage() {
         if (type !== "pie") {
           layout = {
             ...layout,
-            xaxis: { title: xAxis, showgrid: showGrid },
-            yaxis: { title: yAxis, showgrid: showGrid },
+            xaxis: {
+              title: xAxis,
+              showgrid: showGrid,
+              gridcolor: "#333333",
+              linecolor: "#555555",
+              zerolinecolor: "#444444",
+            },
+            yaxis: {
+              title: yAxis,
+              showgrid: showGrid,
+              gridcolor: "#333333",
+              linecolor: "#555555",
+              zerolinecolor: "#444444",
+            },
           }
         }
       }
@@ -245,6 +319,10 @@ export default function ChartPage() {
         responsive: true,
         displayModeBar: true,
         modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
+        modeBarStyle: {
+          color: "#00FFFF",
+          backgroundColor: "#121212",
+        },
       })
       plotlyInstance.current = true
     } catch (err) {
@@ -287,11 +365,13 @@ export default function ChartPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10 px-4">
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p>Loading your chart...</p>
+      <div className="neon-bg min-h-screen" style={{ backgroundColor: "#121212" }}>
+        <div className="container mx-auto py-10 px-4">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
+              <p style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(0, 255, 255, 0.7)" }}>Loading your chart...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -300,14 +380,16 @@ export default function ChartPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-10 px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Error</h1>
-          <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
+      <div className="min-h-screen" style={{ backgroundColor: "black" }}>
+        <div className="container mx-auto py-10 px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4" style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(0, 255, 255, 0.7)" }}>Error</h1>
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={() => navigate("/dashboard")} className="bg-black hover:bg-[#00FFFF] text-black">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -315,80 +397,121 @@ export default function ChartPage() {
 
   if (!chartConfig) {
     return (
-      <div className="container mx-auto py-10 px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Chart not found</h1>
-          <Button onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
+      <div className="min-h-screen" style={{ backgroundColor: "black" }}>
+        <div className="container mx-auto py-10 px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4" style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(0, 255, 255, 0.7)" }}>Chart not found</h1>
+            <Button onClick={() => navigate("/dashboard")} className="bg-black hover:bg-[#00FFFF] text-black">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="mb-6 flex items-center justify-between">
-        <Button variant="outline" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={downloadChart}>
-            <Download className="h-4 w-4 mr-2" />
-            Download PNG
+    <div className="min-h-screen" style={{ backgroundColor: "#121212" }}>
+      <div className="container mx-auto py-10 px-4">
+        <div className="mb-6 flex items-center justify-between">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/dashboard")} 
+            className="border-[#00BFFF] text-[#00FFFF] hover:bg-[#121212] hover:border-[#00FFFF] bg-black"
+            style={{ borderColor: "#00BFFF", color: "#00FFFF" }}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
           </Button>
-          <Button variant="outline" onClick={shareChart}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {chartConfig.is3D && <Cube className="h-5 w-5" />}
-            {chartConfig.chartTitle}
-          </CardTitle>
-          <CardDescription>
-            Generated from {chartConfig.fileName} • {chartConfig.type} chart • {chartConfig.selectedTheme} theme
-            {chartConfig.is3D && " • 3D Visualization"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[600px] w-full">
-            <div ref={chartRef} className="w-full h-full"></div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={downloadChart} 
+              className="border-[#00BFFF] text-[#00FFFF] hover:bg-[#121212] hover:border-[#00FFFF] bg-black"
+              style={{ borderColor: "#00BFFF", color: "#00FFFF" }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download PNG
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={shareChart} 
+              className="border-[#00BFFF] text-[#00FFFF] hover:bg-[#121212] hover:border-[#00FFFF] bg-black"
+              style={{ borderColor: "#00BFFF", color: "#00FFFF" }}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-gray-600">Chart Type</p>
-            <p className="font-semibold capitalize">{chartConfig.type}</p>
+        <Card style={{ 
+          backgroundColor: "rgba(18, 18, 18, 0.8)", 
+          borderColor: "#00BFFF", 
+          boxShadow: "0 0 10px rgba(0, 191, 255, 0.3)" 
+        }}>
+          <CardHeader style={{ borderBottomColor: "rgba(0, 191, 255, 0.3)" }}>
+            <CardTitle className="flex items-center gap-2" style={{ color: "#00FFFF" }}>
+              {chartConfig.is3D && <Cube className="h-5 w-5" style={{ color: "#00FFFF" }} />}
+              {chartConfig.chartTitle}
+            </CardTitle>
+            <CardDescription style={{ color: "rgba(0, 191, 255, 0.7)" }}>
+              Generated from {chartConfig.fileName} • {chartConfig.type} chart • {chartConfig.selectedTheme} theme
+              {chartConfig.is3D && " • 3D Visualization"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-[600px] w-full p-4">
+              <div ref={chartRef} className="w-full h-full"></div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-gray-600">X-Axis</p>
-            <p className="font-semibold">{chartConfig.xAxis}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-gray-600">Y-Axis</p>
-            <p className="font-semibold">{chartConfig.yAxis}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-gray-600">{chartConfig.is3D ? "Z-Axis" : "Data Points"}</p>
-            <p className="font-semibold">{chartConfig.is3D ? chartConfig.zAxis : chartConfig.xData?.length || 0}</p>
-          </CardContent>
-        </Card>
+
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card style={{ 
+            backgroundColor: "rgba(18, 18, 18, 0.8)", 
+            borderColor: "#00BFFF", 
+            boxShadow: "0 0 10px rgba(0, 191, 255, 0.3)" 
+          }}>
+            <CardContent className="p-4">
+              <p style={{ color: "rgba(0, 191, 255, 0.7)", fontSize: "0.875rem" }}>Chart Type</p>
+              <p style={{ color: "#00FFFF", fontWeight: "600", textTransform: "capitalize" }}>{chartConfig.type}</p>
+            </CardContent>
+          </Card>
+          <Card style={{ 
+            backgroundColor: "rgba(18, 18, 18, 0.8)", 
+            borderColor: "#00BFFF", 
+            boxShadow: "0 0 10px rgba(0, 191, 255, 0.3)" 
+          }}>
+            <CardContent className="p-4">
+              <p style={{ color: "rgba(0, 191, 255, 0.7)", fontSize: "0.875rem" }}>X-Axis</p>
+              <p style={{ color: "#00FFFF", fontWeight: "600" }}>{chartConfig.xAxis}</p>
+            </CardContent>
+          </Card>
+          <Card style={{ 
+            backgroundColor: "rgba(18, 18, 18, 0.8)", 
+            borderColor: "#00BFFF", 
+            boxShadow: "0 0 10px rgba(0, 191, 255, 0.3)" 
+          }}>
+            <CardContent className="p-4">
+              <p style={{ color: "rgba(0, 191, 255, 0.7)", fontSize: "0.875rem" }}>Y-Axis</p>
+              <p style={{ color: "#00FFFF", fontWeight: "600" }}>{chartConfig.yAxis}</p>
+            </CardContent>
+          </Card>
+          <Card style={{ 
+            backgroundColor: "rgba(18, 18, 18, 0.8)", 
+            borderColor: "#00BFFF", 
+            boxShadow: "0 0 10px rgba(0, 191, 255, 0.3)" 
+          }}>
+            <CardContent className="p-4">
+              <p style={{ color: "rgba(0, 191, 255, 0.7)", fontSize: "0.875rem" }}>{chartConfig.is3D ? "Z-Axis" : "Data Points"}</p>
+              <p style={{ color: "#00FFFF", fontWeight: "600" }}>
+                {chartConfig.is3D ? chartConfig.zAxis : chartConfig.xData?.length || 0}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

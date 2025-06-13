@@ -20,6 +20,7 @@ export default function UploadPage() {
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [recentUploadedFile, setRecentUploadedFile] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [originalFiles, setOriginalFiles] = useState({}) // Store original file objects
 
   const handleDrag = (e) => {
     e.preventDefault()
@@ -46,22 +47,39 @@ export default function UploadPage() {
         file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
         file.type === "application/vnd.ms-excel" ||
         file.name.endsWith(".xlsx") ||
-        file.name.endsWith(".xls")
+        file.name.endsWith(".xls"),
     )
 
-    const newFiles = excelFiles.map((file, index) => ({
-      id: Date.now() + index,
-      file,
-      name: file.name,
-      size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-      status: "pending",
-    }))
+    const newFiles = excelFiles.map((file, index) => {
+      const id = Date.now() + index
+
+      // Store the original file object
+      setOriginalFiles((prev) => ({
+        ...prev,
+        [id]: file,
+      }))
+
+      return {
+        id,
+        file,
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+        status: "pending",
+      }
+    })
 
     setSelectedFiles((prev) => [...prev, ...newFiles])
   }
 
   const removeFile = (id) => {
     setSelectedFiles((prev) => prev.filter((file) => file.id !== id))
+
+    // Also remove from originalFiles
+    setOriginalFiles((prev) => {
+      const updated = { ...prev }
+      delete updated[id]
+      return updated
+    })
   }
 
   const uploadFiles = async () => {
@@ -80,6 +98,7 @@ export default function UploadPage() {
                 status: "completed",
                 uploadTime: new Date().toLocaleString(),
                 charts: 0,
+                originalFile: originalFiles[file.id], // Include reference to original file
               }
               setUploadedFiles((prevUploaded) => [...prevUploaded, uploaded])
               setSelectedFiles((prevSelected) => prevSelected.filter((f) => f.id !== file.id))
@@ -127,11 +146,9 @@ export default function UploadPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0a0f1c] overflow-hidden text-white relative">
-      
-      
-<div className="absolute inset-0 z-0 opacity-20 h-full">
-    <Iridescence />
-  </div>
+      <div className="absolute inset-0 z-0 opacity-20 h-full">
+        <Iridescence />
+      </div>
       {/* Sidebar */}
       <DashboardSidebar />
 
@@ -142,9 +159,7 @@ export default function UploadPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-pink-400 bg-clip-text text-transparent">
               Upload Files
             </h1>
-            <p className="text-slate-400">
-              Transform your Excel data into beautiful visualizations
-            </p>
+            <p className="text-slate-400">Transform your Excel data into beautiful visualizations</p>
           </div>
 
           {/* Dropzone */}
@@ -208,10 +223,7 @@ export default function UploadPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {selectedFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="bg-slate-800/60 border border-slate-600 p-6 rounded-xl"
-                  >
+                  <div key={file.id} className="bg-slate-800/60 border border-slate-600 p-6 rounded-xl">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-900 to-teal-800 rounded-lg flex items-center justify-center">
@@ -250,7 +262,10 @@ export default function UploadPage() {
                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
                   <Button
                     variant="outline"
-                    onClick={() => setSelectedFiles([])}
+                    onClick={() => {
+                      setSelectedFiles([])
+                      setOriginalFiles({})
+                    }}
                     className="border-slate-600 text-slate-300"
                   >
                     Clear All
@@ -270,10 +285,7 @@ export default function UploadPage() {
 
           {recentUploadedFile && showAnalysis && (
             <div className="animate-in slide-in-from-bottom-4 duration-500">
-              <FileAnalysisInlineView
-                file={recentUploadedFile}
-                onClose={() => setShowAnalysis(false)}
-              />
+              <FileAnalysisInlineView file={recentUploadedFile} onClose={() => setShowAnalysis(false)} />
             </div>
           )}
         </main>
@@ -291,6 +303,7 @@ export default function UploadPage() {
             status: "completed",
             uploadTime: new Date().toLocaleString(),
             charts: 0,
+            originalFile: file, // Include the original file
           }
           setUploadedFiles((prev) => [...prev, fileData])
           setRecentUploadedFile(fileData)

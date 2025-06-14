@@ -157,3 +157,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes spin-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-spin-border {
+  background-size: 200% 200%;
+  animation: spin-border 6s linear infinite;
+}

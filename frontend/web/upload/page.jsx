@@ -145,15 +145,17 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0a0f1c] overflow-hidden text-white relative">
+    <div className="flex min-h-screen bg-[#0a0f1c] overflow-hidden text-white relative ">
       <div className="absolute inset-0 z-0 opacity-20 h-full">
         <Iridescence />
       </div>
       {/* Sidebar */}
+      
       <DashboardSidebar />
+     
 
       {/* Main Content */}
-      <div className="flex flex-col flex-1 relative z-10">
+      <div className="flex flex-col flex-1 relative z-0">
         <main className="flex-1 p-6 space-y-6">
           <div className="text-center mt-8 space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-pink-400 bg-clip-text text-transparent">

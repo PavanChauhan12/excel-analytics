@@ -48,7 +48,7 @@ export function DashboardSidebar() {
   }
 
   return (
-    <div className="relative flex">
+    <div className="relative flex z-10">
       <div
         className={cn(
           "flex flex-col backdrop-blur-2xl bg-[#0b0c10]/60 shadow-[0_0_10px_#06b6d4] transition-all duration-300 ease-in-out",
@@ -87,7 +87,7 @@ export function DashboardSidebar() {
                     "w-full gap-3 text-white hover:bg-cyan-500/10 hover:text-cyan-300 transition-all duration-200",
                     isCollapsed ? "justify-center px-2" : "justify-start",
                     isActive &&
-                      "bg-cyan-500/10 text-cyan-300 border-l-4 border-cyan-400"
+                      "bg-cyan-500/10 text-cyan-300 "
                   )}
                   onClick={() => handleNavigation(item.href)}
                 >

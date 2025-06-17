@@ -11,6 +11,13 @@ import { BarChart3, Upload, Eye, EyeOff, Mail, Lock, User, Shield, Crown } from 
 import { handleLogin, handleSignup, handleGoogleLogin } from "@/services/api"
 import { useNavigate } from "react-router-dom"
 
+// Add glass effect style
+const glassStyle = {
+  background: "rgba(0, 0, 0, 0.2)",
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
+}
+
 export default function AuthPage() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
@@ -38,7 +45,10 @@ export default function AuthPage() {
           <p className="text-gray-400 mt-2">Transform your Excel data into insights</p>
         </div>
 
-        <Card className="bg-black/60 text-white border border-gray-800 neon-gradient-shadow rounded-md py-8 px-4 backdrop-blur-md">
+        <Card
+          className="text-white border border-gray-800 rounded-md py-8 px-4 shadow-[8px_10px_15px_#00bfff,_-8px_-10px_15px_#ff0038] relative"
+          style={glassStyle}
+        >
           <Tabs defaultValue="login" className="w-full px-4">
             <TabsList className="grid w-full grid-cols-2 bg-gray-900 text-white border border-gray-700">
               <TabsTrigger

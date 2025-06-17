@@ -121,11 +121,11 @@ export const uploadExcelFile = async (file, onUploadProgress) => {
       onUploadProgress,
     })
 
-    toast.success("File uploaded successfully!")
+    console.log("File uploaded successfully, server response:", response.data)
     return response.data
   } catch (error) {
+    console.error("Upload API error:", error)
     const errorMessage = error.response?.data?.message || error.message || "Upload failed"
-    toast.error(`Upload error: ${errorMessage}`)
-    throw error
+    throw new Error(errorMessage)
   }
 }

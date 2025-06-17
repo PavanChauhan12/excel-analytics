@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Upload, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 import { uploadExcelFile } from "@/services/api"
 
 export function UploadButton({ onUploadSuccess, onUploadError, children, file, disabled }) {
@@ -27,9 +28,8 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
   }
 
   const handleFileUpload = async (fileToUpload) => {
-    console.log("Starting upload process for:", fileToUpload.name)
+    console.log("Starting upload for:", fileToUpload.name)
 
-    // Validate file type
     const validTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
 
     const isValidType =
@@ -44,7 +44,6 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
       return
     }
 
-    // Validate file size (e.g., max 50MB)
     const maxSize = 50 * 1024 * 1024 // 50MB
     if (fileToUpload.size > maxSize) {
       const errorMsg = "File size must be less than 50MB"
@@ -58,21 +57,20 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
     setError(null)
 
     try {
-      console.log("Calling uploadExcelFile...")
-
       const result = await uploadExcelFile(fileToUpload, (progressEvent) => {
         if (progressEvent.total) {
           const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          console.log("Upload progress:", percent + "%")
           setUploadProgress(percent)
         }
       })
 
-      console.log("Upload completed successfully:", result)
+      console.log("Upload successful, server response:", result)
       onUploadSuccess?.(fileToUpload, result)
+      toast.success("Upload completed!")
     } catch (error) {
-      console.error("Upload failed in component:", error)
-      setError(error.message)
+      console.error("Upload failed:", error)
+      const errorMsg = error.response?.data?.message || error.message || "Upload failed"
+      setError(errorMsg)
       onUploadError?.(error)
     } finally {
       setUploading(false)

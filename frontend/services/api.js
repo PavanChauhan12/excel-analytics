@@ -71,14 +71,14 @@ export const handleLogin = async (loginData, navigate) => {
 export const handleGoogleLogin = async (response, navigate) => {
   try {
     const res = await axios.post(`${baseurl}/api/auth/google`, {
-      token: response.credential,
+      credential: response.credential,
     })
 
     localStorage.setItem("token", res.data.token)
     localStorage.setItem("username", res.data.username)
     localStorage.setItem("email", res.data.email)
     localStorage.setItem("role", res.data.role)
-    localStorage.setItem("number", res.data.excelRecords.length)
+    localStorage.setItem("number", res.data.excelRecords?.length || 0)
 
     toast.success("Google Login Successful!")
 

@@ -55,25 +55,49 @@ exports.login = async (req, res) => {
 
 exports.googleLogin = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { credential } = req.body;
+    
+    if (!credential) {
+      return res.status(400).json({ error: 'No credential provided' });
+    }
+
+    // Verify the Google token
     const ticket = await client.verifyIdToken({
-      idToken: token,
+      idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID
     });
 
-    const { email, name } = ticket.getPayload();
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
 
+    if (!email) {
+      return res.status(400).json({ error: 'Email not provided by Google' });
+    }
+
+    // Check if user already exists
     let user = await User.findOne({ email });
     
     if (!user) {
       // Create new user if doesn't exist
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
       user = new User({
-        username: name,
+        username: name || email.split('@')[0],
         email,
-        password: await bcrypt.hash(Math.random().toString(36), 10),
-        role: 'user'
+        password: hashedPassword,
+        role: 'user',
+        googleId,
+        profilePicture: picture
       });
       await user.save();
+    } else {
+      // Update existing user with Google info if not already set
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.profilePicture = picture;
+        await user.save();
+      }
     }
 
     const jwtToken = generateToken(user);
@@ -82,10 +106,10 @@ exports.googleLogin = async (req, res) => {
       role: user.role,
       username: user.username,
       email: user.email,
-      excelRecords: user.excelRecords
+      excelRecords: user.excelRecords || []
     });
   } catch (error) {
     console.error('Google login error:', error);
-    res.status(400).json({ error: 'Google login failed' });
+    res.status(400).json({ error: 'Google login failed: ' + error.message });
   }
 };

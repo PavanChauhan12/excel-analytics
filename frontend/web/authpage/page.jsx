@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
@@ -31,6 +31,68 @@ export default function AuthPage() {
     role: "user",
   })
   const [loginData, setLoginData] = useState({ email: "", password: "" })
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    const initializeGoogleSignIn = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: "844713303779-1m6nb0hde24nj3nhmkmktdh6etcro1th.apps.googleusercontent.com", // Replace with your actual Google Client ID
+          callback: handleGoogleResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        })
+      }
+    }
+
+    // Load Google Sign-In script
+    if (!window.google) {
+      const script = document.createElement('script')
+      script.src = 'https://accounts.google.com/gsi/client'
+      script.async = true
+      script.defer = true
+      script.onload = initializeGoogleSignIn
+      document.head.appendChild(script)
+    } else {
+      initializeGoogleSignIn()
+    }
+  }, [])
+
+  const handleGoogleResponse = async (response) => {
+    setGoogleLoading(true)
+    try {
+      await handleGoogleLogin(response, navigate)
+    } catch (error) {
+      console.error('Google login failed:', error)
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
+  const initiateGoogleLogin = () => {
+    if (window.google) {
+      setGoogleLoading(true)
+      window.google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Fallback to popup if prompt is not displayed
+          window.google.accounts.id.renderButton(
+            document.getElementById('google-signin-button'),
+            {
+              theme: 'outline',
+              size: 'large',
+              width: '100%',
+              text: 'continue_with',
+            }
+          )
+        }
+        setGoogleLoading(false)
+      })
+    } else {
+      console.error('Google Sign-In not loaded')
+      setGoogleLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
@@ -130,12 +192,24 @@ export default function AuthPage() {
                   </Button>
                 </form>
                 <Separator className="my-4 bg-gray-700" />
-                <Button
-                  onClick={() => handleGoogleLogin(navigate)}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666]"
-                >
-                  Continue with Google
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    onClick={initiateGoogleLogin}
+                    disabled={googleLoading}
+                    className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666] disabled:opacity-50"
+                  >
+                    {googleLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Signing in...
+                      </div>
+                    ) : (
+                      "Continue with Google"
+                    )}
+                  </Button>
+                  {/* Hidden div for Google button rendering */}
+                  <div id="google-signin-button" className="hidden"></div>
+                </div>
               </CardContent>
             </TabsContent>
 
@@ -321,10 +395,18 @@ export default function AuthPage() {
 
                 <Separator className="my-4 bg-gray-700" />
                 <Button
-                  onClick={() => handleGoogleLogin(navigate)}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666]"
+                  onClick={initiateGoogleLogin}
+                  disabled={googleLoading}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666] disabled:opacity-50"
                 >
-                  Continue with Google
+                  {googleLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    "Continue with Google"
+                  )}
                 </Button>
               </CardContent>
             </TabsContent>

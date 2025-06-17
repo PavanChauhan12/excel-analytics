@@ -119,7 +119,7 @@ export default function ChartsHistoryPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0a0a23] text-white relative overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-60 ">
+      <div className="absolute inset-0 z-0 opacity-60 h-full ">
       <Aurora
       colorStops={["#0038ff", "#00d4ff", "#002233"]}
             amplitude={1.2}

@@ -1043,10 +1043,10 @@ export default function AIInsightsPage() {
   return (
     <div
       style={{ backgroundColor: "black", minHeight: "100vh" }}
-      className="flex  "
+      className="flex relative "
     >
       <DashboardSidebar />
-      <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute inset-0 z-0 opacity-40 h-full">
         <Aurora
           colorStops={["#0038ff", "#00d4ff", "#002233"]}
           amplitude={0.8}

@@ -58,14 +58,14 @@ export default function FilesPage() {
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
       {/* Aurora Background */}
-      <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute inset-0 z-0 opacity-40 h-full">
   <Aurora
     colorStops={["#0038ff", "#00d4ff", "#002233"]}
     amplitude={0.8 }
     blend={1}
   />
 </div>
-      <div className="absolute inset-0 z-0 scale-y-[-1] opacity-40">
+      <div className="absolute inset-0 z-0 scale-y-[-1] opacity-40 h-full">
   <Aurora
     colorStops={["#0038ff", "#00d4ff", "#002233"]}
     amplitude={0.8}

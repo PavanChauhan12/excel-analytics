@@ -25,7 +25,7 @@ export const handleSignup = async (signupData, navigate) => {
 
     // Redirect based on role
     if (res.data.role === "admin") {
-      navigate("/admin/dashboard")
+      navigate("/admin")
     } else {
       navigate("/dashboard")
     }
@@ -84,7 +84,7 @@ export const handleGoogleLogin = async (response, navigate) => {
 
     // Redirect based on role
     if (res.data.role === "admin") {
-      navigate("/admin/dashboard")
+      navigate("/admin")
     } else {
       navigate("/dashboard")
     }

@@ -129,3 +129,16 @@ export const uploadExcelFile = async (file, onUploadProgress) => {
     throw new Error(errorMessage)
   }
 }
+
+export const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, token }) => {
+  const response = await axios.post(
+    '/api/chart/save',
+    { chartType, fromExcelFile, chartConfig },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};

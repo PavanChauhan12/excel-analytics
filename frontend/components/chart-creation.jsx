@@ -23,7 +23,7 @@ import {
   Check,
 } from "lucide-react"
 import * as XLSX from "xlsx"
-
+import { saveChartConfig } from '../services/api';
 // Define chart types for selection
 const chartTypes = [
   {
@@ -499,7 +499,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   }
 
   // Create chart and close dialog
-  const handleCreateChart = () => {
+  const handleCreateChart = async () => {
     if (!xAxis || !yAxis) {
       console.error("Please select both X and Y axes.")
       return
@@ -571,6 +571,24 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
       onOpenChange(false)
 
+      try {
+      // Send chart to backend API
+      const token = localStorage.getItem("token"); // or wherever you store the JWT
+      await saveChartConfig({
+        chartType: selectedChart,
+        fromExcelFile: fileName,
+        chartConfig,
+        token,
+      });
+
+      console.log("Chart saved to backend");
+    } catch (error) {
+      console.error("Failed to save chart to backend:", error);
+    }
+
+    // Continue to navigate
+    onOpenChange(false);
+    window.location.href = `/chart/${chartId}`;
       // Navigate to chart page
       window.location.href = `/chart/${chartId}`
     } catch (error) {

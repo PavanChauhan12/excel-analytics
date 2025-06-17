@@ -24,8 +24,8 @@ import { handleSignOut } from "@/services/api"
 
 const adminNavigation = [
   { name: "Admin Dashboard", href: "/admin", icon: Shield },
-  { name: "User Management", href: "/admin/users", icon: Users, count: 156 },
-  { name: "System Activity", href: "/admin/activity", icon: Activity, count: 12 },
+  { name: "User Management", href: "/admin/users", icon: Users},
+  { name: "System Activity", href: "/admin/activity", icon: Activity },
 ]
 
 const adminSecondaryNavigation = [
@@ -97,11 +97,7 @@ export function AdminSidebar() {
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
-                      {item.count && (
-                        <Badge variant="secondary" className="ml-auto bg-red-500/20 text-red-300 border border-red-400">
-                          {item.count}
-                        </Badge>
-                      )}
+                      
                     </>
                   )}
                 </Button>
@@ -109,7 +105,7 @@ export function AdminSidebar() {
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-red-300 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow border border-red-500/30">
                     {item.name}
-                    {item.count && ` (${item.count})`}
+                    
                   </div>
                 )}
               </div>

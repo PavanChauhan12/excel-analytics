@@ -23,10 +23,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Files", href: "/dashboard/files", icon: FileSpreadsheet, count: 12 },
+  { name: "Files", href: "/dashboard/files", icon: FileSpreadsheet },
   { name: "Upload", href: "/dashboard/upload", icon: Upload },
-  { name: "Charts", href: "/dashboard/charts", icon: BarChart3, count: 24 },
-  { name: "AI Insights", href: "/dashboard/insights", icon: Brain, count: 8 },
+  { name: "Charts", href: "/dashboard/charts", icon: BarChart3},
+  { name: "AI Insights", href: "/dashboard/insights", icon: Brain},
 ];
 
 const role = localStorage.getItem("role") // 'admin' or 'user'
@@ -107,14 +107,7 @@ export function DashboardSidebar() {
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
-                      {item.count && (
-                        <Badge
-                          variant="secondary"
-                          className="ml-auto bg-cyan-500/20 text-cyan-300 border border-cyan-400"
-                        >
-                          {item.count}
-                        </Badge>
-                      )}
+                      
                       {item.admin && (
                         <Badge
                           variant="outline"
@@ -130,7 +123,7 @@ export function DashboardSidebar() {
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1a1a2e] text-cyan-300 text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow">
                     {item.name}
-                    {item.count && ` (${item.count})`}
+                    
                   </div>
                 )}
               </div>

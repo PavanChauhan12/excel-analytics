@@ -119,7 +119,7 @@ export default function ChartsHistoryPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0a0a23] text-white relative overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-30 ">
+      <div className="absolute inset-0 z-0 opacity-60 ">
       <Aurora
       colorStops={["#0038ff", "#00d4ff", "#002233"]}
             amplitude={1.2}
@@ -127,7 +127,7 @@ export default function ChartsHistoryPage() {
       </div>
       <DashboardSidebar />
 
-      <div className="flex-1 z-10">
+      <div className="flex-1 z-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mt-12">
             <div className="flex items-center gap-2">

@@ -24,9 +24,9 @@ function App() {
         <Route path="/dashboard/charts" element={<ChartsHistoryPage />} />
         <Route path="/dashboard/insights" element={<AIInsightsPage />} />
 
-        {/* Admin Routes */}
+       
         <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="admin/users" element={<AdminUsersPage />} />
+        {/* <Route path="admin/users" element={<AdminUsersPage />} /> */}
         
       </Routes>
     </Router>

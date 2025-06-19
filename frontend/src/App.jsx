@@ -6,14 +6,14 @@ import UploadPage from "@/web/user/upload/page"
 import FilesPage from "@/web/user/files/page"
 import ChartsHistoryPage from "@/web/user/charthistory/page"
 import AIInsightsPage from "@/web/user/aiinsights/page"
+import UserHelpPage from "@/web/user/help/page"
 
 // Admin imports
 import AdminDashboardPage from "@/web/admin/dashboard/page"
 import AdminUsersPage from "@/web/admin/users/page"
+import AdminHelpPage from "@/web/admin/help/page"
 import UserSettings from "@/web/user/settings/page"
 import AdminSettings from "@/web/admin/settings/page"
-
-
 
 function App() {
   return (
@@ -27,11 +27,12 @@ function App() {
         <Route path="/dashboard/charts" element={<ChartsHistoryPage />} />
         <Route path="/dashboard/insights" element={<AIInsightsPage />} />
         <Route path="/dashboard/settings" element={<UserSettings/>}/>
+        <Route path="/help" element={<UserHelpPage />} />
 
-       
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/settings" element={<AdminSettings/>}/>
+        <Route path="/admin/help" element={<AdminHelpPage />} />
       </Routes>
     </Router>
   )

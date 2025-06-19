@@ -1,5 +1,11 @@
-tailwind.config.js
+/** @type {import('tailwindcss').Config} */
 module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./web/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       keyframes: {
@@ -26,10 +32,20 @@ module.exports = {
           "95%": { "clip-path": "inset(25% 0 35% 0)" },
           "100%": { "clip-path": "inset(30% 0 40% 0)" },
         },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
       },
       animation: {
         "glitch-after": "glitch var(--after-duration) infinite linear alternate-reverse",
         "glitch-before": "glitch var(--before-duration) infinite linear alternate-reverse",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

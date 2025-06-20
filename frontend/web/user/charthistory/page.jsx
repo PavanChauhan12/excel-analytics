@@ -13,17 +13,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   BarChart3,
   Download,
   Eye,
   CuboidIcon as Cube,
   Search,
   Filter,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { UploadDialog } from "@/components/upload-dialog";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import Aurora from "@/components/ui/aurora";
-import Orb from "@/components/ui/orb";
+import { toast } from "sonner";
 
 export default function ChartsHistoryPage() {
   const navigate = useNavigate();
@@ -32,6 +42,7 @@ export default function ChartsHistoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, chart: null });
 
   useEffect(() => {
     const loadCharts = () => {
@@ -107,6 +118,35 @@ export default function ChartsHistoryPage() {
     console.log("Downloading chart:", chartId);
   };
 
+  const handleDeleteChart = (chart) => {
+    setDeleteDialog({ open: true, chart });
+  };
+
+  const confirmDeleteChart = () => {
+    if (!deleteDialog.chart) return;
+
+    try {
+      // Remove chart from localStorage
+      const updatedCharts = charts.filter(chart => chart.id !== deleteDialog.chart.id);
+      localStorage.setItem("userCharts", JSON.stringify(updatedCharts));
+      
+      // Remove chart config from localStorage
+      localStorage.removeItem(`chartConfig_${deleteDialog.chart.id}`);
+      
+      // Update state
+      setCharts(updatedCharts);
+      
+      // Close dialog
+      setDeleteDialog({ open: false, chart: null });
+      
+      // Show success message
+      toast.success(`Chart "${deleteDialog.chart.title}" deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting chart:", error);
+      toast.error("Failed to delete chart");
+    }
+  };
+
   const getUniqueChartTypes = () => {
     const types = [...new Set(charts.map((chart) => chart.type))];
     return types;
@@ -120,10 +160,11 @@ export default function ChartsHistoryPage() {
   return (
     <div className="flex min-h-screen bg-[#0a0a23] text-white relative overflow-hidden">
       <div className="absolute inset-0 z-0 opacity-60 h-full ">
-      <Aurora
-      colorStops={["#0038ff", "#00d4ff", "#002233"]}
-            amplitude={1.2}
-            blend={0.4} />
+        <Aurora
+          colorStops={["#0038ff", "#00d4ff", "#002233"]}
+          amplitude={1.2}
+          blend={0.4} 
+        />
       </div>
       <DashboardSidebar />
 
@@ -239,7 +280,7 @@ export default function ChartsHistoryPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-cyan-400 border-cyan-500 bg-black"
+                      className="text-cyan-400 border-cyan-500 bg-black hover:bg-cyan-900/20"
                       onClick={() => handleDownloadChart(chart.id)}
                     >
                       <Download className="h-4 w-4 mr-1" />
@@ -253,6 +294,14 @@ export default function ChartsHistoryPage() {
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-400 border-red-500 bg-black hover:bg-red-900/20"
+                      onClick={() => handleDeleteChart(chart)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -260,6 +309,37 @@ export default function ChartsHistoryPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, chart: null })}>
+        <DialogContent className="bg-black border-red-600 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-red-400 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Delete Chart
+            </DialogTitle>
+            <DialogDescription className="text-red-300">
+              Are you sure you want to delete "{deleteDialog.chart?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog({ open: false, chart: null })}
+              className="border-cyan-600 text-cyan-400 hover:bg-cyan-900/20"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDeleteChart}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Chart
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

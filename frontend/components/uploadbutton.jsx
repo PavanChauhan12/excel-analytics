@@ -79,7 +79,7 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 border rounded-md border-cyan-500 text-cyan-500">
       {!file && (
         <input type="file" accept=".xls,.xlsx" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
       )}
@@ -103,7 +103,7 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
       {uploading && (
         <div className="space-y-1">
           <Progress value={uploadProgress} />
-          <p className="text-xs text-gray-500 text-center">{uploadProgress}% uploaded</p>
+          <p className="text-xs text-cyan-500text-center ">{uploadProgress}% uploaded</p>
         </div>
       )}
 

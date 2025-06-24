@@ -1,7 +1,7 @@
 import toast from "react-hot-toast"
 import axios from "axios"
 
-const baseurl = "http://localhost:5050"
+const baseurl = import.meta.env.VITE_API_BASE_URL;
 
 // Get admin statistics
 export const getAdminStats = async () => {

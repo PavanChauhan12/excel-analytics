@@ -209,21 +209,21 @@ export function UploadDialog({ open, onOpenChange, onUploadSuccess }) {
           )}
 
           {!uploadComplete && (
-            <div className="flex justify-between items-center pt-4 border-t border-slate-700">
+            <div className="flex justify-between items-center pt-4 border-t border-cyan-500 ">
               <UploadButton
                 file={selectedFile}
                 onUploadSuccess={handleUploadSuccess}
                 onUploadError={handleUploadError}
                 disabled={!selectedFile}
               >
-                <Upload className="mr-2 h-4 w-4" />
+                <Upload className="mr-2 h-4 w-4 " />
                 Upload & Process File
               </UploadButton>
 
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="h-10 px-4 border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                className="h-10 px-4 border-slate-600 text-cyan-500 hover:bg-slate-800 hover:text-white"
               >
                 Cancel
               </Button>

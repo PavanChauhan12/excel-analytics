@@ -15,4 +15,10 @@ router.put("/requests/:id/approve", verifyToken, isAdmin, AdminController.approv
 // Reject admin request (admin only)
 router.put("/requests/:id/reject", verifyToken, isAdmin, AdminController.rejectRequest)
 
+router.get('/users', verifyToken, isAdmin, AdminController.getAllUsers)
+
+router.get("/users/:userId/files", verifyToken, isAdmin, AdminController.getUserFiles);
+router.get("/users/:userId/charts", verifyToken, isAdmin, AdminController.getUserCharts);
+router.put("/users/:userId", verifyToken, isAdmin, AdminController.updateUserStatus);
+
 module.exports = router

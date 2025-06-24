@@ -64,14 +64,19 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     const filtered = users.filter((user) => {
-      const matchesSearch =
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesRole = filterRole === "all" || user.role === filterRole
-      const matchesStatus = filterStatus === "all" || user.status === filterStatus
+  const username = user.username || ""
+  const email = user.email || ""
 
-      return matchesSearch && matchesRole && matchesStatus
-    })
+  const matchesSearch =
+    username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.toLowerCase().includes(searchTerm.toLowerCase())
+
+  const matchesRole = filterRole === "all" || user.role === filterRole
+  const matchesStatus = filterStatus === "all" || user.status === filterStatus
+
+  return matchesSearch && matchesRole && matchesStatus
+})
+
 
     setFilteredUsers(filtered)
   }, [users, searchTerm, filterRole, filterStatus])
@@ -83,7 +88,7 @@ export default function AdminUsersPage() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       })
-      setUsers(response.data.users || [])
+      setUsers(response.data || [])
       setLoading(false)
     } catch (error) {
       console.error("Error fetching users:", error)
@@ -104,8 +109,8 @@ export default function AdminUsersPage() {
         }),
       ])
 
-      setUserFiles(filesResponse.data.files || [])
-      setUserCharts(chartsResponse.data.charts || [])
+      setUserFiles(filesResponse.data || [])
+      setUserCharts(chartsResponse.data || [])
     } catch (error) {
       console.error("Error fetching user details:", error)
       toast.error("Failed to fetch user details")
@@ -495,9 +500,9 @@ export default function AdminUsersPage() {
                                               <div className="flex items-center gap-3">
                                                 <FileText className="h-5 w-5 text-red-400" />
                                                 <div>
-                                                  <p className="font-medium text-white">{file.filename}</p>
+                                                  <p className="font-medium text-white">{file.fileName}</p>
                                                   <div className="flex items-center gap-4 text-sm text-red-300">
-                                                    <span>{file.size || "Unknown size"}</span>
+                                                    <span>{file.fileSize || "Unknown size"}</span>
                                                     <span className="flex items-center gap-1">
                                                       <Calendar className="h-3 w-3" />
                                                       {file.uploadedAt

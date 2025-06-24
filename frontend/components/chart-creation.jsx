@@ -143,7 +143,11 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile)
+      processExcelFile(selectedFile);
+
+      if (selectedFile?.name) {
+        setFileName(selectedFile.name);
+      }
     }
   }, [selectedFile, open])
 
@@ -498,6 +502,29 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
     }
   }
 
+  // --- Save chart to backend ---
+  const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, token }) => {
+  try {
+    const res = await fetch("http://localhost:5050/api/chart/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ chartType, fromExcelFile, chartConfig }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to save chart");
+    }
+
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+
   // Create chart and close dialog
   const handleCreateChart = async () => {
     if (!xAxis || !yAxis) {
@@ -576,7 +603,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       const token = localStorage.getItem("token"); // or wherever you store the JWT
       await saveChartConfig({
         chartType: selectedChart,
-        fromExcelFile: fileName,
+        fromExcelFile: filename,
         chartConfig,
         token,
       });

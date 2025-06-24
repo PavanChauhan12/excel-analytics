@@ -110,14 +110,26 @@ export default function UploadPage() {
           console.log("Upload success with result:", result)
           const fileData = {
             id: Date.now(),
-            name: file.name,
-            size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+            name: file.filename || file.name || "Unnamed",
+            size: file.filesize
+            ? `${(file.filesize / 1024).toFixed(2)} KB`
+            : file.size
+            ? `${(file.size / 1024).toFixed(2)} KB`
+            : "Unknown",
             status: "completed",
-            uploadTime: new Date().toLocaleString(),
+            uploadedAt: new Date().toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }),
             charts: 0,
             originalFile: file,
-            serverResponse: result, // Store server response
-          }
+            serverResponse: result,
+          };
+
           setRecentUploadedFile(fileData)
           setShowAnalysis(true)
         }}

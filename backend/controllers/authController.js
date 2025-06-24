@@ -28,6 +28,7 @@ exports.register = async (req, res) => {
         role: user.role,
         username: user.username,
         email: user.email,
+        status: user.status,
         excelRecords: user.excelRecords
       });
   } catch (err) {
@@ -49,7 +50,8 @@ exports.login = async (req, res) => {
     role: user.role,
     username: user.username,
     email: user.email,
-    excelRecords: user.excelRecords
+    excelRecords: user.excelRecords,
+    status: user.status
   });
 };
 

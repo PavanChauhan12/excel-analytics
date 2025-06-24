@@ -5,6 +5,14 @@ const cors = require('cors');
 
 dotenv.config();
 const app = express();
+const path = require('path'); // If not already present
+
+// Serve /uploads folder statically
+app.use('/uploads', (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // or specify your frontend origin
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
+
 const uploadRoute = require('./routes/upload');
 const chartRoute = require('./routes/chartRoute');
 const adminRoutes = require("./routes/adminRoute")

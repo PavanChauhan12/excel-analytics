@@ -36,7 +36,7 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
     );
 
     // Always delete the file after processing
-    fs.unlinkSync(filePath);
+    // fs.unlinkSync(filePath);
 
     if (alreadyUploaded) {
       return res.status(200).json({
@@ -91,18 +91,27 @@ router.get('/dashboard', verifyToken, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    console.log("User chartRecords:", user.chartRecords);
+
     res.status(200).json({
       message: 'Dashboard data fetched successfully',
-      records: user.excelRecords.map(record => ({
-        id: record._id,
-        filename: record.filename,
-        filesize: record.filesize + ' KB',
-        // uploaderEmail: record.uploaderEmail,
-        data: record.data, // raw 2D array
-        uploadedAt: record.uploadedAt,
-        rows: record.rows ?? record.data?.length ?? "-",
-        columns: record.columns ?? (record.data?.[0]?.length || "-")
-      }))
+      records: user.excelRecords.map(record => {
+        const chartsLinked = user.chartRecords.filter(
+          chart =>
+            chart.fromExcelFile?.toLowerCase().trim() ===
+            record.filename?.toLowerCase().trim()
+        ).length;
+        
+        return {
+          id: record._id,
+          filename: record.filename,
+          filesize: record.filesize + ' KB',
+          uploadedAt: record.uploadedAt,
+          rows: record.rows,
+          columns: record.columns,
+          charts: chartsLinked, 
+        };
+      })
     });
 
   } catch (error) {

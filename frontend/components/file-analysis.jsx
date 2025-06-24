@@ -14,38 +14,36 @@ export function FileAnalysisInlineView({ file, onClose }) {
 
   // When the component mounts or file changes, try to retrieve the actual file
   useEffect(() => {
-    if (file && file.originalFile) {
-      // If the file object already has the original file reference
-      setActualFile(file.originalFile);
-    } else if (file && file.path) {
-      // If we need to fetch the file from storage
-      fetchFileFromStorage(file.path)
-        .then((fileBlob) => {
-          setActualFile(fileBlob);
-        })
-        .catch((err) => {
-          console.error("Failed to retrieve file:", err);
-          setError("Could not retrieve the original file for chart creation.");
-        });
-    } else {
-      // If we don't have a way to get the actual file
-      setError("File data is not available for chart creation.");
-    }
-  }, [file]);
+  console.log("file received:", file);
+
+  if (file && file.originalFile) {
+    console.log("Using originalFile:", file.originalFile);
+    setActualFile(file.originalFile);
+  } else if (file && file.path) {
+    console.log("Fetching from path:", file.path);
+    fetchFileFromStorage(file.path)
+      .then((fileBlob) => {
+        console.log("Fetched fileBlob:", fileBlob);
+        setActualFile(fileBlob);
+      })
+      .catch((err) => {
+        console.error("Failed to retrieve file:", err);
+        setError("Could not retrieve the original file for chart creation.");
+      });
+  } else {
+    setError("File data is not available for chart creation.");
+  }
+}, [file]);
+
 
   // Function to fetch file from storage if needed
   const fetchFileFromStorage = async (path) => {
-    // This is a placeholder - in a real app, you would implement
-    // logic to fetch the file from your storage system
-    // For now, we'll create a mock file for demonstration
-    return new File(
-      [new ArrayBuffer(1024)], // Mock file content
-      file.name,
-      {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      }
-    );
-  };
+  const response = await fetch(path);
+  if (!response.ok) throw new Error("Failed to fetch file from server");
+  const blob = await response.blob();
+  return new File([blob], file.name, { type: blob.type });
+};
+
 
   if (!file) return null;
 
@@ -53,7 +51,7 @@ export function FileAnalysisInlineView({ file, onClose }) {
     <>
       <Card className="border border-pink-500/20 bg-white/10 text-white">
         <CardHeader className="flex items-center justify-between">
-          <CardTitle>Analysis for: {file.name}</CardTitle>
+          <CardTitle>Analysis for: {file.filename || file.name}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -67,13 +65,25 @@ export function FileAnalysisInlineView({ file, onClose }) {
         <CardContent className="space-y-4">
           <div>
             <p>
-              <strong>Size:</strong> {file.size}
+              <strong>Size:</strong>{" "}
+              {file.filesize || file.size || "Unknown"}
             </p>
             <p>
-              <strong>Uploaded at:</strong> {file.uploadTime}
+              <strong>Uploaded at:</strong>{" "}
+              {file.uploadedAt
+              ? new Date(file.uploadedAt).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+              : "-"}
             </p>
+
             <p>
-              <strong>Charts Detected:</strong> {file.charts}
+              <strong>Charts Detected:</strong> {file.charts ?? 0}
             </p>
           </div>
 

@@ -142,3 +142,27 @@ export const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, t
   );
   return response.data;
 };
+
+export const getUserProfile = async () => {
+  const token = localStorage.getItem("token")
+  const response = await axios.get("http://localhost:5050/api/user/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
+}
+
+export const requestAdminAccess = async ({ reason, experience }) => {
+  const token = localStorage.getItem("token")
+  const response = await axios.post(
+    "http://localhost:5050/admin/request",
+    { reason, experience },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+  return response.data
+}

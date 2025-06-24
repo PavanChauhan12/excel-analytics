@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  status: { type: String, enum: ['active', 'suspended'], default: 'active' },
   googleId: { type: String, sparse: true }, // Google OAuth ID
   profilePicture: { type: String }, // Google profile picture URL
   firstName: { type: String },

@@ -50,7 +50,11 @@ export default function FilesPage() {
         },
       })
       .then((res) => {
-        setUploadedFiles(res.data?.records || []);
+        const filesWithPaths = (res.data?.records || []).map(file => ({
+          ...file,
+          path: `http://localhost:5050/uploads/${file.filename}` // <- added
+        }));
+        setUploadedFiles(filesWithPaths);
       })
       .catch((err) => console.error("Failed to fetch dashboard data:", err));
   }, []);

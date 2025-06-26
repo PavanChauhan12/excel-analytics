@@ -38,7 +38,7 @@ export default function AuthPage() {
     const initializeGoogleSignIn = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: "844713303779-1m6nb0hde24nj3nhmkmktdh6etcro1th.apps.googleusercontent.com", // Replace with your actual Google Client ID
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleResponse,
           auto_select: false,
           cancel_on_tap_outside: true,
@@ -71,23 +71,31 @@ export default function AuthPage() {
   }
 
   const initiateGoogleLogin = () => {
-    if (window.google) {
+    if (window.google && window.google.accounts) {
       setGoogleLoading(true)
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // Fallback to popup if prompt is not displayed
-          window.google.accounts.id.renderButton(
-            document.getElementById('google-signin-button'),
-            {
-              theme: 'outline',
-              size: 'large',
-              width: '100%',
-              text: 'continue_with',
+      try {
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            // If prompt fails, show the button
+            const buttonDiv = document.getElementById('google-signin-button')
+            if (buttonDiv) {
+              buttonDiv.innerHTML = '' // Clear existing content
+              window.google.accounts.id.renderButton(buttonDiv, {
+                theme: 'outline',
+                size: 'large',
+                width: '100%',
+                text: 'continue_with',
+                shape: 'rectangular',
+              })
+              buttonDiv.style.display = 'block'
             }
-          )
-        }
+          }
+          setGoogleLoading(false)
+        })
+      } catch (error) {
+        console.error('Google Sign-In error:', error)
         setGoogleLoading(false)
-      })
+      }
     } else {
       console.error('Google Sign-In not loaded')
       setGoogleLoading(false)
@@ -207,8 +215,8 @@ export default function AuthPage() {
                       "Continue with Google"
                     )}
                   </Button>
-                  {/* Hidden div for Google button rendering */}
-                  <div id="google-signin-button" className="hidden"></div>
+                  {/* Div for Google button rendering */}
+                  <div id="google-signin-button" className="w-full" style={{ display: 'none' }}></div>
                 </div>
               </CardContent>
             </TabsContent>

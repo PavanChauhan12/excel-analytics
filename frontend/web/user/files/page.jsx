@@ -25,6 +25,7 @@ import { FileAnalysisInlineView } from "@/components/file-analysis";
 import axios from "axios";
 import { Search, FileSpreadsheet, Eye } from "lucide-react";
 import Aurora from "@/components/ui/aurora";
+const baseurl = import.meta.env.VITE_API_BASE_URL;
 
 export default function FilesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +45,7 @@ export default function FilesPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5050/api/dashboard", {
+      .get(`${baseurl}/api/dashboard`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -52,7 +53,7 @@ export default function FilesPage() {
       .then((res) => {
         const filesWithPaths = (res.data?.records || []).map(file => ({
           ...file,
-          path: `http://localhost:5050/uploads/${file.filename}` // <- added
+          path: `${baseurl}/uploads/${file.filename}` // <- added
         }));
         setUploadedFiles(filesWithPaths);
       })

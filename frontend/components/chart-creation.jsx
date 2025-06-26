@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+const baseurl = import.meta.env.VITE_API_BASE_URL;
 import { Switch } from "@/components/ui/switch"
 import {
   BarChart3,
@@ -505,7 +506,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // --- Save chart to backend ---
   const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, token }) => {
   try {
-    const res = await fetch("http://localhost:5050/api/chart/save", {
+    const res = await fetch(`${baseurl}/api/chart/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

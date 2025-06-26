@@ -38,6 +38,7 @@ import { AdminSidebar } from "@/components/admin-sidebar"
 import Aurora from "@/components/ui/aurora"
 import axios from "axios"
 import toast from "react-hot-toast"
+const baseurl = import.meta.env.VITE_API_BASE_URL;
 
 export default function AdminUsersPage() {
   const navigate = useNavigate()
@@ -83,7 +84,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:5050/api/admin/users", {
+      const response = await axios.get(`${baseurl}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -101,10 +102,10 @@ export default function AdminUsersPage() {
     setLoadingUserData(true)
     try {
       const [filesResponse, chartsResponse] = await Promise.all([
-        axios.get(`http://localhost:5050/api/admin/users/${userId}/files`, {
+        axios.get(`${baseurl}/api/admin/users/${userId}/files`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }),
-        axios.get(`http://localhost:5050/api/admin/users/${userId}/charts`, {
+        axios.get(`${baseurl}/api/admin/users/${userId}/charts`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }),
       ])
@@ -122,7 +123,7 @@ export default function AdminUsersPage() {
   const handleUserAction = async (action, userId) => {
     try {
       const response = await axios.put(
-        `http://localhost:5050/api/admin/users/${userId}`,
+        `${baseurl}/api/admin/users/${userId}`,
         { action },
         {
           headers: {
@@ -144,7 +145,7 @@ export default function AdminUsersPage() {
 
   const handleDeleteFile = async (fileId) => {
     try {
-      await axios.delete(`http://localhost:5050/api/admin/files/${fileId}`, {
+      await axios.delete(`${baseurl}/api/admin/files/${fileId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       toast.success("File deleted successfully")
@@ -158,7 +159,7 @@ export default function AdminUsersPage() {
 
   const handleDeleteChart = async (chartId) => {
     try {
-      await axios.delete(`http://localhost:5050/api/admin/charts/${chartId}`, {
+      await axios.delete(`${baseurl}/api/admin/charts/${chartId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       toast.success("Chart deleted successfully")

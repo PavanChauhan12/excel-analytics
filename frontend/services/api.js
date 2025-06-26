@@ -113,7 +113,7 @@ export const uploadExcelFile = async (file, onUploadProgress) => {
   const token = localStorage.getItem("token")
 
   try {
-    const response = await axios.post("http://localhost:5050/api/upload", formData, {
+    const response = await axios.post(`${baseurl}/api/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
@@ -145,7 +145,7 @@ export const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, t
 
 export const getUserProfile = async () => {
   const token = localStorage.getItem("token")
-  const response = await axios.get("http://localhost:5050/api/user/profile", {
+  const response = await axios.get(`${baseurl}/api/user/profile`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -156,7 +156,7 @@ export const getUserProfile = async () => {
 export const requestAdminAccess = async ({ reason, experience }) => {
   const token = localStorage.getItem("token")
   const response = await axios.post(
-    "http://localhost:5050/admin/request",
+    `${baseurl}/admin/request`,
     { reason, experience },
     {
       headers: {

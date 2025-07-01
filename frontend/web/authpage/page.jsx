@@ -1,39 +1,45 @@
-"use client"
-import { useState, useEffect } from "react"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Label } from "../../components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import { Separator } from "../../components/ui/separator"
-import { BarChart3, Upload, Eye, EyeOff, Mail, Lock, User, Shield, Crown } from "lucide-react"
-import { handleLogin, handleSignup, handleGoogleLogin } from "@/services/api"
-import { useNavigate } from "react-router-dom"
+"use client";
 
-// Add glass effect style
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Eye, EyeOff } from "lucide-react"; // Removed BarChart3, TrendingUp, Users, Shield as they are not used in the new left panel
+import { handleLogin, handleSignup, handleGoogleLogin } from "@/services/api";
+import { useNavigate } from "react-router-dom";
+import Particles from "@/components/ui/particles";
+
+// Glass style for the right-side card
 const glassStyle = {
   background: "rgba(0, 0, 0, 0.2)",
   backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(10px)",
-}
+};
 
 export default function AuthPage() {
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
   const [signupData, setSignupData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user",
-  })
-  const [loginData, setLoginData] = useState({ email: "", password: "" })
-  const [googleLoading, setGoogleLoading] = useState(false)
+  });
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Initialize Google Sign-In
   useEffect(() => {
     const initializeGoogleSignIn = () => {
       if (window.google) {
@@ -42,403 +48,506 @@ export default function AuthPage() {
           callback: handleGoogleResponse,
           auto_select: false,
           cancel_on_tap_outside: true,
-        })
+        });
       }
-    }
+    };
 
-    // Load Google Sign-In script
     if (!window.google) {
-      const script = document.createElement('script')
-      script.src = 'https://accounts.google.com/gsi/client'
-      script.async = true
-      script.defer = true
-      script.onload = initializeGoogleSignIn
-      document.head.appendChild(script)
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogleSignIn;
+      document.head.appendChild(script);
     } else {
-      initializeGoogleSignIn()
+      initializeGoogleSignIn();
     }
-  }, [])
+  }, []);
 
   const handleGoogleResponse = async (response) => {
-    setGoogleLoading(true)
+    setGoogleLoading(true);
     try {
-      await handleGoogleLogin(response, navigate)
+      await handleGoogleLogin(response, navigate);
     } catch (error) {
-      console.error('Google login failed:', error)
+      console.error("Google login failed:", error);
     } finally {
-      setGoogleLoading(false)
+      setGoogleLoading(false);
     }
-  }
+  };
 
   const initiateGoogleLogin = () => {
     if (window.google && window.google.accounts) {
-      setGoogleLoading(true)
+      setGoogleLoading(true);
       try {
         window.google.accounts.id.prompt((notification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // If prompt fails, show the button
-            const buttonDiv = document.getElementById('google-signin-button')
+            const buttonDiv = document.getElementById("google-signin-button");
             if (buttonDiv) {
-              buttonDiv.innerHTML = '' // Clear existing content
+              buttonDiv.innerHTML = "";
               window.google.accounts.id.renderButton(buttonDiv, {
-                theme: 'outline',
-                size: 'large',
-                width: '100%',
-                text: 'continue_with',
-                shape: 'rectangular',
-              })
-              buttonDiv.style.display = 'block'
+                theme: "outline",
+                size: "large",
+                width: "100%",
+                text: "continue_with",
+                shape: "rectangular",
+              });
+              buttonDiv.style.display = "block";
             }
           }
-          setGoogleLoading(false)
-        })
+          setGoogleLoading(false);
+        });
       } catch (error) {
-        console.error('Google Sign-In error:', error)
-        setGoogleLoading(false)
+        console.error("Google Sign-In error:", error);
+        setGoogleLoading(false);
       }
     } else {
-      console.error('Google Sign-In not loaded')
-      setGoogleLoading(false)
+      console.error("Google Sign-In not loaded");
+      setGoogleLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-black border border-cyan-400 p-3 rounded-md shadow-[0_0_12px_#00bfff]">
-              <BarChart3 className="h-8 w-8 text-cyan-400" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-cyan-400">Excel Analytics</h1>
-          <p className="text-gray-400 mt-2">Transform your Excel data into insights</p>
-        </div>
+    <div className="relative min-h-screen w-full bg-black overflow-hidden text-white">
+      {/* Background particles */}
+      <div className="absolute inset-0 z-0 h-full">
+        <Particles />
+      </div>
 
-        <Card
-          className="text-white border border-gray-800 rounded-md py-8 px-4 shadow-[8px_10px_15px_#00bfff,_-8px_-10px_15px_#ff0038] relative"
-          style={glassStyle}
+      {/* Foreground content - Main container for the two columns */}
+      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen items-center justify-center lg:p-8">
+        {/* LEFT SIDE: Info Card - Styled to match the image */}
+        <div
+          className="flex-1 flex items-center justify-center p-12 rounded-2xl shadow-2xl  lg:m-8"
+          style={{
+            background: `linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(41, 158, 225, 0.17) 40%,
+      rgba(255, 0, 25, 0.15) 100%
+    )`,
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            boxShadow: `
+      0 25px 50px -12px rgba(0, 0, 0, 0.2),
+      0 0 10px rgba(0, 238, 255, 0.4),
+      0 0 20px rgba(255, 0, 85, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1)
+    `,
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+          }}
         >
-          <Tabs defaultValue="login" className="w-full px-4">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-900 text-white border border-gray-700">
-              <TabsTrigger
-                value="login"
-                className="data-[state=active]:bg-cyan-900/30 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-400"
-              >
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger
-                value="signup"
-                className="data-[state=active]:bg-red-900/30 data-[state=active]:text-red-400 data-[state=active]:border-red-400"
-              >
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
+          <div className="max-w-md text-left text-white space-y-8">
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tight">
+              <span className="block">Visualize Instantly.</span>
+              <span className="block bg-gradient-to-r from-cyan-400 to-red-400 text-transparent bg-clip-text px-2 py-1 rounded-md inline-block">
+                Excel Analytics.
+              </span>
+            </h1>
 
-            {/* Login */}
-            <TabsContent value="login">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center text-cyan-400">Welcome back</CardTitle>
-                <CardDescription className="text-center mb-4 text-gray-400">
-                  Sign in to access your data visualizations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handleLogin(loginData, navigate)
-                  }}
-                  className="space-y-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-white">
-                      Email
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-cyan-400" />
-                      <Input
-                        id="login-email"
-                        type="email"
-                        className="bg-black text-white border border-cyan-400 pl-10 focus:border-cyan-300 focus:shadow-[0_0_8px_#00bfff]"
-                        placeholder="Enter your email"
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                        required
-                      />
-                    </div>
+            <div className="space-y-10 mt-10">
+              {/* Feature 1 */}
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-9 h-9 flex items-center justify-center rounded-md bg-cyan-500 bg-opacity-20 border border-cyan-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="cyan"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-bar-chart-3"
+                    >
+                      <path d="M3 3v18h18" />
+                      <path d="M18 17v-6" />
+                      <path d="M13 17V9" />
+                      <path d="M8 17V5" />
+                    </svg>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-white">
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-cyan-400" />
-                      <Input
-                        id="login-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        className="bg-black text-white border border-cyan-400 pl-10 pr-10 focus:border-cyan-300 focus:shadow-[0_0_8px_#00bfff]"
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 text-cyan-400 hover:bg-cyan-900/20"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff /> : <Eye />}
-                      </Button>
-                    </div>
+                  <h2 className="text-xl font-semibold text-white">
+                    Instant Excel Upload
+                  </h2>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Drag and drop your Excel files to immediately begin exploring
+                  data. Our platform parses sheets and prepares it for fast
+                  visual analysis.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-9 h-9 flex items-center justify-center rounded-md bg-red-500 bg-opacity-10 border border-red-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="red"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-presentation-chart"
+                    >
+                      <path d="M2 3h20" />
+                      <path d="M4 3v13a8 8 0 0 0 16 0V3" />
+                      <path d="M12 12v5" />
+                      <path d="M8 12v3" />
+                      <path d="M16 12v2" />
+                    </svg>
                   </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-bold shadow-[0_0_10px_#00bfff] border border-cyan-400"
+                  <h2 className="text-xl font-semibold text-white">
+                    2D & 3D Chart Builder
+                  </h2>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Instantly generate interactive 2D and 3D visualizations from
+                  your data — no coding required. Customize and share with ease.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-9 h-9 flex items-center justify-center rounded-md bg-purple-500 bg-opacity-20 border border-purple-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="purple"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-user-cog"
+                    >
+                      <circle cx="12" cy="7" r="4" />
+                      <path d="M5.5 21a10.3 10.3 0 0 1 13 0" />
+                      <path d="M18.5 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                      <path d="M21 17h-0.5" />
+                      <path d="M17 17h-0.5" />
+                      <path d="M18.5 19.5v-0.5" />
+                      <path d="M18.5 14.5v-0.5" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-white">
+                    User-Friendly Dashboard
+                  </h2>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Navigate and analyze with ease. Our UI is built for clarity —
+                  making insights accessible for everyone on your team.
+                </p>
+              </div>
+            </div>
+
+            
+          </div>
+
+          {/* RIGHT SIDE: Auth Form - Kept as provided in the prompt */}
+          <div className="flex-1 flex items-center justify-center">
+            <Card
+              className="w-full max-w-md text-white border border-gray-800 rounded-xl py-8 px-4 relative overflow-hidden"
+              style={glassStyle}
+            >
+              <div className="absolute inset-0 -z-10 opacity-20">
+                <div className="absolute -left-1/4 -top-1/4 w-1/2 h-1/2 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+                <div className="absolute -right-1/4 -bottom-1/4 w-1/2 h-1/2 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+              </div>
+
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full px-4"
+              >
+                <TabsList className="grid w-full grid-cols-2 bg-gray-900 text-white border border-gray-700 rounded-lg mb-6">
+                  <TabsTrigger
+                    value="login"
+                    className="data-[state=active]:bg-gradient-to-r from-cyan-700 to-cyan-900 data-[state=active]:text-cyan-300 data-[state=active]:border-b-2 data-[state=active]:border-cyan-400 rounded-lg text-white"
                   >
                     Sign In
-                  </Button>
-                </form>
-                <Separator className="my-4 bg-gray-700" />
-                <div className="space-y-2">
-                  <Button
-                    onClick={initiateGoogleLogin}
-                    disabled={googleLoading}
-                    className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666] disabled:opacity-50"
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="signup"
+                    className="data-[state=active]:bg-gradient-to-r from-red-700 to-red-900 data-[state=active]:text-red-300 data-[state=active]:border-b-2 data-[state=active]:border-red-400 rounded-lg text-white"
                   >
-                    {googleLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Signing in...
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Login content */}
+                <TabsContent value="login">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-3xl text-cyan-400 font-bold">
+                      Welcome back
+                    </CardTitle>
+                    <CardDescription className="text-gray-400 mt-2">
+                      Sign in to access your data visualizations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleLogin(loginData, navigate);
+                      }}
+                      className="space-y-6"
+                    >
+                      <div className="space-y-2">
+                        <Label htmlFor="login-email">Email</Label>
+                        <Input
+                          id="login-email"
+                          type="email"
+                          className="bg-black text-white border border-cyan-600 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          placeholder="your.email@example.com"
+                          onChange={(e) =>
+                            setLoginData({
+                              ...loginData,
+                              email: e.target.value,
+                            })
+                          }
+                          required
+                        />
                       </div>
-                    ) : (
-                      "Continue with Google"
-                    )}
-                  </Button>
-                  {/* Div for Google button rendering */}
-                  <div id="google-signin-button" className="w-full" style={{ display: 'none' }}></div>
-                </div>
-              </CardContent>
-            </TabsContent>
-
-            {/* Signup */}
-            <TabsContent value="signup">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center text-red-400">Create account</CardTitle>
-                <CardDescription className="text-center mb-4 text-gray-400">
-                  Start visualizing your Excel data today
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handleSignup(signupData, navigate)
-                  }}
-                  className="space-y-4"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name" className="text-white">
-                        First name
-                      </Label>
-                      <Input
-                        id="first-name"
-                        className="bg-black text-white border border-red-400 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                        placeholder="John"
-                        value={signupData.firstName}
-                        onChange={(e) => setSignupData({ ...signupData, firstName: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name" className="text-white">
-                        Last name
-                      </Label>
-                      <Input
-                        id="last-name"
-                        className="bg-black text-white border border-red-400 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                        placeholder="Doe"
-                        value={signupData.lastName}
-                        onChange={(e) => setSignupData({ ...signupData, lastName: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-white">
-                      Email
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-red-400" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        className="bg-black text-white border border-red-400 pl-10 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                        placeholder="Enter your email"
-                        value={signupData.email}
-                        onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="role-select" className="text-white">
-                      Role
-                    </Label>
-                    <div className="relative">
-                      {signupData.role === "admin" ? (
-                        <Crown className="absolute left-3 top-3 h-4 w-4 text-red-400 z-10" />
+                      <div className="space-y-2">
+                        <Label htmlFor="login-password">Password</Label>
+                        <div className="relative">
+                          <Input
+                            id="login-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="bg-black text-white border border-cyan-600 pr-10 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                            onChange={(e) =>
+                              setLoginData({
+                                ...loginData,
+                                password: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 text-cyan-400 hover:bg-cyan-900/20"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 rounded-lg transition-all duration-300"
+                      >
+                        Sign In
+                      </Button>
+                    </form>
+                    <Separator className="my-6 bg-gray-700" />
+                    <Button
+                      onClick={initiateGoogleLogin}
+                      disabled={googleLoading}
+                      className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 py-2 rounded-lg transition-all duration-300 disabled:opacity-50"
+                    >
+                      {googleLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Signing in...
+                        </div>
                       ) : (
-                        <User className="absolute left-3 top-3 h-4 w-4 text-cyan-400 z-10" />
+                        "Continue with Google"
                       )}
-                      <Select
-                        value={signupData.role}
-                        onValueChange={(value) => setSignupData({ ...signupData, role: value })}
-                      >
-                        <SelectTrigger
-                          className={`bg-black text-white pl-10 ${
-                            signupData.role === "admin"
-                              ? "border border-red-400 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                              : "border border-cyan-400 focus:border-cyan-300 focus:shadow-[0_0_8px_#00bfff]"
-                          }`}
-                        >
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-black border border-gray-700">
-                          <SelectItem value="user" className="text-cyan-400 hover:bg-cyan-900/20 focus:bg-cyan-900/20">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              <span>User</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="admin" className="text-red-400 hover:bg-red-900/20 focus:bg-red-900/20">
-                            <div className="flex items-center gap-2">
-                              <Crown className="h-4 w-4" />
-                              <span>Admin</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                    </Button>
+                    <div
+                      id="google-signin-button"
+                      className="w-full mt-2"
+                      style={{ display: "none" }}
+                    ></div>
+                  </CardContent>
+                </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-white">
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-red-400" />
-                      <Input
-                        id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
-                        className="bg-black text-white border border-red-400 pl-10 pr-10 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 text-red-400 hover:bg-red-900/20"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff /> : <Eye />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-white">
-                      Confirm password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-red-400" />
-                      <Input
-                        id="confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        className="bg-black text-white border border-red-400 pl-10 pr-10 focus:border-red-300 focus:shadow-[0_0_8px_#ff0038]"
-                        value={signupData.confirmPassword}
-                        onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 text-red-400 hover:bg-red-900/20"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? <EyeOff /> : <Eye />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className={`w-full font-bold border ${
-                      signupData.role === "admin"
-                        ? "bg-red-600 hover:bg-red-500 text-white shadow-[0_0_10px_#ff0038] border-red-400"
-                        : "bg-cyan-600 hover:bg-cyan-500 text-black shadow-[0_0_10px_#00bfff] border-cyan-400"
-                    }`}
-                  >
-                    {signupData.role === "admin" ? (
-                      <div className="flex items-center gap-2">
-                        <Crown className="h-4 w-4" />
-                        Create Admin Account
+                {/* Signup content */}
+                <TabsContent value="signup">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-3xl text-red-400 font-bold">
+                      Create account
+                    </CardTitle>
+                    <CardDescription className="text-gray-400 mt-2">
+                      Start visualizing your Excel data today
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSignup({ ...signupData, role: "user" }, navigate);
+                      }}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="first-name">First name</Label>
+                          <Input
+                            id="first-name"
+                            className="bg-black text-white border border-red-600 focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                            placeholder="John"
+                            value={signupData.firstName}
+                            onChange={(e) =>
+                              setSignupData({
+                                ...signupData,
+                                firstName: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="last-name">Last name</Label>
+                          <Input
+                            id="last-name"
+                            className="bg-black text-white border border-red-600 focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                            placeholder="Doe"
+                            value={signupData.lastName}
+                            onChange={(e) =>
+                              setSignupData({
+                                ...signupData,
+                                lastName: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                        </div>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Create User Account
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">Email</Label>
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          className="bg-black text-white border border-red-600 focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                          placeholder="your.email@example.com"
+                          value={signupData.email}
+                          onChange={(e) =>
+                            setSignupData({
+                              ...signupData,
+                              email: e.target.value,
+                            })
+                          }
+                          required
+                        />
                       </div>
-                    )}
-                  </Button>
-                </form>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Password</Label>
+                        <div className="relative">
+                          <Input
+                            id="signup-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="bg-black text-white border border-red-600 pr-10 focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                            value={signupData.password}
+                            onChange={(e) =>
+                              setSignupData({
+                                ...signupData,
+                                password: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 text-red-400 hover:bg-red-900/20"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password">
+                          Confirm password
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="confirm-password"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="bg-black text-white border border-red-600 pr-10 focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                            value={signupData.confirmPassword}
+                            onChange={(e) =>
+                              setSignupData({
+                                ...signupData,
+                                confirmPassword: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 text-red-400 hover:bg-red-900/20"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full font-bold py-2 rounded-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white"
+                      >
+                        Create Account
+                      </Button>
+                    </form>
+                    <Separator className="my-6 bg-gray-700" />
+                    <Button
+                      onClick={initiateGoogleLogin}
+                      disabled={googleLoading}
+                      className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 py-2 rounded-lg transition-all duration-300 disabled:opacity-50"
+                    >
+                      {googleLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Signing in...
+                        </div>
+                      ) : (
+                        "Continue with Google"
+                      )}
+                    </Button>
+                  </CardContent>
+                </TabsContent>
+              </Tabs>
 
-                <Separator className="my-4 bg-gray-700" />
-                <Button
-                  onClick={initiateGoogleLogin}
-                  disabled={googleLoading}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 shadow-[0_0_8px_#666] disabled:opacity-50"
-                >
-                  {googleLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Signing in...
-                    </div>
-                  ) : (
-                    "Continue with Google"
-                  )}
-                </Button>
-              </CardContent>
-            </TabsContent>
-          </Tabs>
-        </Card>
-
-        <div className="mt-8 text-center text-white">
-          <p className="text-sm mb-4 text-gray-400">What you'll get access to:</p>
-          <div className="grid grid-cols-3 gap-4 text-xs">
-            <div className="flex flex-col items-center">
-              <Upload className="h-6 w-6 text-cyan-400 mb-2" />
-              <span className="text-gray-300">Excel Upload</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <BarChart3 className="h-6 w-6 text-purple-400 mb-2" />
-              <span className="text-gray-300">2D/3D Charts</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Shield className="h-6 w-6 text-red-400 mb-2" />
-              <span className="text-gray-300">Role Management</span>
-            </div>
+              <div
+                id="google-signin-button"
+                className="w-full mt-2"
+                style={{ display: "none" }}
+              ></div>
+            </Card>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

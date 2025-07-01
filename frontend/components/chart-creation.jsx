@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-const baseurl = import.meta.env.VITE_API_BASE_URL;
 import { Switch } from "@/components/ui/switch"
 import {
   BarChart3,
@@ -24,7 +23,10 @@ import {
   Check,
 } from "lucide-react"
 import * as XLSX from "xlsx"
-import { saveChartConfig } from '../services/api';
+import { Separator } from "@/components/ui/separator"
+
+const baseurl = import.meta.env.VITE_API_BASE_URL
+
 // Define chart types for selection
 const chartTypes = [
   {
@@ -97,7 +99,7 @@ const chartTypes = [
 const colorThemes = [
   {
     name: "Default",
-    colors: ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"],
+    colors: ["#228DFF", "#66D9EF", "#FF6B6B", "#FFD700", "#8B5CF6"], // Greenish-cyan as primary
   },
   {
     name: "Ocean",
@@ -135,6 +137,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   const [fileName, setFileName] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+
+  // Customization states
+  const [plotBgColor, setPlotBgColor] = useState("#1C1C1C") // Dark background
+  const [paperBgColor, setPaperBgColor] = useState("#1C1C1C") // Dark background
+  const [fontColor, setFontColor] = useState("#E0E0E0") // Soft white
+  const [legendFontSize, setLegendFontSize] = useState(12)
+  const [legendFontColor, setLegendFontColor] = useState("#E0E0E0")
+  const [xAxisLabelFontSize, setXAxisLabelFontSize] = useState(12)
+  const [xAxisLabelFontColor, setXAxisLabelFontColor] = useState("#E0E0E0")
+  const [yAxisLabelFontSize, setYAxisLabelFontSize] = useState(12)
+  const [yAxisLabelFontColor, setYAxisLabelFontColor] = useState("#E0E0E0")
+  const [zAxisLabelFontSize, setZAxisLabelFontSize] = useState(12)
+  const [zAxisLabelFontColor, setZAxisLabelFontColor] = useState("#E0E0E0")
+
   const chartRef = useRef(null)
   const plotlyInstance = useRef(null)
 
@@ -144,10 +160,9 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile);
-
+      processExcelFile(selectedFile)
       if (selectedFile?.name) {
-        setFileName(selectedFile.name);
+        setFileName(selectedFile.name)
       }
     }
   }, [selectedFile, open])
@@ -157,7 +172,28 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
     if (currentStep === 4 && fileData.length > 0 && xAxis && yAxis && selectedChart) {
       renderPreviewChart()
     }
-  }, [currentStep, fileData, xAxis, yAxis, zAxis, selectedChart, selectedTheme, showLegend, showGrid])
+  }, [
+    currentStep,
+    fileData,
+    xAxis,
+    yAxis,
+    zAxis,
+    selectedChart,
+    selectedTheme,
+    showLegend,
+    showGrid,
+    plotBgColor,
+    paperBgColor,
+    fontColor,
+    legendFontSize,
+    legendFontColor,
+    xAxisLabelFontSize,
+    xAxisLabelFontColor,
+    yAxisLabelFontSize,
+    yAxisLabelFontColor,
+    zAxisLabelFontSize,
+    zAxisLabelFontColor,
+  ])
 
   // Cleanup effect
   useEffect(() => {
@@ -189,7 +225,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
     const samples = data.slice(0, Math.min(10, data.length))
     let numericCount = 0
     let totalCount = 0
-
     for (const row of samples) {
       const value = row[columnName]
       if (value !== null && value !== undefined && value !== "") {
@@ -199,7 +234,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         }
       }
     }
-
     return totalCount > 0 && numericCount / totalCount > 0.7 ? "number" : "text"
   }
 
@@ -210,10 +244,8 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       setIsProcessing(false)
       return
     }
-
     setIsProcessing(true)
     setFileName(file.name || "Unknown file")
-
     const reader = new FileReader()
     reader.onload = (event) => {
       try {
@@ -229,7 +261,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         }
 
         setFileData(jsonData)
-
         const headers = Object.keys(jsonData[0])
         const columnsWithTypes = headers.map((header) => {
           const detectedType = detectColumnType(header, jsonData)
@@ -239,7 +270,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             sample: jsonData[0][header],
           }
         })
-
         setColumns(columnsWithTypes)
         setIsProcessing(false)
       } catch (error) {
@@ -247,7 +277,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         setIsProcessing(false)
       }
     }
-
     if (file instanceof Blob) {
       reader.readAsBinaryString(file)
     } else {
@@ -300,11 +329,25 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
       let plotData = []
       let layout = {
-        title: chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
+        title: {
+          text: chartTitle || `${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`,
+          font: {
+            color: fontColor,
+          },
+        },
         showlegend: showLegend,
         margin: { l: 50, r: 50, b: 50, t: 50, pad: 4 },
-        paper_bgcolor: "white",
-        plot_bgcolor: "white",
+        paper_bgcolor: paperBgColor,
+        plot_bgcolor: plotBgColor,
+        font: {
+          color: fontColor,
+        },
+        legend: {
+          font: {
+            size: legendFontSize,
+            color: legendFontColor,
+          },
+        },
       }
 
       // Configure chart based on type
@@ -352,7 +395,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
             // Create a 2D array for z values
             const zValues = Array(uniqueY.length)
-              .fill()
+              .fill(0)
               .map(() => Array(uniqueX.length).fill(0))
 
             // Fill in z values where we have data
@@ -360,7 +403,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
               const x = row[xAxis]
               const y = row[yAxis]
               const z = row[zAxis]
-
               if (isNumericValue(x) && isNumericValue(y) && isNumericValue(z)) {
                 const xIndex = uniqueX.indexOf(x)
                 const yIndex = uniqueY.indexOf(y)
@@ -382,14 +424,25 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             ]
             break
         }
-
         // 3D layout settings
         layout = {
           ...layout,
           scene: {
-            xaxis: { title: xAxis, showgrid: showGrid },
-            yaxis: { title: yAxis, showgrid: showGrid },
-            zaxis: { title: zAxis, showgrid: showGrid },
+            xaxis: {
+              title: xAxis,
+              showgrid: showGrid,
+              font: { size: xAxisLabelFontSize, color: xAxisLabelFontColor },
+            },
+            yaxis: {
+              title: yAxis,
+              showgrid: showGrid,
+              font: { size: yAxisLabelFontSize, color: yAxisLabelFontColor },
+            },
+            zaxis: {
+              title: zAxis,
+              showgrid: showGrid,
+              font: { size: zAxisLabelFontSize, color: zAxisLabelFontColor },
+            },
           },
         }
       } else {
@@ -456,13 +509,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             ]
             break
         }
-
         // 2D layout settings
         if (selectedChart !== "pie") {
           layout = {
             ...layout,
-            xaxis: { title: xAxis, showgrid: showGrid },
-            yaxis: { title: yAxis, showgrid: showGrid },
+            xaxis: {
+              title: xAxis,
+              showgrid: showGrid,
+              font: { size: xAxisLabelFontSize, color: xAxisLabelFontColor },
+            },
+            yaxis: {
+              title: yAxis,
+              showgrid: showGrid,
+              font: { size: yAxisLabelFontSize, color: yAxisLabelFontColor },
+            },
           }
         }
       }
@@ -481,7 +541,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Handle chart type selection
   const handleChartTypeSelect = (chartType) => {
     setSelectedChart(chartType)
-
     // Reset z-axis if switching from 3D to 2D chart
     const is3D = chartTypes.find((chart) => chart.id === chartType)?.is3D || false
     if (!is3D) {
@@ -504,27 +563,24 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   }
 
   // --- Save chart to backend ---
-  const saveChartConfig = async ({ chartType, fromExcelFile, chartConfig, token }) => {
-  try {
-    const res = await fetch(`${baseurl}/api/chart/save`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ chartType, fromExcelFile, chartConfig }),
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to save chart");
+  const saveChartConfigToBackend = async ({ chartType, fromExcelFile, chartConfig, token }) => {
+    try {
+      const res = await fetch(`${baseurl}/api/chart/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ chartType, fromExcelFile, chartConfig }),
+      })
+      if (!res.ok) {
+        throw new Error("Failed to save chart")
+      }
+      return await res.json()
+    } catch (error) {
+      throw error
     }
-
-    return await res.json();
-  } catch (error) {
-    throw error;
   }
-};
-
 
   // Create chart and close dialog
   const handleCreateChart = async () => {
@@ -564,6 +620,17 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       selectedTheme,
       showLegend,
       showGrid,
+      plotBgColor,
+      paperBgColor,
+      fontColor,
+      legendFontSize,
+      legendFontColor,
+      xAxisLabelFontSize,
+      xAxisLabelFontColor,
+      yAxisLabelFontSize,
+      yAxisLabelFontColor,
+      zAxisLabelFontSize: is3D ? zAxisLabelFontSize : null,
+      zAxisLabelFontColor: is3D ? zAxisLabelFontColor : null,
       xData,
       yData,
       zData,
@@ -575,7 +642,6 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
     // Generate unique ID and store chart config
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-
     try {
       // Store chart configuration
       localStorage.setItem(`chartConfig_${chartId}`, JSON.stringify(chartConfig))
@@ -600,23 +666,19 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
       onOpenChange(false)
 
       try {
-      // Send chart to backend API
-      const token = localStorage.getItem("token"); // or wherever you store the JWT
-      await saveChartConfig({
-        chartType: selectedChart,
-        fromExcelFile: filename,
-        chartConfig,
-        token,
-      });
+        // Send chart to backend API
+        const token = localStorage.getItem("token") // or wherever you store the JWT
+        await saveChartConfigToBackend({
+          chartType: selectedChart,
+          fromExcelFile: fileName, // Use fileName here
+          chartConfig,
+          token,
+        })
+        console.log("Chart saved to backend")
+      } catch (error) {
+        console.error("Failed to save chart to backend:", error)
+      }
 
-      console.log("Chart saved to backend");
-    } catch (error) {
-      console.error("Failed to save chart to backend:", error);
-    }
-
-    // Continue to navigate
-    onOpenChange(false);
-    window.location.href = `/chart/${chartId}`;
       // Navigate to chart page
       window.location.href = `/chart/${chartId}`
     } catch (error) {
@@ -630,6 +692,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Get available columns for Y-axis and Z-axis
   const availableYAxisColumns = columns.filter((col) => col.name !== xAxis && col.name !== zAxis)
   const availableZAxisColumns = columns.filter((col) => col.name !== xAxis && col.name !== yAxis)
+
   const numericYAxisColumns = availableYAxisColumns.filter((col) => col.type === "number")
   const numericZAxisColumns = availableZAxisColumns.filter((col) => col.type === "number")
 
@@ -654,11 +717,11 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   if (isProcessing) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md bg-black border border-cyan-600">
+        <DialogContent className="max-w-md bg-[#1C1C1C] border border-[#228DFF]">
           <div className="flex flex-col items-center justify-center py-8">
-            <FileSpreadsheet className="h-16 w-16 text-cyan-500 animate-pulse mb-4" />
-            <h3 className="text-lg font-semibold mb-2 text-cyan-100">Processing Excel File</h3>
-            <p className="text-sm text-cyan-300 text-center">Reading and analyzing your data...</p>
+            <FileSpreadsheet className="h-16 w-16 text-[#228DFF] animate-pulse mb-4" />
+            <h3 className="text-lg font-semibold mb-2 text-[#E0E0E0]">Processing Excel File</h3>
+            <p className="text-sm text-[#66D9EF] text-center">Reading and analyzing your data...</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -667,13 +730,14 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] overflow-y-auto bg-black border border-cyan-600 text-white">
+     <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-[#1A1A2E]/60 border border-[#228DFF] text-[#E0E0E0]">
+
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-cyan-100">
-            {is3D ? <Cube className="h-5 w-5" /> : <BarChart3 className="h-5 w-5" />}
+          <DialogTitle className="flex items-center gap-2 text-[#E0E0E0]">
+            {is3D ? <Cube className="h-5 w-5 text-[#228DFF]" /> : <BarChart3 className="h-5 w-5 text-[#228DFF]" />}
             Create {is3D ? "3D " : ""}Chart from {fileName}
           </DialogTitle>
-          <DialogDescription className="text-cyan-300">
+          <DialogDescription className="text-[#66D9EF]">
             Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
           </DialogDescription>
         </DialogHeader>
@@ -685,20 +749,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
               <div key={step} className="flex items-center">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    index <= currentStep ? "bg-cyan-600 text-white" : "bg-gray-800 text-gray-400"
+                    index <= currentStep ? "bg-[#228DFF] text-black" : "bg-[#333333] text-gray-400"
                   }`}
                 >
                   {index + 1}
                 </div>
                 <span
                   className={`ml-1 text-xs hidden sm:inline ${
-                    index <= currentStep ? "text-cyan-400" : "text-gray-500"
+                    index <= currentStep ? "text-[#228DFF]" : "text-gray-500"
                   }`}
                 >
                   {step}
                 </span>
                 {index < steps.length - 1 && (
-                  <div className={`w-4 h-0.5 mx-2 ${index < currentStep ? "bg-cyan-600" : "bg-gray-700"}`} />
+                  <div className={`w-4 h-0.5 mx-2 ${index < currentStep ? "bg-[#228DFF]" : "bg-[#333333]"}`} />
                 )}
               </div>
             ))}
@@ -708,10 +772,10 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         {/* select data */}
         {currentStep === 0 && (
           <div className="space-y-4">
-            <Card className="bg-black border border-cyan-800">
+            <Card className="bg-[#1C1C1C] border border-[#333333]">
               <CardHeader>
-                <CardTitle className="text-cyan-100">Data Analysis</CardTitle>
-                <CardDescription className="text-cyan-300">
+                <CardTitle className="text-[#E0E0E0]">Data Analysis</CardTitle>
+                <CardDescription className="text-[#66D9EF]">
                   We've analyzed your Excel file and found the following data
                 </CardDescription>
               </CardHeader>
@@ -726,7 +790,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                         width="1em"
                         className="mr-2 flex-shrink-0"
                       >
-                        <path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 18a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm4-4.5a1 1 0 00-2 0v-4a1 1 0 00-2 0v4a1 1 0 002 0v.5a1.5 1.5 0 013 0v-.5a1 1 0 00-1-1h-1a1 1 0 000 2h1a3.5 3.5 0 00-7 0v-.5a1.5 1.5 0 013 0v.5a1 1 0 001 1h1a1 1 0 000-2h-1a1 1 0 00-1 1v4a1 1 0 002 0v-.5a1.5 1.5 0 01-3 0v.5a1 1 0 001 1h1a1 1 0 000-2h-1a3.5 3.5 0 007 0v.5z"></path>
+                        <path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 18a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm4-4.5a1 1 0 00-2 0v-4a1 1 0 00-2 0v4a1 1 0 002 0v.5a1.5 1.5 0 013 0v-.5a1 1 0 00-1-1h-1a1 1 0 000 2h1a3.5 3.5 0 00-7 0v.5a1.5 1.5 0 013 0v.5a1 1 0 001 1h1a1 1 0 000-2h-1a3.5 3.5 0 007 0v.5z"></path>
                       </svg>
                       <div>
                         <h4 className="font-semibold">No Data Available</h4>
@@ -734,46 +798,44 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       </div>
                     </div>
                   )}
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-medium mb-2 text-cyan-100">File Information</h3>
-                      <p className="text-sm text-cyan-300">Filename: {fileName}</p>
-                      <p className="text-sm text-cyan-300">Rows: {fileData.length}</p>
-                      <p className="text-sm text-cyan-300">Columns: {columns.length}</p>
+                      <h3 className="font-medium mb-2 text-[#E0E0E0]">File Information</h3>
+                      <p className="text-sm text-[#66D9EF]">Filename: {fileName}</p>
+                      <p className="text-sm text-[#66D9EF]">Rows: {fileData.length}</p>
+                      <p className="text-sm text-[#66D9EF]">Columns: {columns.length}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium mb-2 text-cyan-100">Column Types</h3>
-                      <p className="text-sm text-cyan-300">
+                      <h3 className="font-medium mb-2 text-[#E0E0E0]">Column Types</h3>
+                      <p className="text-sm text-[#66D9EF]">
                         Numeric columns: {columns.filter((c) => c.type === "number").length}
                       </p>
-                      <p className="text-sm text-cyan-300">
+                      <p className="text-sm text-[#66D9EF]">
                         Text columns: {columns.filter((c) => c.type === "text").length}
                       </p>
                     </div>
                   </div>
-
                   {columns.length > 0 && (
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border border-[#333333] rounded-lg overflow-hidden">
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-white">
+                        <table className="w-full text-sm text-[#E0E0E0]">
                           <thead>
-                            <tr className="bg-cyan-950">
-                              <th className="px-4 py-2 text-left text-cyan-200">Column Name</th>
-                              <th className="px-4 py-2 text-left text-cyan-200">Type</th>
-                              <th className="px-4 py-2 text-left text-cyan-200">Sample Value</th>
+                            <tr className="bg-[#333333]">
+                              <th className="px-4 py-2 text-left text-[#66D9EF]">Column Name</th>
+                              <th className="px-4 py-2 text-left text-[#66D9EF]">Type</th>
+                              <th className="px-4 py-2 text-left text-[#66D9EF]">Sample Value</th>
                             </tr>
                           </thead>
                           <tbody>
                             {columns.map((column, index) => (
-                              <tr key={index} className={index % 2 === 0 ? "bg-black" : "bg-gray-900"}>
-                                <td className="px-4 py-2 border-t border-cyan-800 text-cyan-100">{column.name}</td>
-                                <td className="px-4 py-2 border-t border-cyan-800">
-                                  <Badge variant="outline" className="border-cyan-500 text-cyan-300">
+                              <tr key={index} className={index % 2 === 0 ? "bg-[#1C1C1C]" : "bg-[#282828]"}>
+                                <td className="px-4 py-2 border-t border-[#333333] text-[#E0E0E0]">{column.name}</td>
+                                <td className="px-4 py-2 border-t border-[#333333]">
+                                  <Badge variant="outline" className="border-[#66D9EF] text-[#66D9EF]">
                                     {column.type}
                                   </Badge>
                                 </td>
-                                <td className="px-4 py-2 border-t border-cyan-800 text-cyan-200">
+                                <td className="px-4 py-2 border-t border-[#333333] text-[#E0E0E0]">
                                   {String(column.sample).substring(0, 30)}
                                 </td>
                               </tr>
@@ -792,60 +854,58 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         {/* choose chart */}
         {currentStep === 1 && (
           <div className="space-y-4">
-            <Card className="bg-black border border-cyan-800">
+            <Card className="bg-[#1C1C1C] border border-[#333333]">
               <CardHeader>
-                <CardTitle className="text-cyan-100">Choose Chart Type</CardTitle>
-                <CardDescription className="text-cyan-300">
+                <CardTitle className="text-[#E0E0E0]">Choose Chart Type</CardTitle>
+                <CardDescription className="text-[#66D9EF]">
                   Select the visualization that best represents your data
                 </CardDescription>
               </CardHeader>
-
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                   {chartTypes.map((chart) => (
                     <Card
                       key={chart.id}
-                      className={`cursor-pointer transition-all hover:shadow-md hover:shadow-cyan-500/20 ${
+                      className={`cursor-pointer transition-all hover:shadow-md hover:shadow-[#228DFF]/20 ${
                         selectedChart === chart.id
-                          ? "ring-2 ring-cyan-500 bg-cyan-950"
-                          : "bg-black border border-cyan-800"
+                          ? "ring-2 ring-[#228DFF] bg-[#282828]"
+                          : "bg-[#1C1C1C] border border-[#333333]"
                       }`}
                       onClick={() => handleChartTypeSelect(chart.id)}
                     >
                       <CardContent className="p-2 text-center h-36 flex flex-col items-center justify-center gap-2 rounded-md">
                         <chart.icon
-                          className={`h-6 w-6 ${selectedChart === chart.id ? "text-cyan-400" : "text-gray-400"}`}
+                          className={`h-6 w-6 ${selectedChart === chart.id ? "text-[#228DFF]" : "text-gray-400"}`}
                         />
-                        <h3 className="font-medium text-md leading-tight text-cyan-100">{chart.name}</h3>
-                        <p className="text-xs text-cyan-400 line-clamp-2 leading-tight max-w-[90%]">
+                        <h3 className="font-medium text-md leading-tight text-[#E0E0E0]">{chart.name}</h3>
+                        <p className="text-xs text-[#66D9EF] line-clamp-2 leading-tight max-w-[90%]">
                           {chart.description}
                         </p>
                         <div className="flex flex-wrap gap-1 justify-center">
                           <Badge
                             variant="outline"
-                            className="px-1 py-[1px] leading-tight whitespace-normal break-words text-[10px] max-w-[100px] border-cyan-500 text-cyan-300"
+                            className="px-1 py-[1px] leading-tight whitespace-normal break-words text-[10px] max-w-[100px] border-[#66D9EF] text-[#66D9EF]"
                           >
                             {chart.best_for}
                           </Badge>
                           {chart.is3D && (
-                            <Badge className="text-[10px] px-1 py-0 bg-cyan-600 leading-tight text-white">3D</Badge>
+                            <Badge className="text-[10px] px-1 py-0 bg-[#228DFF] leading-tight text-black">3D</Badge>
                           )}
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
-
                 {selectedChartType && (
-                  <div className="mt-6 p-4 bg-cyan-950 border border-cyan-600 rounded-lg">
+                  <div className="mt-6 p-4 bg-[#282828] border border-[#333333] rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <selectedChartType.icon className="h-5 w-5 text-cyan-400" />
-                      <h4 className="font-medium text-cyan-100">{selectedChartType.name}</h4>
+                      <selectedChartType.icon className="h-5 w-5 text-[#228DFF]" />
+                      <h4 className="font-medium text-[#E0E0E0]">{selectedChartType.name}</h4>
                     </div>
-                    <p className="text-sm text-cyan-200">{selectedChartType.description}</p>
-                    <p className="text-xs text-cyan-400 mt-1">Best for: {selectedChartType.best_for}</p>
+                    <p className="text-sm text-[#66D9EF]">{selectedChartType.description}</p>
+                    <p className="text-xs text-[#228DFF] mt-1">Best for: {selectedChartType.best_for}</p>
                     {selectedChartType.is3D && (
-                      <p className="text-xs text-cyan-300 mt-1 font-semibold">
+                      <p className="text-xs text-[#66D9EF] mt-1 font-semibold">
                         This is a 3D chart and requires X, Y, and Z axes selection.
                       </p>
                     )}
@@ -859,31 +919,31 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         {/* ask axes */}
         {currentStep === 2 && (
           <div className="space-y-4">
-            <Card className="bg-black border border-cyan-800">
+            <Card className="bg-[#1C1C1C] border border-[#333333]">
               <CardHeader>
-                <CardTitle className="text-cyan-100">Select Chart Axes</CardTitle>
-                <CardDescription className="text-cyan-300">
+                <CardTitle className="text-[#E0E0E0]">Select Chart Axes</CardTitle>
+                <CardDescription className="text-[#66D9EF]">
                   Choose which columns from your Excel file to use for {is3D ? "X, Y, and Z axes" : "X and Y axes"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className={`grid ${is3D ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"} gap-4`}>
-                  <div>
-                    <Label htmlFor="x-axis" className="text-sm font-medium text-cyan-300">
+                  <div className="space-y-2">
+                    <Label htmlFor="x-axis" className="text-sm font-medium text-[#66D9EF]">
                       X-Axis (Categories)
                     </Label>
                     <Select value={xAxis} onValueChange={setXAxis}>
-                      <SelectTrigger className="mt-1 border-cyan-600 bg-black text-white">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
                         <SelectValue placeholder="Select X-axis" />
                       </SelectTrigger>
-                      <SelectContent className="bg-black border-cyan-600 text-white">
+                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
                         {columns
                           .filter((column) => column.name !== yAxis && column.name !== zAxis)
                           .map((column) => (
                             <SelectItem key={column.name} value={column.name}>
                               <div className="flex items-center justify-between w-full">
                                 <span className="truncate">{column.name}</span>
-                                <Badge variant="outline" className="ml-2 text-xs border-cyan-500 text-cyan-300">
+                                <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                   {column.type}
                                 </Badge>
                               </div>
@@ -892,27 +952,27 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       </SelectContent>
                     </Select>
                     {xAxis && (
-                      <p className="text-xs text-cyan-300 mt-1 truncate">
+                      <p className="text-xs text-[#66D9EF] mt-1 truncate">
                         Sample: {columns.find((c) => c.name === xAxis)?.sample}
                       </p>
                     )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="y-axis" className="text-sm font-medium text-cyan-300">
+                  <div className="space-y-2">
+                    <Label htmlFor="y-axis" className="text-sm font-medium text-[#66D9EF]">
                       Y-Axis (Values)
                     </Label>
                     <Select value={yAxis} onValueChange={setYAxis}>
-                      <SelectTrigger className="mt-1 border-cyan-600 bg-black text-white">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
                         <SelectValue placeholder="Select Y-axis" />
                       </SelectTrigger>
-                      <SelectContent className="bg-black border-cyan-600 text-white">
+                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
                         {numericYAxisColumns.length > 0
                           ? numericYAxisColumns.map((column) => (
                               <SelectItem key={column.name} value={column.name}>
                                 <div className="flex items-center justify-between w-full">
                                   <span className="truncate">{column.name}</span>
-                                  <Badge variant="outline" className="ml-2 text-xs border-cyan-500 text-cyan-300">
+                                  <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                     {column.type}
                                   </Badge>
                                 </div>
@@ -922,7 +982,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                               <SelectItem key={column.name} value={column.name}>
                                 <div className="flex items-center justify-between w-full">
                                   <span className="truncate">{column.name}</span>
-                                  <Badge variant="outline" className="ml-2 text-xs border-cyan-500 text-cyan-300">
+                                  <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                     {column.type}
                                   </Badge>
                                 </div>
@@ -931,7 +991,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       </SelectContent>
                     </Select>
                     {yAxis && (
-                      <p className="text-xs text-cyan-300 mt-1 truncate">
+                      <p className="text-xs text-[#66D9EF] mt-1 truncate">
                         Sample: {columns.find((c) => c.name === yAxis)?.sample}
                       </p>
                     )}
@@ -939,21 +999,21 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
 
                   {/* 3d z axis */}
                   {is3D && (
-                    <div>
-                      <Label htmlFor="z-axis" className="text-sm font-medium text-cyan-300">
+                    <div className="space-y-2">
+                      <Label htmlFor="z-axis" className="text-sm font-medium text-[#66D9EF]">
                         Z-Axis (Depth)
                       </Label>
                       <Select value={zAxis} onValueChange={setZAxis}>
-                        <SelectTrigger className="mt-1 border-cyan-600 bg-black text-white">
+                        <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
                           <SelectValue placeholder="Select Z-axis" />
                         </SelectTrigger>
-                        <SelectContent className="bg-black border-cyan-600 text-white">
+                        <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
                           {numericZAxisColumns.length > 0
                             ? numericZAxisColumns.map((column) => (
                                 <SelectItem key={column.name} value={column.name}>
                                   <div className="flex items-center justify-between w-full">
                                     <span className="truncate">{column.name}</span>
-                                    <Badge variant="outline" className="ml-2 text-xs border-cyan-500 text-cyan-300">
+                                    <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                       {column.type}
                                     </Badge>
                                   </div>
@@ -963,7 +1023,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                                 <SelectItem key={column.name} value={column.name}>
                                   <div className="flex items-center justify-between w-full">
                                     <span className="truncate">{column.name}</span>
-                                    <Badge variant="outline" className="ml-2 text-xs border-cyan-500 text-cyan-300">
+                                    <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                       {column.type}
                                     </Badge>
                                   </div>
@@ -972,7 +1032,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                         </SelectContent>
                       </Select>
                       {zAxis && (
-                        <p className="text-xs text-cyan-300 mt-1 truncate">
+                        <p className="text-xs text-[#66D9EF] mt-1 truncate">
                           Sample: {columns.find((c) => c.name === zAxis)?.sample}
                         </p>
                       )}
@@ -981,14 +1041,14 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                 </div>
 
                 {xAxis && yAxis && (!is3D || zAxis) && (
-                  <div className="p-3 bg-cyan-950 border border-cyan-600 rounded-lg">
-                    <h4 className="font-medium text-cyan-200 mb-1 text-sm">Chart Preview</h4>
-                    <p className="text-xs text-cyan-300">
-                      Your chart will show <strong className="text-cyan-100">{yAxis}</strong> values across different{" "}
-                      <strong className="text-cyan-100">{xAxis}</strong>{" "}
+                  <div className="p-3 bg-[#282828] border border-[#333333] rounded-lg">
+                    <h4 className="font-medium text-[#E0E0E0] mb-1 text-sm">Chart Preview</h4>
+                    <p className="text-xs text-[#66D9EF]">
+                      Your chart will show <strong className="text-[#228DFF]">{yAxis}</strong> values across different{" "}
+                      <strong className="text-[#228DFF]">{xAxis}</strong>{" "}
                       {is3D && (
                         <>
-                          and <strong className="text-cyan-100">{zAxis}</strong>
+                          and <strong className="text-[#228DFF]">{zAxis}</strong>
                         </>
                       )}{" "}
                       categories
@@ -1004,13 +1064,13 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         {currentStep === 3 && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
-              <Card className="bg-black border border-cyan-800">
+              <Card className="bg-[#1C1C1C] border border-[#333333]">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-cyan-100">Chart Settings</CardTitle>
+                  <CardTitle className="text-lg text-[#E0E0E0]">Chart Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <Label htmlFor="chart-title" className="text-sm text-cyan-300">
+                    <Label htmlFor="chart-title" className="text-sm text-[#66D9EF]">
                       Chart Title
                     </Label>
                     <Input
@@ -1018,32 +1078,30 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       value={chartTitle}
                       onChange={(e) => setChartTitle(e.target.value)}
                       placeholder={`${yAxis} vs ${xAxis}${zAxis ? ` vs ${zAxis}` : ""}`}
-                      className="mt-1 border-cyan-600 bg-black text-white"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]"
                     />
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="legend-toggle" className="text-sm text-cyan-300">
+                      <Label htmlFor="legend-toggle" className="text-sm text-[#66D9EF] ">
                         Show Legend
                       </Label>
-                      <Switch id="legend-toggle" checked={showLegend} onCheckedChange={setShowLegend} />
+                      <Switch id="legend-toggle" checked={showLegend} onCheckedChange={setShowLegend} className={`border-white`}/>
                     </div>
-
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="grid-toggle" className="text-sm text-cyan-300">
+                      <Label htmlFor="grid-toggle" className="text-sm text-[#66D9EF]">
                         Show Grid Lines
                       </Label>
-                      <Switch id="grid-toggle" checked={showGrid} onCheckedChange={setShowGrid} />
+                      <Switch id="grid-toggle" checked={showGrid} onCheckedChange={setShowGrid} className={`border-white`} />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-black border border-cyan-800">
+              <Card className="bg-[#1C1C1C] border border-[#333333]">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg text-cyan-100">
-                    <Palette className="h-4 w-4" />
+                  <CardTitle className="flex items-center gap-2 text-lg text-[#E0E0E0]">
+                    <Palette className="h-4 w-4 text-[#228DFF]" />
                     Color Theme
                   </CardTitle>
                 </CardHeader>
@@ -1052,20 +1110,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     {colorThemes.map((theme) => (
                       <div
                         key={theme.name}
-                        className={`p-2 border rounded-lg cursor-pointer transition-all ${
+                        className={`p-2 border rounded-lg cursor-pointer transition-all hover:shadow-md hover:shadow-[#228DFF]/20 ${
                           selectedTheme === theme.name
-                            ? "ring-2 ring-cyan-500 bg-cyan-950"
-                            : "hover:bg-gray-900 border-cyan-700"
+                            ? "ring-2 ring-[#228DFF] bg-[#282828]"
+                            : "bg-[#1C1C1C] border border-[#333333]"
                         }`}
                         onClick={() => setSelectedTheme(theme.name)}
                       >
                         <div className="flex flex-col items-center space-y-1">
-                          <span className="font-medium text-sm text-cyan-100">{theme.name}</span>
+                          <span className="font-medium text-sm text-[#E0E0E0]">{theme.name}</span>
                           <div className="flex gap-1">
                             {theme.colors.slice(0, 4).map((color, index) => (
                               <div
                                 key={index}
-                                className="w-3 h-3 rounded-full border border-cyan-600"
+                                className="w-3 h-3 rounded-full border border-[#333333]"
                                 style={{ backgroundColor: color }}
                               />
                             ))}
@@ -1076,6 +1134,9 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* New Customization Options */}
+              
             </div>
           </div>
         )}
@@ -1084,43 +1145,42 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
         {currentStep === 4 && (
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-cyan-950 rounded-lg">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[#282828] rounded-lg">
                 <div>
-                  <p className="text-xs text-cyan-400">Chart Type</p>
-                  <p className="font-medium text-sm truncate text-cyan-100">
+                  <p className="text-xs text-[#66D9EF]">Chart Type</p>
+                  <p className="font-medium text-sm truncate text-[#E0E0E0]">
                     {selectedChartType?.name || "Not selected"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-cyan-400">X-Axis</p>
-                  <p className="font-medium text-sm truncate text-cyan-100">{xAxis || "Not selected"}</p>
+                  <p className="text-xs text-[#66D9EF]">X-Axis</p>
+                  <p className="font-medium text-sm truncate text-[#E0E0E0]">{xAxis || "Not selected"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-cyan-400">Y-Axis</p>
-                  <p className="font-medium text-sm truncate text-cyan-100">{yAxis || "Not selected"}</p>
+                  <p className="text-xs text-[#66D9EF]">Y-Axis</p>
+                  <p className="font-medium text-sm truncate text-[#E0E0E0]">{yAxis || "Not selected"}</p>
                 </div>
                 {is3D ? (
                   <div>
-                    <p className="text-xs text-cyan-400">Z-Axis</p>
-                    <p className="font-medium text-sm truncate text-cyan-100">{zAxis || "Not selected"}</p>
+                    <p className="text-xs text-[#66D9EF]">Z-Axis</p>
+                    <p className="font-medium text-sm truncate text-[#E0E0E0]">{zAxis || "Not selected"}</p>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-xs text-cyan-400">Theme</p>
-                    <p className="font-medium text-sm truncate text-cyan-100">{selectedTheme}</p>
+                    <p className="text-xs text-[#66D9EF]">Theme</p>
+                    <p className="font-medium text-sm truncate text-[#E0E0E0]">{selectedTheme}</p>
                   </div>
                 )}
               </div>
-
-              <div className="h-80 bg-white rounded-lg flex items-center justify-center p-4 border">
+              <div className="h-80 bg-[#1C1C1C] rounded-lg flex items-center justify-center p-4 border border-[#333333]">
                 {selectedChart && xAxis && yAxis && (!is3D || zAxis) && fileData.length > 0 ? (
                   <div id="plotly-chart" ref={chartRef} className="w-full h-full"></div>
                 ) : (
-                  <div className="text-center text-cyan-400">
+                  <div className="text-center text-[#66D9EF]">
                     {is3D ? (
-                      <Cube className="h-12 w-12 mx-auto mb-3 text-cyan-500" />
+                      <Cube className="h-12 w-12 mx-auto mb-3 text-[#228DFF]" />
                     ) : (
-                      <BarChart3 className="h-12 w-12 mx-auto mb-3 text-cyan-500" />
+                      <BarChart3 className="h-12 w-12 mx-auto mb-3 text-[#228DFF]" />
                     )}
                     <p className="text-sm">Complete the configuration to see the preview</p>
                     {!selectedChart && <p className="text-xs mt-1">Select a chart type</p>}
@@ -1133,12 +1193,12 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
           </CardContent>
         )}
 
-        <div className="flex justify-between pt-4 border-t">
+        <div className="flex justify-between pt-4 border-t border-[#333333]">
           {currentStep > 0 ? (
             <Button
               variant="outline"
               onClick={handlePrevStep}
-              className="flex items-center gap-2 border-cyan-500 text-cyan-400 hover:bg-cyan-950"
+              className="flex items-center gap-2 border-[#66D9EF] text-[#228DFF] hover:bg-[#282828] bg-transparent"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -1147,7 +1207,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-cyan-500 text-cyan-400 hover:bg-cyan-950"
+              className="border-[#66D9EF] text-[#228DFF] hover:bg-[#282828] bg-transparent"
             >
               Cancel
             </Button>
@@ -1157,7 +1217,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             <Button
               onClick={handleNextStep}
               disabled={!canProceedToNextStep()}
-              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white"
+              className="flex items-center gap-2 bg-[#228DFF] hover:bg-[#66D9EF] text-black"
             >
               Next
               <ArrowRight className="h-4 w-4" />
@@ -1166,7 +1226,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
             <Button
               onClick={handleCreateChart}
               disabled={!selectedChart || !xAxis || !yAxis || (is3D && !zAxis)}
-              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white"
+              className="flex items-center gap-2 bg-[#228DFF] hover:bg-[#66D9EF] text-black"
             >
               <Check className="h-4 w-4" />
               Create Chart

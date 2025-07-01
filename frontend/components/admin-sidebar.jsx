@@ -25,7 +25,6 @@ import { handleSignOut } from "@/services/api"
 const adminNavigation = [
   { name: "Admin Dashboard", href: "/admin", icon: Shield },
   { name: "User Management", href: "/admin/users", icon: Users},
-  { name: "System Activity", href: "/admin/activity", icon: Activity },
 ]
 
 const adminSecondaryNavigation = [

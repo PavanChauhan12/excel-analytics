@@ -74,10 +74,10 @@ export default function DashboardPage() {
 
           {features.map((feature, index) => {
             const positions = [
-              "top-6 left-12 rotate-[-6deg]",
-              "top-6 right-16 rotate-[6deg]",
-              "bottom-6 left-16 rotate-[6deg]",
-              "bottom-6 right-12 rotate-[-6deg]",
+              "top-6 left-12 ",
+              "top-6 right-16 ",
+              "bottom-6 left-16 ",
+              "bottom-6 right-12",
             ];
 
             return (

@@ -20,7 +20,7 @@ import Particles from "@/components/ui/particles";
 
 // Glass style for the right-side card
 const glassStyle = {
-  background: "rgba(0, 0, 0, 0.2)",
+  background: "rgba(0, 0, 0, 0.3)",
   backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(10px)",
 };
@@ -256,10 +256,7 @@ export default function AuthPage() {
               className="w-full max-w-md text-white border border-gray-800 rounded-xl py-8 px-4 relative overflow-hidden"
               style={glassStyle}
             >
-              <div className="absolute inset-0 -z-10 opacity-20">
-                <div className="absolute -left-1/4 -top-1/4 w-1/2 h-1/2 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-                <div className="absolute -right-1/4 -bottom-1/4 w-1/2 h-1/2 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-              </div>
+              
 
               <Tabs
                 value={activeTab}

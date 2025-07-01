@@ -28,8 +28,6 @@ import {
   Phone,
   ExternalLink,
   Zap,
-  BarChart3,
-  FileSpreadsheet,
   Brain,
 } from "lucide-react"
 import { AdminSidebar } from "@/components/admin-sidebar"
@@ -38,7 +36,7 @@ import Aurora from "@/components/ui/aurora"
 const adminFaqData = [
   {
     category: "User Management",
-    icon: <Users className="h-4 w-4" />,
+    
     questions: [
       {
         question: "How do I promote a user to admin?",
@@ -60,7 +58,7 @@ const adminFaqData = [
   },
   {
     category: "System Administration",
-    icon: <Settings className="h-4 w-4" />,
+
     questions: [
       {
         question: "How do I monitor system activity?",
@@ -82,7 +80,7 @@ const adminFaqData = [
   },
   {
     category: "Security & Compliance",
-    icon: <Lock className="h-4 w-4" />,
+
     questions: [
       {
         question: "How do I ensure data security?",
@@ -104,7 +102,7 @@ const adminFaqData = [
   },
   {
     category: "Advanced Features",
-    icon: <Brain className="h-4 w-4" />,
+
     questions: [
       {
         question: "What additional AI features do admins have?",
@@ -126,7 +124,7 @@ const adminFaqData = [
   },
   {
     category: "Troubleshooting",
-    icon: <AlertTriangle className="h-4 w-4" />,
+
     questions: [
       {
         question: "A user reports they can't upload files. How do I help?",
@@ -278,7 +276,7 @@ export default function AdminHelpPage() {
           </Card>
 
           <Tabs defaultValue="faq" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-red-950/20 border border-red-800">
+            <TabsList className="grid w-full grid-cols-2 bg-red-950/20 border border-red-800">
               <TabsTrigger 
                 value="faq" 
                 className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-red-300"
@@ -286,20 +284,7 @@ export default function AdminHelpPage() {
                 <Shield className="h-4 w-4 mr-2" />
                 Admin FAQ
               </TabsTrigger>
-              <TabsTrigger 
-                value="tutorials" 
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-red-300"
-              >
-                <Video className="h-4 w-4 mr-2" />
-                Tutorials
-              </TabsTrigger>
-              <TabsTrigger 
-                value="guides" 
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-red-300"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                Admin Guides
-              </TabsTrigger>
+             
               <TabsTrigger 
                 value="contact" 
                 className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-red-300"
@@ -347,9 +332,7 @@ export default function AdminHelpPage() {
                     {filteredFAQ.map((category, categoryIndex) => (
                       <div key={categoryIndex}>
                         <div className="flex items-center gap-2 mb-4">
-                          <div className="p-2 bg-red-900/20 rounded-lg border border-red-500/30">
-                            {category.icon}
-                          </div>
+                          
                           <h3 className="text-lg font-semibold text-red-300">{category.category}</h3>
                         </div>
                         

@@ -16,7 +16,7 @@ import toast from "react-hot-toast"
 const colorThemes = [
   {
     name: "Default",
-    colors: ["#03DAC6", "#66D9EF", "#FF6B6B", "#FFD700", "#8B5CF6"], // Greenish-cyan as primary
+    colors: ["#00FFFF", "#66D9EF", "#FF6B6B", "#FFD700", "#8B5CF6"], // Greenish-cyan as primary
   },
   {
     name: "Ocean",
@@ -564,8 +564,8 @@ export default function ChartPage() {
         <div className="container mx-auto py-10 px-4">
           <div className="flex items-center justify-center min-h-[50vh]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03DAC6] mx-auto mb-4"></div>
-              <p style={{ color: "#03DAC6", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}>Loading your chart...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
+              <p style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}>Loading your chart...</p>
             </div>
           </div>
         </div>
@@ -580,14 +580,14 @@ export default function ChartPage() {
           <div className="text-center">
             <h1
               className="text-2xl font-bold mb-4"
-              style={{ color: "#03DAC6", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}
+              style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}
             >
               Error
             </h1>
             <p className="text-red-500 mb-4">{error}</p>
             <Button
               onClick={() => navigate("/dashboard")}
-              className="bg-transparent hover:bg-[#03DAC6] text-[#03DAC6] hover:text-black border border-[#03DAC6]"
+              className="bg-transparent hover:bg-[#00FFFF] text-[#00FFFF] hover:text-black border border-[#00FFFF]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
@@ -605,13 +605,13 @@ export default function ChartPage() {
           <div className="text-center">
             <h1
               className="text-2xl font-bold mb-4"
-              style={{ color: "#03DAC6", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}
+              style={{ color: "#00FFFF", textShadow: "0 0 5px rgba(3, 218, 198, 0.7)" }}
             >
               Chart not found
             </h1>
             <Button
               onClick={() => navigate("/dashboard")}
-              className="bg-transparent hover:bg-[#03DAC6] text-[#03DAC6] hover:text-black border border-[#03DAC6]"
+              className="bg-transparent hover:bg-[#00FFFF] text-[#00FFFF] hover:text-black border border-[#00FFFF]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
@@ -629,8 +629,8 @@ export default function ChartPage() {
           <Button
             variant="outline"
             onClick={() => navigate("/dashboard")}
-            className="w-full sm:w-auto border-[#03DAC6] text-[#03DAC6] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
-            style={{ borderColor: "#03DAC6", color: "#03DAC6" }}
+            className="w-full sm:w-auto border-[#00FFFF] text-[#00FFFF] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
+            style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
@@ -639,8 +639,8 @@ export default function ChartPage() {
             <Button
               variant="outline"
               onClick={downloadChart}
-              className="border-[#03DAC6] text-[#03DAC6] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
-              style={{ borderColor: "#03DAC6", color: "#03DAC6" }}
+              className="border-[#00FFFF] text-[#00FFFF] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
+              style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
             >
               <Download className="h-4 w-4 mr-2" />
               Download PNG
@@ -648,8 +648,8 @@ export default function ChartPage() {
             <Button
               variant="outline"
               onClick={shareChart}
-              className="border-[#03DAC6] text-[#03DAC6] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
-              style={{ borderColor: "#03DAC6", color: "#03DAC6" }}
+              className="border-[#00FFFF] text-[#00FFFF] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
+              style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share
@@ -657,8 +657,8 @@ export default function ChartPage() {
             <Button
               variant="outline"
               onClick={() => setShowCustomization(!showCustomization)}
-              className="border-[#03DAC6] text-[#03DAC6] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
-              style={{ borderColor: "#03DAC6", color: "#03DAC6" }}
+              className="border-[#00FFFF] text-[#00FFFF] hover:bg-[#1C1C1C] hover:border-[#66D9EF] bg-transparent"
+              style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
             >
               <Settings className="h-4 w-4 mr-2" />
               {showCustomization ? "Hide" : "Customize"}
@@ -672,12 +672,12 @@ export default function ChartPage() {
               className="lg:col-span-1 text-white border border-[#333333] rounded-xl py-4 px-6 relative overflow-hidden max-h-[calc(100vh-150px)] overflow-y-auto"
               style={{
                 backgroundColor: "rgba(28, 28, 28, 0.8)", // Slightly transparent dark gray
-                borderColor: "#03DAC6", // Primary accent border
+                borderColor: "#00FFFF", // Primary accent border
                 boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)", // Primary accent shadow
               }}
             >
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg text-[#03DAC6]">
+                <CardTitle className="flex items-center gap-2 text-lg text-[#00FFFF]">
                   <Settings className="h-5 w-5" />
                   Chart Customization
                 </CardTitle>
@@ -697,7 +697,7 @@ export default function ChartPage() {
                       value={currentChartTitle}
                       onChange={(e) => setCurrentChartTitle(e.target.value)}
                       placeholder="Enter chart title"
-                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -705,7 +705,7 @@ export default function ChartPage() {
                       Color Theme
                     </Label>
                     <Select value={currentSelectedTheme} onValueChange={setCurrentSelectedTheme}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                         <SelectValue placeholder="Select theme" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -744,7 +744,7 @@ export default function ChartPage() {
                 <Separator className="my-4 bg-[#333333]" />
 
                 {/* Background & Global Font Colors */}
-                <h5 className="text-md font-medium text-[#03DAC6]">Background & Global Colors</h5>
+                <h5 className="text-md font-medium text-[#00FFFF]">Background & Global Colors</h5>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="plot-bg-color" className="text-sm text-[#66D9EF]">
@@ -796,7 +796,7 @@ export default function ChartPage() {
                       onChange={(e) => setCurrentGlobalFontSize(Number(e.target.value))}
                       min="8"
                       max="32"
-                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -804,7 +804,7 @@ export default function ChartPage() {
                       Global Font Family
                     </Label>
                     <Select value={currentGlobalFontFamily} onValueChange={setCurrentGlobalFontFamily}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                         <SelectValue placeholder="Select font" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -821,7 +821,7 @@ export default function ChartPage() {
                 <Separator className="my-4 bg-[#333333]" />
 
                 {/* Font Customization */}
-                <h5 className="text-md font-medium text-[#03DAC6]">Legend Font</h5>
+                <h5 className="text-md font-medium text-[#00FFFF]">Legend Font</h5>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="legend-font-size" className="text-sm text-[#66D9EF]">
@@ -834,7 +834,7 @@ export default function ChartPage() {
                       onChange={(e) => setCurrentLegendFontSize(Number(e.target.value))}
                       min="8"
                       max="32"
-                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -854,7 +854,7 @@ export default function ChartPage() {
                       Font Family
                     </Label>
                     <Select value={currentLegendFontFamily} onValueChange={setCurrentLegendFontFamily}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                         <SelectValue placeholder="Select font" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -870,7 +870,7 @@ export default function ChartPage() {
 
                 <Separator className="my-4 bg-[#333333]" />
 
-                <h5 className="text-md font-medium text-[#03DAC6]">X-Axis Label Font</h5>
+                <h5 className="text-md font-medium text-[#00FFFF]">X-Axis Label Font</h5>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="xaxis-font-size" className="text-sm text-[#66D9EF]">
@@ -883,7 +883,7 @@ export default function ChartPage() {
                       onChange={(e) => setCurrentXAxisLabelFontSize(Number(e.target.value))}
                       min="8"
                       max="32"
-                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -903,7 +903,7 @@ export default function ChartPage() {
                       Font Family
                     </Label>
                     <Select value={currentXAxisLabelFontFamily} onValueChange={setCurrentXAxisLabelFontFamily}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                         <SelectValue placeholder="Select font" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -919,7 +919,7 @@ export default function ChartPage() {
 
                 <Separator className="my-4 bg-[#333333]" />
 
-                <h5 className="text-md font-medium text-[#03DAC6]">Y-Axis Label Font</h5>
+                <h5 className="text-md font-medium text-[#00FFFF]">Y-Axis Label Font</h5>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="yaxis-font-size" className="text-sm text-[#66D9EF]">
@@ -932,7 +932,7 @@ export default function ChartPage() {
                       onChange={(e) => setCurrentYAxisLabelFontSize(Number(e.target.value))}
                       min="8"
                       max="32"
-                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                      className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -952,7 +952,7 @@ export default function ChartPage() {
                       Font Family
                     </Label>
                     <Select value={currentYAxisLabelFontFamily} onValueChange={setCurrentYAxisLabelFontFamily}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                         <SelectValue placeholder="Select font" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -969,7 +969,7 @@ export default function ChartPage() {
                 {chartConfig.is3D && (
                   <>
                     <Separator className="my-4 bg-[#333333]" />
-                    <h5 className="text-md font-medium text-[#03DAC6]">Z-Axis Label Font</h5>
+                    <h5 className="text-md font-medium text-[#00FFFF]">Z-Axis Label Font</h5>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="zaxis-font-size" className="text-sm text-[#66D9EF]">
@@ -982,7 +982,7 @@ export default function ChartPage() {
                           onChange={(e) => setCurrentZAxisLabelFontSize(Number(e.target.value))}
                           min="8"
                           max="32"
-                          className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]"
+                          className="mt-1 border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1002,7 +1002,7 @@ export default function ChartPage() {
                           Font Family
                         </Label>
                         <Select value={currentZAxisLabelFontFamily} onValueChange={setCurrentZAxisLabelFontFamily}>
-                          <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#03DAC6] focus:ring-1 focus:ring-[#03DAC6]">
+                          <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF]">
                             <SelectValue placeholder="Select font" />
                           </SelectTrigger>
                           <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
@@ -1020,7 +1020,7 @@ export default function ChartPage() {
                 <div className="flex justify-end pt-4">
                   <Button
                     onClick={saveCustomization}
-                    className="flex items-center gap-2 bg-[#03DAC6] hover:bg-[#66D9EF] text-black"
+                    className="flex items-center gap-2 bg-[#00FFFF] hover:bg-[#66D9EF] text-black"
                   >
                     <Save className="h-4 w-4" />
                     Save Customization
@@ -1034,13 +1034,13 @@ export default function ChartPage() {
             <Card
               style={{
                 backgroundColor: "rgba(28, 28, 28, 0.8)",
-                borderColor: "#03DAC6",
+                borderColor: "#00FFFF",
                 boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)",
               }}
             >
               <CardHeader style={{ borderBottomColor: "rgba(3, 218, 198, 0.3)" }}>
-                <CardTitle className="flex items-center gap-2" style={{ color: "#03DAC6" }}>
-                  {chartConfig.is3D && <Cube className="h-5 w-5" style={{ color: "#03DAC6" }} />}
+                <CardTitle className="flex items-center gap-2" style={{ color: "#00FFFF" }}>
+                  {chartConfig.is3D && <Cube className="h-5 w-5" style={{ color: "#00FFFF" }} />}
                   {currentChartTitle}
                 </CardTitle>
                 <CardDescription style={{ color: "rgba(102, 217, 239, 0.7)" }}>
@@ -1059,43 +1059,43 @@ export default function ChartPage() {
               <Card
                 style={{
                   backgroundColor: "rgba(28, 28, 28, 0.8)",
-                  borderColor: "#03DAC6",
+                  borderColor: "#00FFFF",
                   boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)",
                 }}
               >
                 <CardContent className="p-4">
                   <p style={{ color: "rgba(102, 217, 239, 0.7)", fontSize: "0.875rem" }}>Chart Type</p>
-                  <p style={{ color: "#03DAC6", fontWeight: "600", textTransform: "capitalize" }}>{chartConfig.type}</p>
+                  <p style={{ color: "#00FFFF", fontWeight: "600", textTransform: "capitalize" }}>{chartConfig.type}</p>
                 </CardContent>
               </Card>
               <Card
                 style={{
                   backgroundColor: "rgba(28, 28, 28, 0.8)",
-                  borderColor: "#03DAC6",
+                  borderColor: "#00FFFF",
                   boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)",
                 }}
               >
                 <CardContent className="p-4">
                   <p style={{ color: "rgba(102, 217, 239, 0.7)", fontSize: "0.875rem" }}>X-Axis</p>
-                  <p style={{ color: "#03DAC6", fontWeight: "600" }}>{chartConfig.xAxis}</p>
+                  <p style={{ color: "#00FFFF", fontWeight: "600" }}>{chartConfig.xAxis}</p>
                 </CardContent>
               </Card>
               <Card
                 style={{
                   backgroundColor: "rgba(28, 28, 28, 0.8)",
-                  borderColor: "#03DAC6",
+                  borderColor: "#00FFFF",
                   boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)",
                 }}
               >
                 <CardContent className="p-4">
                   <p style={{ color: "rgba(102, 217, 239, 0.7)", fontSize: "0.875rem" }}>Y-Axis</p>
-                  <p style={{ color: "#03DAC6", fontWeight: "600" }}>{chartConfig.yAxis}</p>
+                  <p style={{ color: "#00FFFF", fontWeight: "600" }}>{chartConfig.yAxis}</p>
                 </CardContent>
               </Card>
               <Card
                 style={{
                   backgroundColor: "rgba(28, 28, 28, 0.8)",
-                  borderColor: "#03DAC6",
+                  borderColor: "#00FFFF",
                   boxShadow: "0 0 10px rgba(3, 218, 198, 0.3)",
                 }}
               >
@@ -1103,7 +1103,7 @@ export default function ChartPage() {
                   <p style={{ color: "rgba(102, 217, 239, 0.7)", fontSize: "0.875rem" }}>
                     {chartConfig.is3D ? "Z-Axis" : "Data Points"}
                   </p>
-                  <p style={{ color: "#03DAC6", fontWeight: "600" }}>
+                  <p style={{ color: "#00FFFF", fontWeight: "600" }}>
                     {chartConfig.is3D ? chartConfig.zAxis : chartConfig.xData?.length || 0}
                   </p>
                 </CardContent>

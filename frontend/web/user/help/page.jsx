@@ -175,36 +175,6 @@ const faqData = [
   }
 ]
 
-const tutorialVideos = [
-  {
-    title: "Getting Started with Excel Analytics",
-    description: "Learn the basics of uploading files and navigating the dashboard",
-    duration: "3:45",
-    thumbnail: "🎬",
-    url: "#"
-  },
-  {
-    title: "Creating Your First Chart",
-    description: "Step-by-step guide to creating beautiful visualizations",
-    duration: "5:20",
-    thumbnail: "📊",
-    url: "#"
-  },
-  {
-    title: "Advanced 3D Visualizations",
-    description: "Master 3D charts and surface plots for complex data",
-    duration: "7:15",
-    thumbnail: "🎯",
-    url: "#"
-  },
-  {
-    title: "AI Insights and Analysis",
-    description: "Leverage AI to discover patterns in your data",
-    duration: "4:30",
-    thumbnail: "🤖",
-    url: "#"
-  }
-]
 
 const quickActions = [
   {
@@ -263,7 +233,7 @@ export default function UserHelpPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
               Help & Support
             </h1>
-            <p className="text-slate-400">Find answers, tutorials, and get the help you need</p>
+            <p className="text-slate-400">Find answers and get the help you need</p>
           </div>
 
           {/* Quick Actions */}
@@ -297,8 +267,8 @@ export default function UserHelpPage() {
             </CardContent>
           </Card>
 
-          <Tabs defaultValue="faq" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-cyan-500/30">
+          <Tabs defaultValue="faq" className="w-full ">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-cyan-500/30">
               <TabsTrigger 
                 value="faq" 
                 className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-cyan-300"
@@ -306,20 +276,8 @@ export default function UserHelpPage() {
                 <HelpCircle className="h-4 w-4 mr-2" />
                 FAQ
               </TabsTrigger>
-              <TabsTrigger 
-                value="tutorials" 
-                className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-cyan-300"
-              >
-                <Video className="h-4 w-4 mr-2" />
-                Tutorials
-              </TabsTrigger>
-              <TabsTrigger 
-                value="guides" 
-                className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-cyan-300"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                Guides
-              </TabsTrigger>
+             
+             
               <TabsTrigger 
                 value="contact" 
                 className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-cyan-300"
@@ -402,98 +360,8 @@ export default function UserHelpPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="tutorials" className="mt-6">
-              <Card className="bg-transparent border border-blue-900/50 shadow-xl backdrop-blur-3xl">
-                <CardHeader>
-                  <CardTitle className="text-cyan-400">Video Tutorials</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Step-by-step video guides to help you master the platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {tutorialVideos.map((video, index) => (
-                      <div key={index} className="border border-cyan-500/30 rounded-lg p-4 bg-slate-800/30 hover:bg-slate-800/50 transition-colors">
-                        <div className="flex items-start gap-4">
-                          <div className="text-4xl">{video.thumbnail}</div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-cyan-200 mb-1">{video.title}</h4>
-                            <p className="text-sm text-slate-400 mb-2">{video.description}</p>
-                            <div className="flex items-center justify-between">
-                              <Badge variant="outline" className="border-cyan-500 text-cyan-300">
-                                {video.duration}
-                              </Badge>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="border-cyan-500 text-cyan-400 hover:bg-cyan-900/20"
-                              >
-                                <ExternalLink className="h-3 w-3 mr-1" />
-                                Watch
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="guides" className="mt-6">
-              <Card className="bg-transparent border border-blue-900/50 shadow-xl backdrop-blur-3xl">
-                <CardHeader>
-                  <CardTitle className="text-cyan-400">User Guides</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Comprehensive guides for advanced features
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="border border-cyan-500/30 rounded-lg p-4 bg-slate-800/30">
-                      <h4 className="font-semibold text-cyan-200 mb-2">📊 Advanced Chart Creation</h4>
-                      <p className="text-slate-400 text-sm mb-3">
-                        Learn how to create complex visualizations with multiple data series, custom styling, and interactive features.
-                      </p>
-                      <Button size="sm" variant="outline" className="border-cyan-500 text-cyan-400">
-                        Read Guide
-                      </Button>
-                    </div>
-                    
-                    <div className="border border-cyan-500/30 rounded-lg p-4 bg-slate-800/30">
-                      <h4 className="font-semibold text-cyan-200 mb-2">🤖 AI Features Deep Dive</h4>
-                      <p className="text-slate-400 text-sm mb-3">
-                        Maximize the potential of AI insights, understand recommendations, and learn best practices for data analysis.
-                      </p>
-                      <Button size="sm" variant="outline" className="border-cyan-500 text-cyan-400">
-                        Read Guide
-                      </Button>
-                    </div>
-                    
-                    <div className="border border-cyan-500/30 rounded-lg p-4 bg-slate-800/30">
-                      <h4 className="font-semibold text-cyan-200 mb-2">🔧 Data Preparation Tips</h4>
-                      <p className="text-slate-400 text-sm mb-3">
-                        Best practices for preparing your Excel files for optimal analysis and visualization results.
-                      </p>
-                      <Button size="sm" variant="outline" className="border-cyan-500 text-cyan-400">
-                        Read Guide
-                      </Button>
-                    </div>
-                    
-                    <div className="border border-cyan-500/30 rounded-lg p-4 bg-slate-800/30">
-                      <h4 className="font-semibold text-cyan-200 mb-2">🎨 Customization & Themes</h4>
-                      <p className="text-slate-400 text-sm mb-3">
-                        Master chart customization, color themes, and styling options to create professional visualizations.
-                      </p>
-                      <Button size="sm" variant="outline" className="border-cyan-500 text-cyan-400">
-                        Read Guide
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            
+           
 
             <TabsContent value="contact" className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

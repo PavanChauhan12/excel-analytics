@@ -82,6 +82,63 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
   }
 });
 
+// Delete file endpoint
+router.delete('/files/:fileId', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const fileId = req.params.fileId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find the file in user's excelRecords
+    const fileIndex = user.excelRecords.findIndex(
+      record => record._id.toString() === fileId
+    );
+
+    if (fileIndex === -1) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    const fileRecord = user.excelRecords[fileIndex];
+    
+    // Remove the file from filesystem if it exists
+    const filePath = path.join(__dirname, '..', 'uploads', fileRecord.filename);
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (fsError) {
+        console.error('Error deleting physical file:', fsError);
+        // Continue with database deletion even if file deletion fails
+      }
+    }
+
+    // Remove charts created from this file
+    user.chartRecords = user.chartRecords.filter(
+      chart => chart.fromExcelFile !== fileRecord.filename
+    );
+
+    // Remove the file record from user's excelRecords
+    user.excelRecords.splice(fileIndex, 1);
+    
+    await user.save();
+
+    res.status(200).json({
+      message: 'File deleted successfully',
+      deletedFile: fileRecord.filename
+    });
+
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    res.status(500).json({
+      message: 'Error deleting file',
+      error: error.message
+    });
+  }
+});
+
 router.get('/dashboard', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id; // token gives id as 'id', not '_id'

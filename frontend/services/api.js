@@ -153,10 +153,20 @@ export const getUserProfile = async () => {
   return response.data
 }
 
+export const updateUserProfile = async (profileData) => {
+  const token = localStorage.getItem("token")
+  const response = await axios.put(`${baseurl}/api/user/profile`, profileData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
+}
+
 export const requestAdminAccess = async ({ reason, experience }) => {
   const token = localStorage.getItem("token")
   const response = await axios.post(
-    `${baseurl}/admin/request`,
+    `${baseurl}/api/user/admin-request`,
     { reason, experience },
     {
       headers: {

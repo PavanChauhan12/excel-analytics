@@ -7,16 +7,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { User, Mail, Calendar, Shield, Send, CheckCircle, Clock } from "lucide-react"
+import { User, Mail, Calendar, Shield, Send, CheckCircle, Clock, Save, Edit, X } from "lucide-react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { toast } from "sonner"
-// import { getUserProfile, requestAdminAccess } from "@/services/api"
+import { getUserProfile, updateUserProfile, requestAdminAccess } from "@/services/api"
 import Iridescence from "@/components/ui/iridescence"
 
 export default function UserSettings() {
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [requestLoading, setRequestLoading] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [saving, setSaving] = useState(false)
+  
+  // Editable profile fields
+  const [editableProfile, setEditableProfile] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+  })
+  
   const [adminRequest, setAdminRequest] = useState({
     reason: "",
     experience: "",
@@ -31,12 +41,59 @@ export default function UserSettings() {
     try {
       const profile = await getUserProfile()
       setUserProfile(profile)
+      setEditableProfile({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        username: profile.username || "",
+      })
       setAdminRequest((prev) => ({ ...prev, status: profile.adminRequestStatus }))
     } catch (error) {
       toast.error("Failed to load profile")
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSaveProfile = async () => {
+    // Validate required fields
+    if (!editableProfile.firstName.trim() || !editableProfile.lastName.trim() || !editableProfile.username.trim()) {
+      toast.error("All fields are required")
+      return
+    }
+
+    setSaving(true)
+    try {
+      const response = await updateUserProfile(editableProfile)
+      
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        firstName: editableProfile.firstName,
+        lastName: editableProfile.lastName,
+        username: editableProfile.username,
+      }))
+      
+      // Update localStorage
+      localStorage.setItem("username", editableProfile.username)
+      
+      setEditMode(false)
+      toast.success("Profile updated successfully!")
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to update profile"
+      toast.error(errorMessage)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancelEdit = () => {
+    // Reset to original values
+    setEditableProfile({
+      firstName: userProfile?.firstName || "",
+      lastName: userProfile?.lastName || "",
+      username: userProfile?.username || "",
+    })
+    setEditMode(false)
   }
 
   const handleRequestAdminAccess = async () => {
@@ -54,7 +111,8 @@ export default function UserSettings() {
       toast.success("Admin access request submitted successfully!")
       setAdminRequest((prev) => ({ ...prev, status: "pending" }))
     } catch (error) {
-      toast.error("Failed to submit admin request")
+      const errorMessage = error.response?.data?.message || "Failed to submit admin request"
+      toast.error(errorMessage)
     } finally {
       setRequestLoading(false)
     }
@@ -91,30 +149,99 @@ export default function UserSettings() {
           {/* Profile Information */}
           <Card className="bg-transparent border border-blue-900/50 shadow-xl backdrop-blur-3xl shadow-[0_0_20px_rgba(0,191,255,0.1)]">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Profile Information
-              </CardTitle>
-              <CardDescription className="text-slate-400">Your account details and information</CardDescription>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-cyan-400" />
+                  <CardTitle className="text-cyan-400">Profile Information</CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  {editMode ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        className="border-red-500 text-red-400 hover:bg-red-900/20"
+                        disabled={saving}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveProfile}
+                        disabled={saving}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                      >
+                        {saving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-1" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditMode(true)}
+                      className="border-cyan-500 text-cyan-400 hover:bg-cyan-900/20"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <CardDescription className="text-slate-400">
+                {editMode ? "Edit your account details" : "Your account details and information"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-cyan-300">First Name</Label>
                   <Input
-                    value={userProfile?.firstName || ""}
-                    readOnly
-                    className="bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400"
+                    value={editMode ? editableProfile.firstName : userProfile?.firstName || ""}
+                    onChange={(e) => editMode && setEditableProfile(prev => ({ ...prev, firstName: e.target.value }))}
+                    readOnly={!editMode}
+                    className={`bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400 ${
+                      editMode ? "cursor-text" : "cursor-default"
+                    }`}
+                    placeholder={editMode ? "Enter first name" : ""}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-cyan-300">Last Name</Label>
                   <Input
-                    value={userProfile?.lastName || ""}
-                    readOnly
-                    className="bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400"
+                    value={editMode ? editableProfile.lastName : userProfile?.lastName || ""}
+                    onChange={(e) => editMode && setEditableProfile(prev => ({ ...prev, lastName: e.target.value }))}
+                    readOnly={!editMode}
+                    className={`bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400 ${
+                      editMode ? "cursor-text" : "cursor-default"
+                    }`}
+                    placeholder={editMode ? "Enter last name" : ""}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-cyan-300">Username</Label>
+                <Input
+                  value={editMode ? editableProfile.username : userProfile?.username || ""}
+                  onChange={(e) => editMode && setEditableProfile(prev => ({ ...prev, username: e.target.value }))}
+                  readOnly={!editMode}
+                  className={`bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400 ${
+                    editMode ? "cursor-text" : "cursor-default"
+                  }`}
+                  placeholder={editMode ? "Enter username" : ""}
+                />
               </div>
 
               <div className="space-y-2">
@@ -125,8 +252,9 @@ export default function UserSettings() {
                 <Input
                   value={userProfile?.email || ""}
                   readOnly
-                  className="bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400"
+                  className="bg-slate-800/50 border-cyan-500/30 text-white cursor-default opacity-75"
                 />
+                <p className="text-xs text-slate-400">Email cannot be changed</p>
               </div>
 
               <div className="flex items-center gap-4">

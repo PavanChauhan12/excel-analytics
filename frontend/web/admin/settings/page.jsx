@@ -197,7 +197,7 @@ export default function AdminSettings() {
                           </div>
                           <div>
                             <h4 className="font-medium text-white">
-                              {request.user.firstName} {request.user.lastName}
+                              {request.user.firstName || request.user.username} {request.user.lastName || ""}
                             </h4>
                             <p className="text-sm text-red-300">{request.user.email}</p>
                           </div>

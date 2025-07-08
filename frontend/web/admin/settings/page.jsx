@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { User, Mail, Calendar, Shield, Crown, Check, X, Clock, AlertCircle } from "lucide-react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { toast } from "sonner"
-// import { getUserProfile, getAdminRequests, approveAdminRequest, rejectAdminRequest } from "@/services/api"
+import { getUserProfile, getAdminRequests, approveAdminRequest, rejectAdminRequest } from "@/services/api"
 import Iridescence from "@/components/ui/iridescence"
 import { AdminSidebar } from "@/components/admin-sidebar"
 
@@ -25,10 +25,16 @@ export default function AdminSettings() {
 
   const fetchData = async () => {
     try {
-      const [profile, requests] = await Promise.all([getUserProfile(), getAdminRequests()])
+      const profile = await getUserProfile()
       setUserProfile(profile)
-      setAdminRequests(requests)
+      
+      // Only fetch admin requests if user is admin
+      if (profile.role === 'admin') {
+        const requests = await getAdminRequests()
+        setAdminRequests(requests)
+      }
     } catch (error) {
+      console.error("Error fetching data:", error)
       toast.error("Failed to load data")
     } finally {
       setLoading(false)
@@ -53,8 +59,11 @@ export default function AdminSettings() {
     try {
       await rejectAdminRequest(requestId)
       toast.success("Admin request rejected")
-      fetchData()
+      // Refresh the admin requests
+      const requests = await getAdminRequests()
+      setAdminRequests(requests)
     } catch (error) {
+      console.error("Error rejecting request:", error)
       toast.error("Failed to reject request")
     } finally {
       setRequestsLoading(false)
@@ -64,9 +73,12 @@ export default function AdminSettings() {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-[#0a0f1c] text-white">
-        <AdminSidebar/>
+        <AdminSidebar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-red-400">Loading...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+            <p className="text-red-400">Loading admin settings...</p>
+          </div>
         </div>
       </div>
     )
@@ -75,10 +87,10 @@ export default function AdminSettings() {
   return (
     <div className="flex min-h-screen bg-[#0a0f1c] overflow-hidden text-white relative">
       <div className="absolute inset-0 z-0 opacity-20 h-full">
-        <Iridescence color={ [1, 0.2, 0.2]} />
+        <Iridescence color={[1, 0.2, 0.2]} />
       </div>
 
-      <AdminSidebar/>
+      <AdminSidebar />
 
       <div className="flex flex-col flex-1 relative z-0">
         <main className="flex-1 p-6 space-y-6">

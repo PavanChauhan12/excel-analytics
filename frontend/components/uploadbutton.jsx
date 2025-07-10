@@ -69,9 +69,42 @@ export function UploadButton({ onUploadSuccess, onUploadError, children, file, d
       toast.success("Upload completed!")
     } catch (error) {
       console.error("Upload failed:", error)
-      const errorMsg = error.response?.data?.message || error.message || "Upload failed"
+      
+      // Better error handling for different types of errors
+      let errorMsg = "Upload failed"
+      
+      if (error.response) {
+        // Server responded with error status
+        const status = error.response.status
+        const data = error.response.data
+        
+        switch (status) {
+          case 400:
+            errorMsg = data?.message || data?.error || "Invalid file format or corrupted file"
+            break
+          case 401:
+            errorMsg = "Authentication failed. Please log in again."
+            break
+          case 413:
+            errorMsg = "File too large. Please upload a file smaller than 50MB."
+            break
+          case 500:
+            errorMsg = data?.message || data?.error || "Server error. Please try again or contact support."
+            break
+          default:
+            errorMsg = data?.message || data?.error || `Server error (${status}). Please try again.`
+        }
+      } else if (error.request) {
+        // Network error
+        errorMsg = "Network error. Please check your connection and try again."
+      } else {
+        // Other error
+        errorMsg = error.message || "An unexpected error occurred"
+      }
+      
       setError(errorMsg)
       onUploadError?.(error)
+      toast.error(errorMsg)
     } finally {
       setUploading(false)
       setUploadProgress(0)

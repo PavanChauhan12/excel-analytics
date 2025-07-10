@@ -87,16 +87,6 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
       (record) => record.filename === req.file.filename
     );
 
-    // Clean up the uploaded file after processing
-    try {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log('Cleaned up uploaded file:', filePath);
-      }
-    } catch (cleanupError) {
-      console.error('Error cleaning up file:', cleanupError);
-      // Don't fail the request for cleanup errors
-    }
 
     if (alreadyUploaded) {
       return res.status(200).json({
@@ -110,16 +100,22 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
       });
     }
 
+    // Generate a unique file ID for database storage
+    const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    
     // Only add to DB if it's a new file
     user.excelRecords.push({
+      fileId: fileId,
       uploaderEmail: email,
       filename: req.file.originalname || req.file.filename,
+      storedFilename: req.file.filename, // Store the actual filename on disk
       filesize: fileSizeKB,
       data: data,
       rows: rowCount,
       columns: columnCount,
       uploadedBy: userId,
-      uploadedAt: new Date()
+      uploadedAt: new Date(),
+      filePath: `/uploads/${req.file.filename}` // Store relative path for serving
     });
 
     await user.save();
@@ -128,12 +124,14 @@ router.post('/upload', verifyToken, upload.single("excelFile"), async (req, res)
 
     res.status(200).json({
       message: 'File uploaded and saved to user document',
+      fileId: fileId,
       filename: req.file.originalname || req.file.filename,
       fileSize: fileSizeKB + ' KB',
       data: data.slice(0, 10), // Return first 10 rows as preview
       uploaderEmail: email,
       rowCount,
-      columnCount
+      columnCount,
+      filePath: `/uploads/${req.file.filename}`
     });
 
   } catch (error) {
@@ -240,12 +238,16 @@ router.get('/dashboard', verifyToken, async (req, res) => {
         
         return {
           id: record._id,
+          fileId: record.fileId,
           filename: record.filename,
+          storedFilename: record.storedFilename,
           filesize: record.filesize + ' KB',
           uploadedAt: record.uploadedAt,
           rows: record.rows,
           columns: record.columns,
           charts: chartsLinked, 
+          filePath: record.filePath || `/uploads/${record.storedFilename || record.filename}`,
+          hasOriginalFile: true // Indicate that original file is available
         };
       })
     });
@@ -253,6 +255,76 @@ router.get('/dashboard', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     res.status(500).json({ message: 'Error fetching dashboard data', error: error.message });
+  }
+});
+
+// New endpoint to serve file data for chart creation
+router.get('/file/:fileId', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const fileId = req.params.fileId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find the file record
+    const fileRecord = user.excelRecords.find(record => 
+      record._id.toString() === fileId || record.fileId === fileId
+    );
+
+    if (!fileRecord) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Check if we have the data stored in the database
+    if (fileRecord.data && fileRecord.data.length > 0) {
+      return res.status(200).json({
+        success: true,
+        filename: fileRecord.filename,
+        data: fileRecord.data,
+        rows: fileRecord.rows,
+        columns: fileRecord.columns,
+        source: 'database'
+      });
+    }
+
+    // If no data in database, try to read from file system
+    const storedFilename = fileRecord.storedFilename || fileRecord.filename;
+    const filePath = path.join(__dirname, '..', 'uploads', storedFilename);
+    
+    if (fs.existsSync(filePath)) {
+      try {
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        
+        return res.status(200).json({
+          success: true,
+          filename: fileRecord.filename,
+          data: data,
+          rows: data.length,
+          columns: data[0]?.length || 0,
+          source: 'filesystem'
+        });
+      } catch (readError) {
+        console.error('Error reading file from filesystem:', readError);
+      }
+    }
+
+    return res.status(404).json({ 
+      message: 'File data not available',
+      error: 'Could not retrieve file data from database or filesystem'
+    });
+
+  } catch (error) {
+    console.error('Error retrieving file data:', error);
+    res.status(500).json({ 
+      message: 'Error retrieving file data', 
+      error: error.message 
+    });
   }
 });
 

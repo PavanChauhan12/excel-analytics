@@ -94,11 +94,7 @@ export default function FilesPage() {
         },
       })
       .then((res) => {
-        const filesWithPaths = (res.data?.records || []).map(file => ({
-          ...file,
-          path: `${baseurl}/uploads/${file.filename}` // <- added
-        }));
-        setUploadedFiles(filesWithPaths);
+        setUploadedFiles(res.data?.records || []);
       })
       .catch((err) => console.error("Failed to fetch dashboard data:", err));
   };

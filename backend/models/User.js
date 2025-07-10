@@ -12,6 +12,11 @@ const UserSchema = new mongoose.Schema({
   lastName: { type: String },
   createdAt: { type: Date, default: Date.now },
   excelRecords: [{
+    fileId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
     uploaderEmail: {
         type: String,
         required: true,
@@ -19,6 +24,9 @@ const UserSchema = new mongoose.Schema({
       filename: {
         type: String,
         required: true,
+      },
+      storedFilename: {
+        type: String,
       },
       filesize: {
         type: Number,
@@ -37,7 +45,8 @@ const UserSchema = new mongoose.Schema({
         default: Date.now,
       },
       rows: { type: Number}, 
-      columns: { type: Number }
+      columns: { type: Number },
+      filePath: { type: String }
   }],
   chartRecords: [
   {

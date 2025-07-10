@@ -160,9 +160,29 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile)
-      if (selectedFile?.name) {
-        setFileName(selectedFile.name)
+      if (selectedFile.isVirtualFile) {
+        // Handle virtual file (data from backend)
+        console.log("Processing virtual file:", selectedFile);
+        setFileData(selectedFile.data);
+        setFileName(selectedFile.name);
+        
+        const headers = Object.keys(selectedFile.data[0] || {});
+        const columnsWithTypes = headers.map((header) => {
+          const detectedType = detectColumnType(header, selectedFile.data);
+          return {
+            name: header,
+            type: detectedType,
+            sample: selectedFile.data[0][header],
+          };
+        });
+        setColumns(columnsWithTypes);
+        setIsProcessing(false);
+      } else {
+        // Handle regular file upload
+        processExcelFile(selectedFile);
+        if (selectedFile?.name) {
+          setFileName(selectedFile.name);
+        }
       }
     }
   }, [selectedFile, open])

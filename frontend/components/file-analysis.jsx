@@ -9,40 +9,61 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function FileAnalysisInlineView({ file, onClose }) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [actualFile, setActualFile] = useState(null);
+  const [fileData, setFileData] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // When the component mounts or file changes, try to retrieve the actual file
+  // When the component mounts or file changes, try to retrieve the file data
   useEffect(() => {
-  console.log("file received:", file);
+    console.log("file received:", file);
 
-  if (file && file.originalFile) {
-    console.log("Using originalFile:", file.originalFile);
-    setActualFile(file.originalFile);
-  } else if (file && file.path) {
-    console.log("Fetching from path:", file.path);
-    fetchFileFromStorage(file.path)
-      .then((fileBlob) => {
-        console.log("Fetched fileBlob:", fileBlob);
-        setActualFile(fileBlob);
-      })
-      .catch((err) => {
-        console.error("Failed to retrieve file:", err);
-        setError("Could not retrieve the original file for chart creation.");
+    if (file && file.originalFile) {
+      console.log("Using originalFile:", file.originalFile);
+      setFileData(file.originalFile);
+    } else if (file && (file.id || file.fileId)) {
+      console.log("Fetching file data from server:", file.id || file.fileId);
+      fetchFileData(file.id || file.fileId);
+    } else {
+      setError("File data is not available for chart creation.");
+    }
+  }, [file]);
+
+  // Function to fetch file data from backend
+  const fetchFileData = async (fileId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/file/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-  } else {
-    setError("File data is not available for chart creation.");
-  }
-}, [file]);
 
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file data: ${response.status}`);
+      }
 
-  // Function to fetch file from storage if needed
-  const fetchFileFromStorage = async (path) => {
-  const response = await fetch(path);
-  if (!response.ok) throw new Error("Failed to fetch file from server");
-  const blob = await response.blob();
-  return new File([blob], file.name, { type: blob.type });
-};
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Create a virtual file object with the data
+        const virtualFile = {
+          name: result.filename,
+          data: result.data,
+          rows: result.rows,
+          columns: result.columns,
+          isVirtualFile: true
+        };
+        setFileData(virtualFile);
+      } else {
+        throw new Error("Invalid file data received from server");
+      }
+    } catch (err) {
+      console.error("Failed to retrieve file data:", err);
+      setError("Could not retrieve the file data for chart creation.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   if (!file) return null;
@@ -87,7 +108,12 @@ export function FileAnalysisInlineView({ file, onClose }) {
             </p>
           </div>
 
-          {error ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+              <span className="text-blue-400">Loading file data...</span>
+            </div>
+          ) : error ? (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
@@ -99,7 +125,7 @@ export function FileAnalysisInlineView({ file, onClose }) {
               className="bg-[--neon-dark] text-white border border-[--neon-blue] shadow-[0_0_10px_rgba(0,191,255,0.6)] 
              hover:bg-gradient-to-r hover:from-[--neon-blue] hover:to-[--neon-cyan] 
              hover:shadow-[0_0_20px_rgba(0,255,255,0.8)] transition duration-300"
-              disabled={!actualFile}
+              disabled={!fileData}
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Create Chart
@@ -111,7 +137,7 @@ export function FileAnalysisInlineView({ file, onClose }) {
       <ChartCreationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        selectedFile={actualFile}
+        selectedFile={fileData}
       />
     </>
   );

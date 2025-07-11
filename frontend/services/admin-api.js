@@ -36,20 +36,24 @@ export const getAllUsers = async () => {
 // Promote user to admin
 export const promoteUser = async (userId) => {
   try {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     const response = await axios.put(
       `${baseurl}/api/admin/users/${userId}/promote`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
-    )
-    toast.success("User promoted to admin successfully")
-    return response.data
+      {}, // no body needed
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    toast.success("User promoted to admin successfully");
+    return response.data;
   } catch (error) {
-    console.error("Error promoting user:", error)
-    toast.error("Failed to promote user")
-    throw error
+    console.error("Error promoting user:", error);
+    toast.error("Failed to promote user");
+    throw error;
   }
-}
+};
+
 
 // Suspend user account
 export const suspendUser = async (userId) => {

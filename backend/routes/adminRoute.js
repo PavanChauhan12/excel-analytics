@@ -21,4 +21,12 @@ router.get("/users/:userId/files", verifyToken, isAdmin, AdminController.getUser
 router.get("/users/:userId/charts", verifyToken, isAdmin, AdminController.getUserCharts);
 router.put("/users/:userId", verifyToken, isAdmin, AdminController.updateUserStatus);
 
+router.put("/users/:userId/promote", verifyToken, isAdmin, AdminController.promoteUser);
+
+router.delete('/files/:fileId', verifyToken, isAdmin, AdminController.deleteUserFile);
+router.get('/files/:fileId/download', verifyToken, isAdmin, AdminController.downloadUserFile);
+router.get('/files/:fileId/view', verifyToken, isAdmin, AdminController.viewUserFile);
+
+
+
 module.exports = router

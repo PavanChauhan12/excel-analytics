@@ -40,25 +40,28 @@ export default function UserSettings() {
   }
 
   const handleRequestAdminAccess = async () => {
-    if (!adminRequest.reason.trim()) {
-      toast.error("Please provide a reason for admin access")
-      return
-    }
-
-    setRequestLoading(true)
-    try {
-      await requestAdminAccess({
-        reason: adminRequest.reason,
-        experience: adminRequest.experience,
-      })
-      toast.success("Admin access request submitted successfully!")
-      setAdminRequest((prev) => ({ ...prev, status: "pending" }))
-    } catch (error) {
-      toast.error("Failed to submit admin request")
-    } finally {
-      setRequestLoading(false)
-    }
+  if (!adminRequest.reason.trim()) {
+    toast.error("Please provide a reason for admin access")
+    return
   }
+
+  try {
+    setRequestLoading(true)
+    const token = localStorage.getItem("token")
+    await axios.post(
+      `${baseurl}/api/admin/request`,
+      { reason: adminRequest.reason },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    toast.success("Request sent successfully!")
+  } catch (err) {
+    console.error(err)
+    toast.error("Failed to send request.")
+  } finally {
+    setRequestLoading(false)
+  }
+}
+
 
   if (loading) {
     return (

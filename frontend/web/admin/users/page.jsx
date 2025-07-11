@@ -121,27 +121,89 @@ export default function AdminUsersPage() {
   }
 
   const handleUserAction = async (action, userId) => {
-    try {
-      const response = await axios.put(
+  try {
+    const token = localStorage.getItem("token");
+    let response;
+
+    if (action === "promote") {
+      // Call the new promote API
+      response = await axios.put(
+        `${baseurl}/api/admin/users/${userId}/promote`,
+        {}, // no body needed
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("User promoted to admin successfully");
+    } else {
+      // Call the existing suspend/activate API
+      response = await axios.put(
         `${baseurl}/api/admin/users/${userId}`,
         { action },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
-        },
-      )
-
-      if (response.data.success) {
-        toast.success(`User ${action} successfully`)
-        fetchUsers()
-        setActionDialog({ open: false, type: "", user: null })
-      }
-    } catch (error) {
-      console.error(`Error ${action} user:`, error)
-      toast.error(`Failed to ${action} user`)
+        }
+      );
+      toast.success(`User ${action}ed successfully`);
     }
+
+    fetchUsers();
+    setActionDialog({ open: false, type: "", user: null });
+
+  } catch (error) {
+    console.error(`Error performing ${action} on user:`, error);
+    toast.error(`Failed to ${action} user`);
   }
+};
+
+const handleDownloadFile = async (fileId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${baseurl}/api/admin/files/${fileId}/download`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!response.ok) throw new Error("Failed to download file");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "file.xlsx"; // optionally use the real file name
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to download file");
+  }
+};
+
+const handleViewFile = async (fileId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${baseurl}/api/admin/files/${fileId}/view`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!response.ok) throw new Error("Failed to view file");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to view file");
+  }
+};
+
+
 
   const handleDeleteFile = async (fileId) => {
     try {
@@ -496,7 +558,7 @@ export default function AdminUsersPage() {
                                           {userFiles.map((file) => (
                                             <div
                                               key={file.id}
-                                              className="flex items-center justify-between p-4 bg-red-950/10 rounded-lg border border-red-800/30"
+                                              className="flex items-center justify-between p-4 bg-red-900/20 hover:bg-red-900/30 transition-colors rounded-lg border border-red-800/30"
                                             >
                                               <div className="flex items-center gap-3">
                                                 <FileText className="h-5 w-5 text-red-400" />
@@ -517,22 +579,24 @@ export default function AdminUsersPage() {
                                                 <Button
                                                   size="sm"
                                                   variant="outline"
-                                                  className="border-red-500 text-red-400 hover:bg-red-950"
+                                                  className="border-red-500 text-red-400 hover:bg-red-900"
+                                                  onClick={() => handleViewFile(file.fileId)}
                                                 >
                                                   <Eye className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                   size="sm"
                                                   variant="outline"
-                                                  className="border-red-500 text-red-400 hover:bg-red-950"
+                                                  className="border-red-500 text-red-400 hover:bg-red-900"
+                                                  onClick={() => handleDownloadFile(file.fileId)}
                                                 >
                                                   <Download className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                   size="sm"
                                                   variant="outline"
-                                                  className="border-red-500 text-red-400 hover:bg-red-950"
-                                                  onClick={() => handleDeleteFile(file.id)}
+                                                  className="border-red-500 text-red-400 hover:bg-red-900"
+                                                  onClick={() => handleDeleteFile(file.fileId)}
                                                 >
                                                   <Trash2 className="h-4 w-4" />
                                                 </Button>

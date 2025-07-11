@@ -162,6 +162,7 @@ class AdminController {
     const files = user.excelRecords || [];
 
     const formattedFiles = files.map((file) => ({
+      fileId: file._id, // add this
       fileName: file.filename,
       fileSize: file.filesize,
       uploadedAt: file.uploadedAt,
@@ -175,6 +176,7 @@ class AdminController {
     res.status(500).json({ message: "Server error" });
   }
 }
+
 static async getUserCharts(req, res) {
   try {
     const user = await User.findById(req.params.userId);
@@ -221,6 +223,101 @@ static async updateUserStatus(req, res) {
     res.status(500).json({ message: "Server error" })
   }
 }
+
+static async promoteUser(req, res) {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "User is already an admin" });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    res.json({ success: true, message: "User promoted to admin successfully", user });
+  } catch (error) {
+    console.error("Error promoting user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+static async deleteUserFile(req, res) {
+  try {
+    const fileId = req.params.fileId;
+
+    // Assuming you store files in user.excelRecords
+    const user = await User.findOne({ "excelRecords._id": fileId });
+    if (!user) {
+      return res.status(404).json({ message: "File/User not found" });
+    }
+
+    // Remove the file from the array
+    user.excelRecords = user.excelRecords.filter(f => f._id.toString() !== fileId);
+    await user.save();
+
+    res.json({ success: true, message: "File deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting file:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+static async downloadUserFile(req, res) {
+  try {
+    const fileId = req.params.fileId;
+    const user = await User.findOne({ "excelRecords._id": fileId });
+    if (!user) {
+      return res.status(404).json({ message: "File/User not found" });
+    }
+
+    const file = user.excelRecords.find(f => f._id.toString() === fileId);
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    // If you save the file physically
+    res.download(file.path, file.filename); // adapt if needed
+
+    // Or if you store contents in DB
+    // res.set('Content-Type', 'application/vnd.ms-excel');
+    // res.send(file.data);
+
+  } catch (err) {
+    console.error("Error downloading file:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+static async viewUserFile(req, res) {
+  try {
+    const fileId = req.params.fileId;
+    const user = await User.findOne({ "excelRecords._id": fileId });
+    if (!user) {
+      return res.status(404).json({ message: "File/User not found" });
+    }
+
+    const file = user.excelRecords.find(f => f._id.toString() === fileId);
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    // Adjust MIME type if possible
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(file.data);
+  } catch (err) {
+    console.error("Error viewing file:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+
+
 
 }
 

@@ -97,40 +97,30 @@ export default function UserSettings() {
   }
 
   const handleRequestAdminAccess = async () => {
-  if (!adminRequest.reason.trim()) {
-    toast.error("Please provide a reason for admin access");
-    return;
-  }
-
-  setRequestLoading(true);
-
-  try {
-    const token = localStorage.getItem("token");
-
-    // If you want to use axios directly:
-    await axios.post(
-      `${baseurl}/api/admin/request`,
-      {
-        reason: adminRequest.reason,
-        experience: adminRequest.experience,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    toast.success("Admin access request submitted successfully!");
-    setAdminRequest((prev) => ({ ...prev, status: "pending" }));
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.message || "Failed to submit admin request";
-    toast.error(errorMessage);
-    console.error(error);
-  } finally {
-    setRequestLoading(false);
-  }
-};
-
+    if (!adminRequest.reason.trim()) {
+      toast.error("Please provide a reason for admin access");
+      return;
+    }
+    
+    setRequestLoading(true);
+    
+    try {
+      await requestAdminAccess({
+      reason: adminRequest.reason,
+      experience: adminRequest.experience,
+      });
+      
+      toast.success("Admin access request submitted successfully!");
+      setAdminRequest((prev) => ({ ...prev, status: "pending" }));
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to submit admin request";
+      toast.error(errorMessage);
+      console.error(error);
+    } finally {
+      setRequestLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -218,33 +208,6 @@ export default function UserSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-cyan-300">First Name</Label>
-                  <Input
-                    value={editMode ? editableProfile.firstName : userProfile?.firstName || ""}
-                    onChange={(e) => editMode && setEditableProfile(prev => ({ ...prev, firstName: e.target.value }))}
-                    readOnly={!editMode}
-                    className={`bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400 ${
-                      editMode ? "cursor-text" : "cursor-default"
-                    }`}
-                    placeholder={editMode ? "Enter first name" : ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-cyan-300">Last Name</Label>
-                  <Input
-                    value={editMode ? editableProfile.lastName : userProfile?.lastName || ""}
-                    onChange={(e) => editMode && setEditableProfile(prev => ({ ...prev, lastName: e.target.value }))}
-                    readOnly={!editMode}
-                    className={`bg-slate-800/50 border-cyan-500/30 text-white focus:border-cyan-400 ${
-                      editMode ? "cursor-text" : "cursor-default"
-                    }`}
-                    placeholder={editMode ? "Enter last name" : ""}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-2">
                 <Label className="text-cyan-300">Username</Label>
                 <Input

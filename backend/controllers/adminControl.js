@@ -138,7 +138,7 @@ class AdminController {
   static async getAllUsers(req, res) {
     try {
       const users = await User.find({})
-        .select("firstName lastName email username role status excelRecords")
+        .select("firstName lastName email username role status excelRecords chartRecords")
         .sort({ createdAt: -1 });
 
       // Format the response to match frontend expectations

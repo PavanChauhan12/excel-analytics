@@ -10,6 +10,7 @@ import { User, Mail, Calendar, Shield, Crown, Check, X, Clock, AlertCircle } fro
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { toast } from "sonner"
 import { getUserProfile, getAdminRequests, approveAdminRequest, rejectAdminRequest } from "@/services/api"
+import { getAdminStats } from "@/services/admin-api"
 import Iridescence from "@/components/ui/iridescence"
 import { AdminSidebar } from "@/components/admin-sidebar"
 
@@ -40,6 +41,7 @@ export default function AdminSettings() {
       setLoading(false)
     }
   }
+
 
   const handleApproveRequest = async (requestId) => {
     setRequestsLoading(true)
@@ -115,15 +117,7 @@ export default function AdminSettings() {
                 <div className="space-y-2">
                   <Label className="text-red-300">First Name</Label>
                   <Input
-                    value={userProfile?.firstName || ""}
-                    readOnly
-                    className="bg-slate-800/50 border-red-500/30 text-white focus:border-red-400"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-red-300">Last Name</Label>
-                  <Input
-                    value={userProfile?.lastName || ""}
+                    value={userProfile?.username || ""}
                     readOnly
                     className="bg-slate-800/50 border-red-500/30 text-white focus:border-red-400"
                   />

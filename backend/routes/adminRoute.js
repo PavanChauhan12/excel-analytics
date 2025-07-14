@@ -17,6 +17,8 @@ router.put("/requests/:id/reject", verifyToken, isAdmin, AdminController.rejectR
 
 router.get('/users', verifyToken, isAdmin, AdminController.getAllUsers)
 
+router.get('/stats', verifyToken, isAdmin, AdminController.getAdminDetails);
+
 router.get("/users/:userId/files", verifyToken, isAdmin, AdminController.getUserFiles);
 router.get("/users/:userId/charts", verifyToken, isAdmin, AdminController.getUserCharts);
 router.put("/users/:userId", verifyToken, isAdmin, AdminController.updateUserStatus);

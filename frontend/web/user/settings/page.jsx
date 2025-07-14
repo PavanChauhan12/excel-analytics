@@ -97,49 +97,39 @@ export default function UserSettings() {
   }
 
   const handleRequestAdminAccess = async () => {
-<<<<<<< HEAD
   if (!adminRequest.reason.trim()) {
-    toast.error("Please provide a reason for admin access")
-    return
-=======
-    if (!adminRequest.reason.trim()) {
-      toast.error("Please provide a reason for admin access")
-      return
-    }
-
-    setRequestLoading(true)
-    try {
-      await requestAdminAccess({
-        reason: adminRequest.reason,
-        experience: adminRequest.experience,
-      })
-      toast.success("Admin access request submitted successfully!")
-      setAdminRequest((prev) => ({ ...prev, status: "pending" }))
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to submit admin request"
-      toast.error(errorMessage)
-    } finally {
-      setRequestLoading(false)
-    }
->>>>>>> e4764ca662b0e0dc2009cd64e7eb2d546a99abf9
+    toast.error("Please provide a reason for admin access");
+    return;
   }
+
+  setRequestLoading(true);
 
   try {
-    setRequestLoading(true)
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
+
+    // If you want to use axios directly:
     await axios.post(
       `${baseurl}/api/admin/request`,
-      { reason: adminRequest.reason },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    toast.success("Request sent successfully!")
-  } catch (err) {
-    console.error(err)
-    toast.error("Failed to send request.")
+      {
+        reason: adminRequest.reason,
+        experience: adminRequest.experience,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    toast.success("Admin access request submitted successfully!");
+    setAdminRequest((prev) => ({ ...prev, status: "pending" }));
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message || "Failed to submit admin request";
+    toast.error(errorMessage);
+    console.error(error);
   } finally {
-    setRequestLoading(false)
+    setRequestLoading(false);
   }
-}
+};
 
 
   if (loading) {

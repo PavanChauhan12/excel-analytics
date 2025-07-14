@@ -151,6 +151,49 @@ class AdminController {
     }
   }
 
+  // Get admin details (statistics)
+  static async getAdminDetails(req, res) {
+    try {
+    const adminId = req.user.id;
+
+    const admin = await User.findById(adminId).select('-password');
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found',
+      });
+    }
+
+    if (admin.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'User is not an admin',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        _id: admin._id,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        email: admin.email,
+        role: admin.role,
+        status: admin.status,
+        createdAt: admin.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching admin details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admin details',
+      error: error.message,
+    });
+  }
+  }
+
   // Get user files (admin only)
   static async getUserFiles(req, res) {
   try {

@@ -7,6 +7,16 @@ dotenv.config();
 const app = express();
 const path = require('path'); // If not already present
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Increase payload limits for file uploads
+app.use(express.json({ limit: '60mb' }));
+app.use(express.urlencoded({ limit: '60mb', extended: true }));
+
 // Serve /uploads folder statically
 app.use('/uploads', (req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*"); // or specify your frontend origin
@@ -18,7 +28,6 @@ const chartRoute = require('./routes/chartRoute');
 const adminRoutes = require("./routes/adminRoute")
 const userRoutes = require("./routes/user")
 app.use(cors());
-app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))

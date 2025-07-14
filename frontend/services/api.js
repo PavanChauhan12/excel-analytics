@@ -153,11 +153,62 @@ export const getUserProfile = async () => {
   return response.data
 }
 
+export const updateUserProfile = async (profileData) => {
+  const token = localStorage.getItem("token")
+  const response = await axios.put(`${baseurl}/api/user/profile`, profileData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
+}
+
 export const requestAdminAccess = async ({ reason, experience }) => {
   const token = localStorage.getItem("token")
   const response = await axios.post(
-    `${baseurl}/admin/request`,
+    `${baseurl}/api/user/admin-request`,
     { reason, experience },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+  return response.data
+}
+
+// Get admin requests (for admin users)
+export const getAdminRequests = async () => {
+  const token = localStorage.getItem("token")
+  const response = await axios.get(`${baseurl}/api/admin/requests`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
+}
+
+// Approve admin request
+export const approveAdminRequest = async (requestId) => {
+  const token = localStorage.getItem("token")
+  const response = await axios.put(
+    `${baseurl}/api/admin/requests/${requestId}/approve`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+  return response.data
+}
+
+// Reject admin request
+export const rejectAdminRequest = async (requestId) => {
+  const token = localStorage.getItem("token")
+  const response = await axios.put(
+    `${baseurl}/api/admin/requests/${requestId}/reject`,
+    {},
     {
       headers: {
         Authorization: `Bearer ${token}`,

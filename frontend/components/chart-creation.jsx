@@ -160,9 +160,29 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
   // Process the selected file when component mounts or file changes
   useEffect(() => {
     if (selectedFile && open) {
-      processExcelFile(selectedFile)
-      if (selectedFile?.name) {
-        setFileName(selectedFile.name)
+      if (selectedFile.isVirtualFile) {
+        // Handle virtual file (data from backend)
+        console.log("Processing virtual file:", selectedFile);
+        setFileData(selectedFile.data);
+        setFileName(selectedFile.name);
+        
+        const headers = Object.keys(selectedFile.data[0] || {});
+        const columnsWithTypes = headers.map((header) => {
+          const detectedType = detectColumnType(header, selectedFile.data);
+          return {
+            name: header,
+            type: detectedType,
+            sample: selectedFile.data[0][header],
+          };
+        });
+        setColumns(columnsWithTypes);
+        setIsProcessing(false);
+      } else {
+        // Handle regular file upload
+        processExcelFile(selectedFile);
+        if (selectedFile?.name) {
+          setFileName(selectedFile.name);
+        }
       }
     }
   }, [selectedFile, open])
@@ -926,22 +946,22 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   Choose which columns from your Excel file to use for {is3D ? "X, Y, and Z axes" : "X and Y axes"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className={`grid ${is3D ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"} gap-4`}>
+              <CardContent className="space-y-6">
+                <div className={`grid ${is3D ? "grid-cols-1 gap-6" : "grid-cols-1 sm:grid-cols-2 gap-4"}`}>
                   <div className="space-y-2">
                     <Label htmlFor="x-axis" className="text-sm font-medium text-[#66D9EF]">
                       X-Axis (Categories)
                     </Label>
                     <Select value={xAxis} onValueChange={setXAxis}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
+                      <SelectTrigger className="w-full border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF] min-h-[40px]">
                         <SelectValue placeholder="Select X-axis" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
+                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0] z-50 max-h-[200px] overflow-y-auto">
                         {columns
                           .filter((column) => column.name !== yAxis && column.name !== zAxis)
                           .map((column) => (
                             <SelectItem key={column.name} value={column.name}>
-                              <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center justify-between w-full min-w-0">
                                 <span className="truncate">{column.name}</span>
                                 <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                   {column.type}
@@ -958,19 +978,20 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     )}
                   </div>
 
+                  {/* Y-Axis Selection */}
                   <div className="space-y-2">
                     <Label htmlFor="y-axis" className="text-sm font-medium text-[#66D9EF]">
                       Y-Axis (Values)
                     </Label>
                     <Select value={yAxis} onValueChange={setYAxis}>
-                      <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
+                      <SelectTrigger className="w-full border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF] min-h-[40px]">
                         <SelectValue placeholder="Select Y-axis" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
+                      <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0] z-50 max-h-[200px] overflow-y-auto">
                         {numericYAxisColumns.length > 0
                           ? numericYAxisColumns.map((column) => (
                               <SelectItem key={column.name} value={column.name}>
-                                <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center justify-between w-full min-w-0">
                                   <span className="truncate">{column.name}</span>
                                   <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                     {column.type}
@@ -980,7 +1001,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                             ))
                           : availableYAxisColumns.map((column) => (
                               <SelectItem key={column.name} value={column.name}>
-                                <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center justify-between w-full min-w-0">
                                   <span className="truncate">{column.name}</span>
                                   <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                     {column.type}
@@ -997,21 +1018,21 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                     )}
                   </div>
 
-                  {/* 3d z axis */}
+                  {/* Z-Axis Selection for 3D Charts */}
                   {is3D && (
                     <div className="space-y-2">
                       <Label htmlFor="z-axis" className="text-sm font-medium text-[#66D9EF]">
                         Z-Axis (Depth)
                       </Label>
                       <Select value={zAxis} onValueChange={setZAxis}>
-                        <SelectTrigger className="border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF]">
+                        <SelectTrigger className="w-full border-[#333333] bg-[#1C1C1C] text-[#E0E0E0] focus:border-[#228DFF] focus:ring-1 focus:ring-[#228DFF] min-h-[40px]">
                           <SelectValue placeholder="Select Z-axis" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0]">
+                        <SelectContent className="bg-[#1C1C1C] border-[#333333] text-[#E0E0E0] z-50 max-h-[200px] overflow-y-auto">
                           {numericZAxisColumns.length > 0
                             ? numericZAxisColumns.map((column) => (
                                 <SelectItem key={column.name} value={column.name}>
-                                  <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center justify-between w-full min-w-0">
                                     <span className="truncate">{column.name}</span>
                                     <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                       {column.type}
@@ -1021,7 +1042,7 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                               ))
                             : availableZAxisColumns.map((column) => (
                                 <SelectItem key={column.name} value={column.name}>
-                                  <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center justify-between w-full min-w-0">
                                     <span className="truncate">{column.name}</span>
                                     <Badge variant="outline" className="ml-2 text-xs border-[#66D9EF] text-[#66D9EF]">
                                       {column.type}
@@ -1040,8 +1061,9 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                   )}
                 </div>
 
+                {/* Chart Preview Section */}
                 {xAxis && yAxis && (!is3D || zAxis) && (
-                  <div className="p-3 bg-[#282828] border border-[#333333] rounded-lg">
+                  <div className="p-4 bg-[#282828] border border-[#333333] rounded-lg mt-6">
                     <h4 className="font-medium text-[#E0E0E0] mb-1 text-sm">Chart Preview</h4>
                     <p className="text-xs text-[#66D9EF]">
                       Your chart will show <strong className="text-[#228DFF]">{yAxis}</strong> values across different{" "}
@@ -1053,6 +1075,11 @@ export function ChartCreationDialog({ open, onOpenChange, selectedFile }) {
                       )}{" "}
                       categories
                     </p>
+                    {is3D && (
+                      <div className="mt-2 p-2 bg-[#228DFF]/10 border border-[#228DFF]/30 rounded text-xs text-[#228DFF]">
+                        <strong>3D Chart:</strong> This will create a three-dimensional visualization with depth and interactive rotation.
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

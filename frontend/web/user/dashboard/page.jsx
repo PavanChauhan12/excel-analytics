@@ -43,7 +43,12 @@ export default function DashboardPage() {
 
   if (!user)
     return (
-      <p className="p-6 text-sm text-gray-500 bg-black h-screen">Loading...</p>
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p className="text-cyan-300">Loading your dashboard...</p>
+        </div>
+      </div>
     );
 
   return (

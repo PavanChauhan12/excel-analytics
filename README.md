@@ -25,8 +25,8 @@
 
 ## 🖼️ Preview
 
-![Dashboard Preview](assets/dashboard.jpeg)
-![Chart Preview](assets/chart-preview.png)
+![Chart Preview](assets/chart-preview.png.png)
+![Dashboard Preview](assets/dashboard.jpeg.png)
 
 ---
 

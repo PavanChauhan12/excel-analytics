@@ -518,29 +518,9 @@ export default function AuthPage() {
                       </Button>
                     </form>
                     <Separator className="my-6 bg-gray-700" />
-                    <Button
-                      onClick={initiateGoogleLogin}
-                      disabled={googleLoading}
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 py-2 rounded-lg transition-all duration-300 disabled:opacity-50"
-                    >
-                      {googleLoading ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Signing in...
-                        </div>
-                      ) : (
-                        "Continue with Google"
-                      )}
-                    </Button>
                   </CardContent>
                 </TabsContent>
               </Tabs>
-
-              <div
-                id="google-signin-button"
-                className="w-full mt-2"
-                style={{ display: "none" }}
-              ></div>
             </Card>
           </div>
         </div>

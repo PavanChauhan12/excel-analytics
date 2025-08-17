@@ -27,7 +27,7 @@ const uploadRoute = require('./routes/upload');
 const chartRoute = require('./routes/chartRoute');
 const adminRoutes = require("./routes/adminRoute")
 const userRoutes = require("./routes/user")
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))

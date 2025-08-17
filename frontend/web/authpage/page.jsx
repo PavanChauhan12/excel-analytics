@@ -38,73 +38,6 @@ export default function AuthPage() {
     confirmPassword: "",
   });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [googleLoading, setGoogleLoading] = useState(false);
-
-  useEffect(() => {
-    const initializeGoogleSignIn = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-      }
-    };
-
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogleSignIn;
-      document.head.appendChild(script);
-    } else {
-      initializeGoogleSignIn();
-    }
-  }, []);
-
-  const handleGoogleResponse = async (response) => {
-    setGoogleLoading(true);
-    try {
-      await handleGoogleLogin(response, navigate);
-    } catch (error) {
-      console.error("Google login failed:", error);
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  const initiateGoogleLogin = () => {
-    if (window.google && window.google.accounts) {
-      setGoogleLoading(true);
-      try {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            const buttonDiv = document.getElementById("google-signin-button");
-            if (buttonDiv) {
-              buttonDiv.innerHTML = "";
-              window.google.accounts.id.renderButton(buttonDiv, {
-                theme: "outline",
-                size: "large",
-                width: "100%",
-                text: "continue_with",
-                shape: "rectangular",
-              });
-              buttonDiv.style.display = "block";
-            }
-          }
-          setGoogleLoading(false);
-        });
-      } catch (error) {
-        console.error("Google Sign-In error:", error);
-        setGoogleLoading(false);
-      }
-    } else {
-      console.error("Google Sign-In not loaded");
-      setGoogleLoading(false);
-    }
-  };
 
   return (
     <div className="relative min-h-screen w-full bg-black overflow-hidden text-white">
@@ -351,25 +284,7 @@ export default function AuthPage() {
                       </Button>
                     </form>
                     <Separator className="my-6 bg-gray-700" />
-                    <Button
-                      onClick={initiateGoogleLogin}
-                      disabled={googleLoading}
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-600 py-2 rounded-lg transition-all duration-300 disabled:opacity-50"
-                    >
-                      {googleLoading ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Signing in...
-                        </div>
-                      ) : (
-                        "Continue with Google"
-                      )}
-                    </Button>
-                    <div
-                      id="google-signin-button"
-                      className="w-full mt-2"
-                      style={{ display: "none" }}
-                    ></div>
+                    
                   </CardContent>
                 </TabsContent>
 
